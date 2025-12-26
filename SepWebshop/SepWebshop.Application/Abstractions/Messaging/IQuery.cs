@@ -3,4 +3,4 @@ using SepWebshop.Domain;
 
 namespace SepWebshop.Application.Abstractions.Messaging;
 
-public interface ICommand<TResponse> : IRequest<Result<TResponse>>;
+public interface IQuery<TResponse> : IRequest<Result<TResponse>>;

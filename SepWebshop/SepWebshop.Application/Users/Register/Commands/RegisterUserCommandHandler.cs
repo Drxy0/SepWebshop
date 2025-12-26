@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using MediatR;
+using Microsoft.EntityFrameworkCore;
 using SepWebshop.Application.Abstractions.Authentication;
 using SepWebshop.Application.Abstractions.Data;
 using SepWebshop.Application.Abstractions.Messaging;
@@ -8,7 +9,7 @@ using SepWebshop.Domain.Users;
 namespace SepWebshop.Application.Users.Register.Commands;
 
 internal sealed class RegisterUserCommandHandler(IApplicationDbContext context, IPasswordHasher passwordHasher)
-    : ICommandHandler<RegisterUserCommand, Guid>
+    : IRequestHandler<RegisterUserCommand, Result<Guid>>
 {
     public async Task<Result<Guid>> Handle(RegisterUserCommand command, CancellationToken cancellationToken)
     {
