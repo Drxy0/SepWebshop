@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SepWebshop.Application\SepWebshop.Application.csproj" />
+    <ProjectReference Include="..\SepWebshop.Infrastructure\SepWebshop.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>
