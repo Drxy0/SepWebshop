@@ -20,6 +20,9 @@ public static class DependencyInjection
 
         services.AddDbContext<ApplicationDbContext>();
 
+        services.AddScoped<IApplicationDbContext>(provider =>
+            provider.GetRequiredService<ApplicationDbContext>());
+
         services.AddScoped<IUserRepository, UserRepository>();
         
         services.AddScoped<IPasswordHasher, PasswordHasher>();
