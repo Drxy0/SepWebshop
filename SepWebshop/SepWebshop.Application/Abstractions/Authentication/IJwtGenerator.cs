@@ -2,5 +2,6 @@
 
 public interface IJwtGenerator
 {
-    string Generate(Guid userId, string email);
+    string GenerateAccessToken(Guid userId, string email);
+    string GenerateRefreshToken();
 }

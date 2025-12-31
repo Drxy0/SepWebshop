@@ -4,4 +4,4 @@ namespace SepWebshop.Application.Users.Login;
 
 public sealed record LoginUserCommand(
     string Email,
-    string Password) : ICommand<string>;
+    string Password) : ICommand<AuthResponse>;
