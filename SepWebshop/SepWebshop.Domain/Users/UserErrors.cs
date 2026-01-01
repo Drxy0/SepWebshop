@@ -22,4 +22,9 @@ public static class UserErrors
         "Users.InvalidCredentials",
         "Invalid credentials");
 
+    // NOTE: Idk if this should be an error or throw an exception in the handler
+    public static readonly Error InvalidRefreshToken = Error.Conflict( 
+        "Users.InvalidRefreshToken",
+        "The refresh token is invalid");
+
 }

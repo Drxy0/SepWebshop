@@ -4,7 +4,6 @@ using Microsoft.Extensions.DependencyInjection;
 using SepWebshop.Application.Abstractions.Authentication;
 using SepWebshop.Application.Abstractions.Data;
 using SepWebshop.Infrastructure.Authentication;
-using SepWebshop.Infrastructure.Repositories;
 
 namespace SepWebshop.Infrastructure;
 
@@ -23,9 +22,8 @@ public static class DependencyInjection
         services.AddScoped<IApplicationDbContext>(provider =>
             provider.GetRequiredService<ApplicationDbContext>());
 
-        services.AddScoped<IUserRepository, UserRepository>();
-        
         services.AddScoped<IPasswordHasher, PasswordHasher>();
+        services.AddScoped<IJwtGenerator, JwtGenerator>();
         
         return services;
     }

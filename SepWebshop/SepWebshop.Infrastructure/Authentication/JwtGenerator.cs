@@ -4,6 +4,7 @@ using SepWebshop.Application.Abstractions.Authentication;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.Extensions.Configuration;
+using System.Security.Cryptography;
 
 namespace SepWebshop.Infrastructure.Authentication;
 
@@ -23,7 +24,7 @@ public class JwtGenerator : IJwtGenerator
 
     }
 
-    public string Generate(Guid userId, string email)
+    public string GenerateAccessToken(Guid userId, string email)
     {
         var handler = new JsonWebTokenHandler();
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secretKey));
@@ -45,6 +46,10 @@ public class JwtGenerator : IJwtGenerator
         });
 
         return token;
+    }
 
+    public string GenerateRefreshToken()
+    {
+        return Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
     }
 }
