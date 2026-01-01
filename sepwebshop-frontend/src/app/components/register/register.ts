@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { User } from '../../services/user/user';
 import { HttpErrorResponse } from '@angular/common/http';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 
 @Component({
   selector: 'app-register',
@@ -18,7 +18,7 @@ export class Register {
 
   form;
 
-  constructor(private fb: FormBuilder, private user: User) {
+  constructor(private fb: FormBuilder, private user: User, private router: Router) {
     this.form = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       name: ['', Validators.required],
@@ -44,6 +44,7 @@ export class Register {
         this.loading = false;
         this.form.enable();
         this.form.reset();
+        this.router.navigate(['/login']);
       },
       error: (err: HttpErrorResponse) => {
         this.loading = false;

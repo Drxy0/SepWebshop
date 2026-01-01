@@ -2,6 +2,7 @@ export const Constants = {
   API_METHOD: {
     REGISTER_USER: 'Users/register',
     LOGIN_USER: 'Users/login',
+    REFRESH_TOKEN: 'Users/refresh-token',
   },
   ALERT_MESSAGES: {
     UNKONOW_ERROR: 'An unknown error occurred',

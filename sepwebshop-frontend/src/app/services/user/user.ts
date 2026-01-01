@@ -19,4 +19,12 @@ export class User {
       obj
     );
   }
+  refreshToken(refreshToken: string): Observable<ILoginResponse> {
+    return this.http.post<ILoginResponse>(
+      environment.api_url + Constants.API_METHOD.REFRESH_TOKEN,
+      {
+        refreshToken,
+      }
+    );
+  }
 }
