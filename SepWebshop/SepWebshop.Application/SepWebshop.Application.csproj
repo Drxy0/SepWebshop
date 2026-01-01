@@ -16,8 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Cars\Delete\" />
-    <Folder Include="Cars\Get\" />
+    <Folder Include="Reservations\" />
   </ItemGroup>
 
 </Project>

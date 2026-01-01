@@ -5,7 +5,6 @@ public sealed class Car
     public Guid Id { get; init; }
     public string BrandAndModel { get; set; } = null!;
     public int Year { get; set; }
+    public float Price { get; init; }
     public string PlateNumber { get; set; } = null!;
-
-    //public float Price { get; init; }
 }
