@@ -1,3 +1,5 @@
+using Microsoft.OpenApi.Models;
+using SepWebshop.API.Extensions;
 using SepWebshop.Application;
 using SepWebshop.Infrastructure;
 
@@ -11,6 +13,10 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddAuthentication("Bearer")
+    .AddJwtBearer();
+
+builder.Services.AddSwaggerWithJwtAuth();
 
 var app = builder.Build();
 
@@ -23,6 +29,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

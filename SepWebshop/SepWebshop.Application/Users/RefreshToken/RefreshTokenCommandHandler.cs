@@ -22,12 +22,21 @@ internal sealed class RefreshTokenCommandHandler(IApplicationDbContext context, 
             return Result.Failure<AuthResponse>(UserErrors.InvalidRefreshToken);
         }
 
-        string accessToken = jwtGenerator.GenerateAccessToken(refreshToken.User.Id, refreshToken.User.Email);
-        refreshToken.Token = jwtGenerator.GenerateRefreshToken();
-        refreshToken.ExpiresAtUtc = DateTime.UtcNow.AddDays(7);
+        refreshToken.IsRevoked = true;
+
+        string newAccessToken = jwtGenerator.GenerateAccessToken(refreshToken.User.Id, refreshToken.User.Email);
+        string newRefreshToken = jwtGenerator.GenerateRefreshToken();
+
+        context.RefreshTokens.Add(new Domain.Users.RefreshToken
+        {
+            Token = newRefreshToken,
+            UserId = refreshToken.UserId,
+            ExpiresAtUtc = DateTime.UtcNow.AddDays(7),
+            IsRevoked = false
+        });
 
         await context.SaveChangesAsync(cancellationToken);
 
-        return new AuthResponse(accessToken, refreshToken.Token);
+        return new AuthResponse(newAccessToken, newRefreshToken);
     }
 }

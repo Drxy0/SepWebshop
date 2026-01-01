@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SepWebshop.API.Contracts.Users;
 using SepWebshop.Application.Users.Login;
