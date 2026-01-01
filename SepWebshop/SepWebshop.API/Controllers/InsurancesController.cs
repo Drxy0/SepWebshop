@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SepWebshop.API.Contracts.Insurances;
 using SepWebshop.Application.Insurances.Create;
@@ -20,6 +21,7 @@ public sealed class InsurancesController : ControllerBase
         _sender = sender;
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateInsuranceRequest request, CancellationToken cancellationToken)
     {
@@ -66,6 +68,7 @@ public sealed class InsurancesController : ControllerBase
         return Ok(result.Value);
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPut("{id:guid}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateInsuranceRequest request, CancellationToken cancellationToken)
     {
@@ -87,6 +90,7 @@ public sealed class InsurancesController : ControllerBase
         return NoContent();
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
     {

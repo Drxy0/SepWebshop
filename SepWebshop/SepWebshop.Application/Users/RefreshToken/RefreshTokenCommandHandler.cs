@@ -24,7 +24,7 @@ internal sealed class RefreshTokenCommandHandler(IApplicationDbContext context, 
 
         refreshToken.IsRevoked = true;
 
-        string newAccessToken = jwtGenerator.GenerateAccessToken(refreshToken.User.Id, refreshToken.User.Email);
+        string newAccessToken = jwtGenerator.GenerateAccessToken(refreshToken.User.Id, refreshToken.User.Email, refreshToken.User.IsAdmin);
         string newRefreshToken = jwtGenerator.GenerateRefreshToken();
 
         context.RefreshTokens.Add(new Domain.Users.RefreshToken

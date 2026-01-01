@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace SepWebshop.API.Controllers
 {
@@ -8,6 +9,13 @@ namespace SepWebshop.API.Controllers
     {
         [HttpGet()]
         public IActionResult Test()
+        {
+            return Ok("Test successful!");
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet("admin-jwt")]
+        public IActionResult Testtwo()
         {
             return Ok("Test successful!");
         }

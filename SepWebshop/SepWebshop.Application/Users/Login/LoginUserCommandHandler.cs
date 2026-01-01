@@ -12,7 +12,7 @@ internal sealed class LoginUserCommandHandler(IApplicationDbContext context, IPa
 {
     public async Task<Result<AuthResponse>> Handle(LoginUserCommand command, CancellationToken cancellationToken)
     {
-        var user = await context.Users.FirstOrDefaultAsync(u => u.Email == command.Email, cancellationToken);
+        User? user = await context.Users.FirstOrDefaultAsync(u => u.Email == command.Email, cancellationToken);
 
         if (user is null)
         {
@@ -24,7 +24,7 @@ internal sealed class LoginUserCommandHandler(IApplicationDbContext context, IPa
             return Result.Failure<AuthResponse>(UserErrors.InvalidCredentials);
         }
 
-        string accessToken = jwtGenerator.GenerateAccessToken(user.Id, user.Email);
+        string accessToken = jwtGenerator.GenerateAccessToken(user.Id, user.Email, user.IsAdmin);
         string refreshToken = jwtGenerator.GenerateRefreshToken();
 
         await context.RefreshTokens.AddAsync(new Domain.Users.RefreshToken
