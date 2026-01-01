@@ -24,7 +24,7 @@ public class JwtGenerator : IJwtGenerator
 
     }
 
-    public string GenerateAccessToken(Guid userId, string email)
+    public string GenerateAccessToken(Guid userId, string email, bool isAdmin)
     {
         var handler = new JsonWebTokenHandler();
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secretKey));
@@ -33,6 +33,7 @@ public class JwtGenerator : IJwtGenerator
         {
             new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()),
             new Claim(JwtRegisteredClaimNames.Email, email),
+            isAdmin ? new Claim(ClaimTypes.Role, "Admin") : new Claim(ClaimTypes.Role, "User")
         };
 
 
