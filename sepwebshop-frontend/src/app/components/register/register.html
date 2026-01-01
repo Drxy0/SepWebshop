@@ -1,1 +1,126 @@
-<p>register works!</p>
+<div class="min-h-screen flex items-center justify-center bg-gray-100">
+  <form
+    [formGroup]="form"
+    (ngSubmit)="submit()"
+    class="bg-white p-8 rounded-xl shadow-md w-full max-w-md space-y-4"
+  >
+    <h2 class="text-2xl font-semibold text-center">Register</h2>
+
+    <!-- General error -->
+    <div *ngIf="generalError" class="bg-red-100 text-red-700 p-3 rounded text-sm">
+      {{ generalError }}
+    </div>
+
+    <!-- Email -->
+    <div>
+      <input
+        type="email"
+        placeholder="Email"
+        formControlName="email"
+        class="w-full border rounded px-3 py-2"
+      />
+
+      <!-- Frontend validation -->
+      <p
+        *ngIf="
+      form.controls.email.touched &&
+      form.controls.email.errors?.['required']
+    "
+        class="text-red-500 text-sm mt-1"
+      >
+        Email is required.
+      </p>
+
+      <p
+        *ngIf="
+      form.controls.email.touched &&
+      form.controls.email.errors?.['email']
+    "
+        class="text-red-500 text-sm mt-1"
+      >
+        Invalid email format.
+      </p>
+
+      <!-- Backend validation -->
+      <p *ngFor="let err of fieldErrors['Email']" class="text-red-500 text-sm mt-1">
+        {{ err }}
+      </p>
+    </div>
+
+    <!-- Name -->
+    <div>
+      <input
+        type="text"
+        placeholder="Name"
+        formControlName="name"
+        class="w-full border rounded px-3 py-2"
+      />
+
+      <p
+        *ngIf="form.controls.name.touched && form.controls.name.errors?.['required']"
+        class="text-red-500 text-sm mt-1"
+      >
+        Name is required.
+      </p>
+
+      <p *ngFor="let err of fieldErrors['Name']" class="text-red-500 text-sm mt-1">
+        {{ err }}
+      </p>
+    </div>
+
+    <!-- Surname -->
+    <div>
+      <input
+        type="text"
+        placeholder="Surname"
+        formControlName="surname"
+        class="w-full border rounded px-3 py-2"
+      />
+
+      <p
+        *ngIf="form.controls.surname.touched && form.controls.surname.errors?.['required']"
+        class="text-red-500 text-sm mt-1"
+      >
+        Surname is required.
+      </p>
+
+      <p *ngFor="let err of fieldErrors['Surname']" class="text-red-500 text-sm mt-1">
+        {{ err }}
+      </p>
+    </div>
+
+    <!-- Password -->
+    <div>
+      <input
+        type="password"
+        placeholder="Password"
+        formControlName="password"
+        class="w-full border rounded px-3 py-2"
+      />
+
+      <p
+        *ngIf="form.controls.password.touched && form.controls.password.errors?.['required']"
+        class="text-red-500 text-sm mt-1"
+      >
+        Password is required.
+      </p>
+
+      <p *ngFor="let err of fieldErrors['Password']" class="text-red-500 text-sm mt-1">
+        {{ err }}
+      </p>
+    </div>
+
+    <button
+      type="submit"
+      [disabled]="loading"
+      class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+    >
+      {{ loading ? 'Registering...' : 'Register' }}
+    </button>
+    <!-- Login link -->
+    <p class="text-center text-sm text-gray-600 mt-4">
+      Already have an account?
+      <a routerLink="/login" class="text-blue-600 hover:underline font-medium"> Sign in </a>
+    </p>
+  </form>
+</div>
