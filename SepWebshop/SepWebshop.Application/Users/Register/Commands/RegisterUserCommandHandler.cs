@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using SepWebshop.Application.Abstractions.Authentication;
 using SepWebshop.Application.Abstractions.Data;
-using SepWebshop.Application.Abstractions.Messaging;
 using SepWebshop.Domain;
 using SepWebshop.Domain.Users;
 

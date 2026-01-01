@@ -1,0 +1,6 @@
+root = true
+
+# C# files
+[*.cs]
+
+csharp_style_namespace_declarations = file_scoped:suggestion

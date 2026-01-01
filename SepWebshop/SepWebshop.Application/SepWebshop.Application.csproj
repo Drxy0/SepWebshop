@@ -15,4 +15,9 @@
     <ProjectReference Include="..\SepWebshop.Domain\SepWebshop.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Cars\Delete\" />
+    <Folder Include="Cars\Get\" />
+  </ItemGroup>
+
 </Project>

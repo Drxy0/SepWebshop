@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.14.36414.22 d17.14
+# Visual Studio Version 18
+VisualStudioVersion = 18.1.11312.151 d18.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SepWebshop.API", "SepWebshop.API\SepWebshop.API.csproj", "{CA8B6A38-81EA-4099-A026-376205D781B4}"
 EndProject
@@ -10,6 +10,11 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SepWebshop.Infrastructure", "SepWebshop.Infrastructure\SepWebshop.Infrastructure.csproj", "{94F7036D-30DD-4394-9338-0660DE2BDF81}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SepWebshop.Domain", "SepWebshop.Domain\SepWebshop.Domain.csproj", "{44CD9836-9F69-4E8B-8A1B-C4E6D77043C7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{CCD554A0-166F-4427-A561-AA6AD0E5ECAC}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
