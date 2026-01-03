@@ -15,6 +15,7 @@ internal sealed class CreateCarCommandHandler(IApplicationDbContext context) : I
             Id = Guid.NewGuid(),
             BrandAndModel = request.BrandAndModel,
             Year = request.Year,
+            Price = request.Price,
             PlateNumber = request.PlateNumber
         };
 
