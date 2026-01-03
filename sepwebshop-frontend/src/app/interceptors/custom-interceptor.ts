@@ -1,6 +1,6 @@
 import { inject } from '@angular/core';
 import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
-import { catchError, switchMap, throwError } from 'rxjs';
+import { catchError, switchMap, throwError, filter, take } from 'rxjs';
 import { Router } from '@angular/router';
 import { User } from '../services/user/user';
 import { Constants } from '../constants/constants';
@@ -33,24 +33,47 @@ export const customInterceptor: HttpInterceptorFn = (req, next) => {
         return throwError(() => error);
       }
 
-      return userService.refreshToken(refreshToken).pipe(
-        switchMap((res) => {
-          localStorage.setItem(Constants.LOCAL_STORAGE_ACCESS_TOKEN, res.accessToken);
-          localStorage.setItem(Constants.LOCAL_STORAGE_REFRESH_TOKEN, res.refreshToken);
+      // Provera Signala pomoću ()
+      if (!userService.isRefreshing()) {
+        // Postavljanje Signala pomoću .set()
+        userService.isRefreshing.set(true);
+        userService.refreshTokenSubject.next(null);
 
-          const retryReq = req.clone({
-            setHeaders: {
-              Authorization: `Bearer ${res.accessToken}`,
-            },
-          });
+        return userService.refreshToken(refreshToken).pipe(
+          switchMap((res: any) => {
+            userService.isRefreshing.set(false);
 
-          return next(retryReq);
-        }),
-        catchError((refreshError) => {
-          logout(router);
-          return throwError(() => refreshError);
-        })
-      );
+            localStorage.setItem(Constants.LOCAL_STORAGE_ACCESS_TOKEN, res.accessToken);
+            localStorage.setItem(Constants.LOCAL_STORAGE_REFRESH_TOKEN, res.refreshToken);
+
+            userService.refreshTokenSubject.next(res.accessToken);
+
+            return next(
+              req.clone({
+                setHeaders: { Authorization: `Bearer ${res.accessToken}` },
+              })
+            );
+          }),
+          catchError((refreshError) => {
+            userService.isRefreshing.set(false);
+            logout(router);
+            return throwError(() => refreshError);
+          })
+        );
+      } else {
+        // Ako je refresh u toku, čekamo RxJS subject
+        return userService.refreshTokenSubject.pipe(
+          filter((token) => token !== null),
+          take(1),
+          switchMap((token) => {
+            return next(
+              req.clone({
+                setHeaders: { Authorization: `Bearer ${token}` },
+              })
+            );
+          })
+        );
+      }
     })
   );
 };

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SepWebshop.API.Contracts.Orders;
+using SepWebshop.Application.Abstractions.IdentityService;
 using SepWebshop.Application.Orders.Create;
 using SepWebshop.Application.Orders.Delete;
 using SepWebshop.Application.Orders.GetAllByUserId;
@@ -15,10 +16,12 @@ namespace SepWebshop.API.Controllers;
 public sealed class OrdersController : ControllerBase
 {
     private readonly IMediator _mediator;
+    private readonly IIdentityService _identityService;
 
-    public OrdersController(IMediator mediator)
+    public OrdersController(IMediator mediator, IIdentityService identityService)
     {
         _mediator = mediator;
+        _identityService = identityService;
     }
 
     [Authorize]
@@ -27,8 +30,10 @@ public sealed class OrdersController : ControllerBase
         [FromBody] CreateOrderRequest request,
         CancellationToken cancellationToken)
     {
+        var userIdFromToken = Guid.Parse(_identityService.UserIdentity!);
+
         var command = new CreateOrderCommand(
-            request.UserId,
+            userIdFromToken,
             request.CarId,
             request.LeaseStartDate,
             request.LeaseEndDate,
@@ -63,7 +68,8 @@ public sealed class OrdersController : ControllerBase
     [HttpGet("user/{userId:guid}")]
     public async Task<IActionResult> GetAllByUserId(Guid userId, CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(new GetAllByUserIdQuery(userId), cancellationToken);
+        var userIdFromToken = Guid.Parse(_identityService.UserIdentity!);
+        var result = await _mediator.Send(new GetAllByUserIdQuery(userIdFromToken), cancellationToken);
         return Ok(result.Value);
     }
 

@@ -3,7 +3,6 @@
 namespace SepWebshop.API.Contracts.Orders;
 
 public sealed record CreateOrderRequest(
-    Guid UserId,
     Guid CarId,
     DateTime LeaseStartDate,
     DateTime LeaseEndDate,

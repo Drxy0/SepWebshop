@@ -1,6 +1,7 @@
-using Microsoft.OpenApi.Models;
 using SepWebshop.API.Extensions;
+using SepWebshop.API.Services;
 using SepWebshop.Application;
+using SepWebshop.Application.Abstractions.IdentityService;
 using SepWebshop.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,6 +13,8 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSwaggerWithJwtAuth();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IIdentityService, IdentityService>();
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 
