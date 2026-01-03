@@ -1,0 +1,113 @@
+<h2 class="text-2xl font-bold mb-6 text-gray-800">Create New Plan</h2>
+
+<div
+  *ngIf="message()"
+  [ngClass]="
+    messageType() === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+  "
+  class="p-4 rounded-xl mb-6 text-sm font-medium"
+>
+  {{ message() }}
+</div>
+
+<form [formGroup]="form" (ngSubmit)="submit()" class="space-y-4">
+  <div>
+    <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Name</label>
+    <input
+      type="text"
+      formControlName="name"
+      class="w-full border-2 rounded-lg px-3 py-2 outline-none transition"
+      [ngClass]="
+        form.get('name')?.invalid && form.get('name')?.touched
+          ? 'border-red-500 focus:ring-red-200'
+          : 'focus:ring-2 focus:ring-blue-500 border-gray-200'
+      "
+    />
+    <p
+      *ngIf="form.get('name')?.invalid && form.get('name')?.touched"
+      class="text-red-500 text-xs mt-1"
+    >
+      Name is required.
+    </p>
+    <p *ngFor="let err of fieldErrors()['Name']" class="text-red-500 text-xs mt-1">{{ err }}</p>
+  </div>
+
+  <div>
+    <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Description</label>
+    <textarea
+      formControlName="description"
+      rows="3"
+      class="w-full border-2 rounded-lg px-3 py-2 outline-none transition"
+      [ngClass]="
+        form.get('description')?.invalid && form.get('description')?.touched
+          ? 'border-red-500 focus:ring-red-200'
+          : 'focus:ring-2 focus:ring-blue-500 border-gray-200'
+      "
+    ></textarea>
+    <p
+      *ngIf="form.get('description')?.invalid && form.get('description')?.touched"
+      class="text-red-500 text-xs mt-1"
+    >
+      Description is required.
+    </p>
+    <p *ngFor="let err of fieldErrors()['Description']" class="text-red-500 text-xs mt-1">
+      {{ err }}
+    </p>
+  </div>
+
+  <div class="grid grid-cols-2 gap-4">
+    <div>
+      <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Price / Day</label>
+      <input
+        type="number"
+        formControlName="pricePerDay"
+        class="w-full border-2 rounded-lg px-3 py-2 outline-none transition"
+        [ngClass]="
+          form.get('pricePerDay')?.invalid && form.get('pricePerDay')?.touched
+            ? 'border-red-500 focus:ring-red-200'
+            : 'focus:ring-2 focus:ring-blue-500 border-gray-200'
+        "
+      />
+      <p
+        *ngIf="form.get('pricePerDay')?.invalid && form.get('pricePerDay')?.touched"
+        class="text-red-500 text-xs mt-1"
+      >
+        Valid price is required.
+      </p>
+      <p *ngFor="let err of fieldErrors()['PricePerDay']" class="text-red-500 text-xs mt-1">
+        {{ err }}
+      </p>
+    </div>
+
+    <div>
+      <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Deductible</label>
+      <input
+        type="number"
+        formControlName="deductibleAmount"
+        class="w-full border-2 rounded-lg px-3 py-2 outline-none transition"
+        [ngClass]="
+          form.get('deductibleAmount')?.invalid && form.get('deductibleAmount')?.touched
+            ? 'border-red-500 focus:ring-red-200'
+            : 'focus:ring-2 focus:ring-blue-500 border-gray-200'
+        "
+      />
+      <p
+        *ngIf="form.get('deductibleAmount')?.invalid && form.get('deductibleAmount')?.touched"
+        class="text-red-500 text-xs mt-1"
+      >
+        Deductible is required.
+      </p>
+      <p *ngFor="let err of fieldErrors()['DeductibleAmount']" class="text-red-500 text-xs mt-1">
+        {{ err }}
+      </p>
+    </div>
+  </div>
+
+  <button
+    type="submit"
+    [disabled]="loading()"
+    class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold hover:bg-blue-700 disabled:opacity-50 transition shadow-lg shadow-blue-100 mt-4"
+  >
+    {{ loading() ? 'Saving...' : 'Add Insurance' }}
+  </button>
+</form>

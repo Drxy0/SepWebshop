@@ -6,6 +6,7 @@ import { Index } from './components/index';
 import { Login } from './components/login/login';
 import { Register } from './components/register/register';
 import { CarsComponent } from './components/admin/cars/cars';
+import { Insurances } from './components/admin/insurances/insurances';
 
 export const routes: Routes = [
   {
@@ -31,6 +32,11 @@ export const routes: Routes = [
   {
     path: 'admin/cars',
     component: CarsComponent,
+    canActivate: [authGuard, adminGuard],
+  },
+  {
+    path: 'admin/insurances',
+    component: Insurances,
     canActivate: [authGuard, adminGuard],
   },
 ];

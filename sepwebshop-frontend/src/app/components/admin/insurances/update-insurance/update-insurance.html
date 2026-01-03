@@ -1,0 +1,58 @@
+<h2 class="text-xl font-bold mb-5 text-gray-800">Update Insurance</h2>
+
+<div
+  *ngIf="message()"
+  [ngClass]="
+    messageType() === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+  "
+  class="p-3 rounded-lg mb-4 text-sm font-medium"
+>
+  {{ message() }}
+</div>
+
+<form [formGroup]="form" (ngSubmit)="submit()" class="space-y-4">
+  <div>
+    <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Name</label>
+    <input
+      type="text"
+      formControlName="name"
+      class="w-full border rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-yellow-400"
+    />
+  </div>
+
+  <div>
+    <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Description</label>
+    <textarea
+      formControlName="description"
+      rows="3"
+      class="w-full border rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-yellow-400"
+    ></textarea>
+  </div>
+
+  <div class="grid grid-cols-2 gap-4">
+    <div>
+      <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Price / Day</label>
+      <input
+        type="number"
+        formControlName="pricePerDay"
+        class="w-full border rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-yellow-400"
+      />
+    </div>
+    <div>
+      <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Deductible</label>
+      <input
+        type="number"
+        formControlName="deductibleAmount"
+        class="w-full border rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-yellow-400"
+      />
+    </div>
+  </div>
+
+  <button
+    type="submit"
+    [disabled]="loading()"
+    class="w-full bg-yellow-500 text-white py-3 rounded-xl font-bold hover:bg-yellow-600 transition shadow-lg shadow-yellow-100"
+  >
+    {{ loading() ? 'Updating...' : 'Save Changes' }}
+  </button>
+</form>

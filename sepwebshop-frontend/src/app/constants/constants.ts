@@ -4,6 +4,7 @@ export const Constants = {
     LOGIN_USER: 'Users/login',
     REFRESH_TOKEN: 'Users/refresh-token',
     CARS: 'Cars',
+    INSURANCES: 'Insurances',
   },
   ALERT_MESSAGES: {
     UNKONOW_ERROR: 'An unknown error occurred',
