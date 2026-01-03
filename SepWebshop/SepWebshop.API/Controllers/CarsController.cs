@@ -28,6 +28,7 @@ public sealed class CarsController : ControllerBase
         var command = new CreateCarCommand(
             BrandAndModel: request.BrandAndModel,
             Year: request.Year,
+            Price: request.Price,
             PlateNumber: request.PlateNumber
         );
 
@@ -75,6 +76,7 @@ public sealed class CarsController : ControllerBase
             Id: id,
             BrandAndModel: request.BrandAndModel,
             Year: request.Year,
+            Price: request.Price,
             PlateNumber: request.PlateNumber
         );
 

@@ -1,4 +1,6 @@
-﻿namespace SepWebshop.Domain.Users;
+﻿using SepWebshop.Domain.Orders;
+
+namespace SepWebshop.Domain.Users;
 
 public sealed class User
 {
@@ -11,4 +13,5 @@ public sealed class User
     public bool IsAdmin { get; set; } = false;
 
     public List<RefreshToken> RefreshTokens { get; set; } = new();
+    public List<Order> Orders { get; set; } = new();
 }

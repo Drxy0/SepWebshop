@@ -2,6 +2,7 @@
 using SepWebshop.Application.Abstractions.Data;
 using SepWebshop.Domain.Cars;
 using SepWebshop.Domain.Insurances;
+using SepWebshop.Domain.Orders;
 using SepWebshop.Domain.Users;
 
 namespace SepWebshop.Infrastructure;
@@ -16,6 +17,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
 
     public DbSet<Car> Cars { get; set; }
     public DbSet<Insurance> Insurances { get; set; }
+    public DbSet<Order> Orders { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -18,6 +18,7 @@ internal sealed class UpdateCarCommandHandler(IApplicationDbContext context) : I
 
         car.BrandAndModel = request.BrandAndModel;
         car.Year = request.Year;
+        car.Price = request.Price;
         car.PlateNumber = request.PlateNumber;
 
         try

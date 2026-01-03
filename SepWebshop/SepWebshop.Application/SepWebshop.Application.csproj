@@ -15,8 +15,4 @@
     <ProjectReference Include="..\SepWebshop.Domain\SepWebshop.Domain.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Reservations\" />
-  </ItemGroup>
-
 </Project>
