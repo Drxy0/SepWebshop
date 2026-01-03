@@ -1,4 +1,6 @@
-﻿namespace SepWebshop.Domain.Cars;
+﻿using SepWebshop.Domain.Orders;
+
+namespace SepWebshop.Domain.Cars;
 
 public sealed class Car
 {
@@ -7,4 +9,6 @@ public sealed class Car
     public int Year { get; set; }
     public float Price { get; set; }
     public string PlateNumber { get; set; } = null!;
+
+    public List<Order> Orders { get; set; } = new();
 }

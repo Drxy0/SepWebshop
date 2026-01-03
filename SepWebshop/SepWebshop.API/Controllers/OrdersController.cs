@@ -35,6 +35,7 @@ public sealed class OrdersController : ControllerBase
         var command = new CreateOrderCommand(
             userIdFromToken,
             request.CarId,
+            request.InsuranceId,
             request.LeaseStartDate,
             request.LeaseEndDate,
             request.TotalPrice,
@@ -90,6 +91,7 @@ public sealed class OrdersController : ControllerBase
             request.LeaseStartDate,
             request.LeaseEndDate,
             request.TotalPrice,
+            request.IsCompleted,
             request.PaymentMethod);
 
         var result = await _mediator.Send(command, cancellationToken);

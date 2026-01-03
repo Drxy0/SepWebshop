@@ -8,5 +8,6 @@ public sealed record UpdateOrderCommand(
     DateTime LeaseStartDate,
     DateTime LeaseEndDate,
     float TotalPrice,
+    bool IsCompleted,
     PaymentMethodType PaymentMethod
 ) : ICommand<Guid>;

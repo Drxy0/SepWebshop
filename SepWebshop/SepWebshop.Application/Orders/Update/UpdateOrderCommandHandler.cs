@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using SepWebshop.Application.Abstractions.Data;
 using SepWebshop.Domain;
+using SepWebshop.Domain.Orders;
 
 namespace SepWebshop.Application.Orders.Update;
 
@@ -11,7 +12,7 @@ internal sealed class UpdateOrderCommandHandler(
 {
     public async Task<Result<Guid>> Handle(UpdateOrderCommand request, CancellationToken cancellationToken)
     {
-        var order = await context.Orders
+        Order? order = await context.Orders
             .FirstOrDefaultAsync(o => o.Id == request.OrderId, cancellationToken);
 
         if (order is null)
@@ -23,6 +24,7 @@ internal sealed class UpdateOrderCommandHandler(
         order.LeaseStartDate = request.LeaseStartDate;
         order.LeaseEndDate = request.LeaseEndDate;
         order.TotalPrice = request.TotalPrice;
+        order.IsCompleted = request.IsCompleted;
         order.PaymentMethod = request.PaymentMethod;
 
         try

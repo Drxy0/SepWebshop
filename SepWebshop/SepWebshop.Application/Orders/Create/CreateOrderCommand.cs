@@ -6,6 +6,7 @@ namespace SepWebshop.Application.Orders.Create;
 public sealed record CreateOrderCommand(
     Guid UserId,
     Guid CarId,
+    Guid InsuranceId,
     DateTime LeaseStartDate,
     DateTime LeaseEndDate,
     float TotalPrice,

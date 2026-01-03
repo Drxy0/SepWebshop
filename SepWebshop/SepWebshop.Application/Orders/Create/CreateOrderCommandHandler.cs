@@ -14,6 +14,7 @@ internal sealed class CreateOrderCommandHandler(IApplicationDbContext context) :
             Id = Guid.NewGuid(),
             UserId = request.UserId,
             CarId = request.CarId,
+            InsuranceId = request.InsuranceId,
             LeaseStartDate = request.LeaseStartDate,
             LeaseEndDate = request.LeaseEndDate,
             TotalPrice = request.TotalPrice,

@@ -14,11 +14,17 @@ public sealed class OrderConfiguration : IEntityTypeConfiguration<Order>
                .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(o => o.Car)
-               .WithMany()
+               .WithMany(c => c.Orders)
                .HasForeignKey(o => o.CarId)
                .OnDelete(DeleteBehavior.Restrict);
 
+        builder.HasOne(o => o.Insurance)
+           .WithMany()
+           .HasForeignKey(o => o.InsuranceId)
+           .OnDelete(DeleteBehavior.Restrict);
+
         builder.HasIndex(o => o.UserId);
         builder.HasIndex(o => o.CarId);
+        builder.HasIndex(o => o.InsuranceId);
     }
 }

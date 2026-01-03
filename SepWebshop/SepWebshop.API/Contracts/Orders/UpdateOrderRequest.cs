@@ -7,4 +7,5 @@ public sealed record UpdateOrderRequest(
     DateTime LeaseStartDate,
     DateTime LeaseEndDate,
     float TotalPrice,
+    bool IsCompleted,
     PaymentMethodType PaymentMethod);
