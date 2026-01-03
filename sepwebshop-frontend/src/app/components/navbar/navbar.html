@@ -1,0 +1,71 @@
+<nav class="bg-gray-800 text-white px-6 py-3">
+  <div class="flex justify-between items-center">
+    <!-- Logo -->
+    <span class="font-bold text-lg">SepWebshop</span>
+
+    <!-- Desktop menu -->
+    <ul class="hidden md:flex gap-6 items-center">
+      <!-- USER MENU -->
+      <li *ngIf="auth.isLoggedIn()">
+        <a routerLink="/index" class="hover:underline">Home</a>
+      </li>
+
+      <!-- ADMIN MENU -->
+      <li *ngIf="auth.isAdmin()">
+        <a routerLink="/admin/cars" class="hover:underline">Cars</a>
+      </li>
+
+      <li *ngIf="auth.isAdmin()">
+        <a routerLink="/admin/insurances" class="hover:underline">Insurances</a>
+      </li>
+
+      <!-- LOGOUT -->
+      <li *ngIf="auth.isLoggedIn()">
+        <button (click)="logout()" class="bg-red-600 px-3 py-1 rounded hover:bg-red-700 transition">
+          Logout
+        </button>
+      </li>
+    </ul>
+
+    <!-- Mobile hamburger -->
+    <button class="md:hidden focus:outline-none" (click)="mobileOpen = !mobileOpen">☰</button>
+  </div>
+
+  <!-- Mobile menu -->
+  <div *ngIf="mobileOpen" class="md:hidden mt-4 space-y-3">
+    <a
+      *ngIf="auth.isLoggedIn()"
+      routerLink="/index"
+      (click)="mobileOpen = false"
+      class="block hover:underline"
+    >
+      Home
+    </a>
+
+    <a
+      *ngIf="auth.isAdmin()"
+      routerLink="/admin/cars"
+      (click)="mobileOpen = false"
+      class="block hover:underline"
+    >
+      Cars
+    </a>
+
+    <a
+      *ngIf="auth.isAdmin()"
+      routerLink="/admin/insurances"
+      (click)="mobileOpen = false"
+      class="block hover:underline"
+    >
+      Insurances
+    </a>
+
+    <button
+      *ngIf="auth.isLoggedIn()"
+      (click)="logout()"
+      class="w-full bg-red-600 px-3 py-2 rounded hover:bg-red-700 transition"
+    >
+      Logout
+    </button>
+  </div>
+</nav>

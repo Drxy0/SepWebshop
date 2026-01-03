@@ -1,9 +1,11 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './guards/auth-guard';
 import { logInGuard } from './guards/log-in-guard';
+import { adminGuard } from './guards/admin-guard';
 import { Index } from './components/index';
 import { Login } from './components/login/login';
 import { Register } from './components/register/register';
+import { CarsComponent } from './components/admin/cars/cars';
 
 export const routes: Routes = [
   {
@@ -25,5 +27,10 @@ export const routes: Routes = [
     path: 'register',
     component: Register,
     canActivate: [logInGuard],
+  },
+  {
+    path: 'admin/cars',
+    component: CarsComponent,
+    canActivate: [authGuard, adminGuard],
   },
 ];

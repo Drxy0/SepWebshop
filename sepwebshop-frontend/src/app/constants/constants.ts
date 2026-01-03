@@ -3,6 +3,7 @@ export const Constants = {
     REGISTER_USER: 'Users/register',
     LOGIN_USER: 'Users/login',
     REFRESH_TOKEN: 'Users/refresh-token',
+    CARS: 'Cars',
   },
   ALERT_MESSAGES: {
     UNKONOW_ERROR: 'An unknown error occurred',
