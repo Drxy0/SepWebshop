@@ -10,20 +10,15 @@ jobs:
     env:
       WORKING_DIRECTORY: ./sepwebshop-frontend
       AZURE_WEBAPP_NAME: lwa-sepapp-fe-dev-eun-001
-      AZURE_RESOURCE_GROUP: rg-sepapp-dev-eun-001
-
-    strategy:
-      matrix:
-        node-version: [22]
 
     steps:
       - name: Checkout the source code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js ${{ matrix.node-version }}
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: "22"
           cache: "npm"
           cache-dependency-path: ${{ env.WORKING_DIRECTORY }}/package-lock.json
 
@@ -35,20 +30,13 @@ jobs:
         run: npm run build
         working-directory: ${{ env.WORKING_DIRECTORY }}
 
-      - name: Archive production build
-        run: |
-          cd ${{ env.WORKING_DIRECTORY }}/dist/sepwebshop-frontend/browser
-          zip -r ../../../frontend.zip .
-
       - name: Azure CLI login
         uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Deploy to Azure Web App
-        run: |
-          az webapp deploy \
-            --resource-group $AZURE_RESOURCE_GROUP \
-            --name $AZURE_WEBAPP_NAME \
-            --src-path ${{ env.WORKING_DIRECTORY }}/frontend.zip \
-            --type zip
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          package: ${{ env.WORKING_DIRECTORY }}/dist/sepwebshop-frontend/browser
