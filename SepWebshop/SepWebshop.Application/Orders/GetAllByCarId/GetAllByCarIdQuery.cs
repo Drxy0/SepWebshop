@@ -3,4 +3,4 @@ using SepWebshop.Domain.Orders;
 
 namespace SepWebshop.Application.Orders.GetAllByCarId;
 
-public sealed record GetAllByCarIdQuery(Guid CarId) : IQuery<IReadOnlyList<Order>>;
+public sealed record GetAllByCarIdQuery(Guid CarId) : IQuery<IReadOnlyList<OrderDto>>;

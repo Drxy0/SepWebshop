@@ -10,5 +10,5 @@ public sealed class Car
     public float Price { get; set; }
     public string PlateNumber { get; set; } = null!;
 
-    public List<Order> Orders { get; set; } = new();
+    public List<OrderDto> Orders { get; set; } = new();
 }

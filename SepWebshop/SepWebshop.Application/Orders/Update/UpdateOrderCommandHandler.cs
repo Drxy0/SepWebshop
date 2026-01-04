@@ -12,7 +12,7 @@ internal sealed class UpdateOrderCommandHandler(
 {
     public async Task<Result<Guid>> Handle(UpdateOrderCommand request, CancellationToken cancellationToken)
     {
-        Order? order = await context.Orders
+        OrderDto? order = await context.Orders
             .FirstOrDefaultAsync(o => o.Id == request.OrderId, cancellationToken);
 
         if (order is null)

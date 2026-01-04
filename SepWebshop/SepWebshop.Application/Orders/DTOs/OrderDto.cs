@@ -1,21 +1,16 @@
-﻿using SepWebshop.Domain.Cars;
-using SepWebshop.Domain.Insurances;
-using SepWebshop.Domain.Users;
+﻿using SepWebshop.Domain.Orders;
 
-namespace SepWebshop.Domain.Orders;
+namespace SepWebshop.Application.Orders.DTOs;
 
-public sealed class OrderDto
+public class OrderDto
 {
     public Guid Id { get; init; }
-    
+
     public Guid UserId { get; set; }
-    public User User { get; set; } = null!;
 
     public Guid CarId { get; set; }
-    public Car Car { get; set; } = null!;
 
     public Guid InsuranceId { get; set; }
-    public Insurance Insurance { get; set; } = null!;
 
     public DateTime LeaseStartDate { get; set; }
     public DateTime LeaseEndDate { get; set; }

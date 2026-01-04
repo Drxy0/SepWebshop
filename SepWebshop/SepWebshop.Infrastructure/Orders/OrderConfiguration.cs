@@ -4,9 +4,9 @@ using SepWebshop.Domain.Orders;
 
 namespace SepWebshop.Infrastructure.Orders;
 
-public sealed class OrderConfiguration : IEntityTypeConfiguration<Order>
+public sealed class OrderConfiguration : IEntityTypeConfiguration<OrderDto>
 {
-    public void Configure(EntityTypeBuilder<Order> builder)
+    public void Configure(EntityTypeBuilder<OrderDto> builder)
     {
         builder.HasOne(o => o.User)
                .WithMany()

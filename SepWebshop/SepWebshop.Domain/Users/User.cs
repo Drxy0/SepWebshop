@@ -13,5 +13,5 @@ public sealed class User
     public bool IsAdmin { get; set; } = false;
 
     public List<RefreshToken> RefreshTokens { get; set; } = new();
-    public List<Order> Orders { get; set; } = new();
+    public List<OrderDto> Orders { get; set; } = new();
 }

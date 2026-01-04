@@ -3,4 +3,4 @@ using SepWebshop.Domain.Orders;
 
 namespace SepWebshop.Application.Orders.GetById;
 
-public sealed record GetOrderByIdQuery(Guid OrderId) : IQuery<Order>;
+public sealed record GetOrderByIdQuery(Guid OrderId) : IQuery<OrderDto>;

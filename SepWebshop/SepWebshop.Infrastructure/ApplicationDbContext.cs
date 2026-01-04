@@ -17,7 +17,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
 
     public DbSet<Car> Cars { get; set; }
     public DbSet<Insurance> Insurances { get; set; }
-    public DbSet<Order> Orders { get; set; }
+    public DbSet<OrderDto> Orders { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

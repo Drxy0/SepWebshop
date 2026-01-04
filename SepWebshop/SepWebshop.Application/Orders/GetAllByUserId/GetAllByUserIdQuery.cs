@@ -1,6 +1,6 @@
-﻿using SepWebshop.Application.Abstractions.Messaging;
-using SepWebshop.Domain.Orders;
+﻿using SepWebshop.Application.Orders.DTOs;
+using SepWebshop.Application.Abstractions.Messaging;
 
 namespace SepWebshop.Application.Orders.GetAllByUserId;
 
-public sealed record GetAllByUserIdQuery(Guid UserId) : IQuery<IReadOnlyList<Order>>;
+public sealed record GetAllByUserIdQuery(Guid UserId) : IQuery<IReadOnlyList<OrderDto>>;

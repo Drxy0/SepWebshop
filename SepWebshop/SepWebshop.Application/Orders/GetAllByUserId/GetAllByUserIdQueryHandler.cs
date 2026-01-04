@@ -1,22 +1,42 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 using SepWebshop.Application.Abstractions.Data;
+using SepWebshop.Application.Abstractions.Messaging;
+using SepWebshop.Application.Orders.DTOs;
 using SepWebshop.Domain;
-using SepWebshop.Domain.Orders;
 
 namespace SepWebshop.Application.Orders.GetAllByUserId;
 
-internal sealed class GetOrdersByUserIdQueryHandler(IApplicationDbContext context) 
-    : IRequestHandler<GetAllByUserIdQuery, Result<IReadOnlyList<Order>>>
+internal sealed class GetOrdersByUserIdQueryHandler
+    : IRequestHandler<GetAllByUserIdQuery, Result<IReadOnlyList<OrderDto>>>
 {
-    public async Task<Result<IReadOnlyList<Order>>> Handle(GetAllByUserIdQuery request, CancellationToken cancellationToken)
+    private readonly IApplicationDbContext context;
+
+    public GetOrdersByUserIdQueryHandler(IApplicationDbContext context)
     {
-        IReadOnlyList<Order> orders = await context.Orders
+        this.context = context;
+    }
+
+    public async Task<Result<IReadOnlyList<OrderDto>>> Handle(
+        GetAllByUserIdQuery request,
+        CancellationToken cancellationToken)
+    {
+        var orderDtos = await context.Orders
             .Where(o => o.UserId == request.UserId)
-            .Include(o => o.Car)
-            .Include(o => o.User)
+            .Select(o => new OrderDto
+            {
+                Id = o.Id,
+                UserId = o.UserId,
+                CarId = o.CarId,
+                InsuranceId = o.InsuranceId,
+                LeaseStartDate = o.LeaseStartDate,
+                LeaseEndDate = o.LeaseEndDate,
+                TotalPrice = o.TotalPrice,
+                IsCompleted = o.IsCompleted,
+                PaymentMethod = o.PaymentMethod
+            })
             .ToListAsync(cancellationToken);
 
-        return Result.Success<IReadOnlyList<Order>>(orders);
+        return Result.Success<IReadOnlyList<OrderDto>>(orderDtos);
     }
 }

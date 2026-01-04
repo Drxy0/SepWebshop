@@ -9,7 +9,7 @@ internal sealed class CreateOrderCommandHandler(IApplicationDbContext context) :
 {
     public async Task<Result<Guid>> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
     {
-        Order order = new()
+        OrderDto order = new()
         {
             Id = Guid.NewGuid(),
             UserId = request.UserId,
