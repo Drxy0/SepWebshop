@@ -79,8 +79,7 @@ public sealed class OrdersController : ControllerBase
     [HttpGet("car/{carId:guid}")]
     public async Task<IActionResult> GetAllByCarId(Guid carId, CancellationToken cancellationToken)
     {
-        var userIdFromToken = Guid.Parse(_identityService.UserIdentity!);
-        var result = await _mediator.Send(new GetAllByCarIdQuery(userIdFromToken), cancellationToken);
+        var result = await _mediator.Send(new GetAllByCarIdQuery(carId), cancellationToken);
         return Ok(result.Value);
     }
 
