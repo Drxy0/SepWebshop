@@ -4,15 +4,15 @@ using SepWebshop.Application.Abstractions.Data;
 using SepWebshop.Domain;
 using SepWebshop.Domain.Orders;
 
-namespace SepWebshop.Application.Orders.GetAllByUserId;
+namespace SepWebshop.Application.Orders.GetAllByCarId;
 
-internal sealed class GetOrdersByUserIdQueryHandler(IApplicationDbContext context) 
-    : IRequestHandler<GetAllByUserIdQuery, Result<IReadOnlyList<Order>>>
+internal class GetAllByCarIdQueryHandler(IApplicationDbContext context)
+    : IRequestHandler<GetAllByCarIdQuery, Result<IReadOnlyList<Order>>>
 {
-    public async Task<Result<IReadOnlyList<Order>>> Handle(GetAllByUserIdQuery request, CancellationToken cancellationToken)
+    public async Task<Result<IReadOnlyList<Order>>> Handle(GetAllByCarIdQuery request, CancellationToken cancellationToken)
     {
         IReadOnlyList<Order> orders = await context.Orders
-            .Where(o => o.UserId == request.UserId)
+            .Where(o => o.CarId == request.CarId)
             .Include(o => o.Car)
             .Include(o => o.User)
             .ToListAsync(cancellationToken);

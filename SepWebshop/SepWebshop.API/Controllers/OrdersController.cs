@@ -5,6 +5,7 @@ using SepWebshop.API.Contracts.Orders;
 using SepWebshop.Application.Abstractions.IdentityService;
 using SepWebshop.Application.Orders.Create;
 using SepWebshop.Application.Orders.Delete;
+using SepWebshop.Application.Orders.GetAllByCarId;
 using SepWebshop.Application.Orders.GetAllByUserId;
 using SepWebshop.Application.Orders.GetById;
 using SepWebshop.Application.Orders.Update;
@@ -71,6 +72,15 @@ public sealed class OrdersController : ControllerBase
     {
         var userIdFromToken = Guid.Parse(_identityService.UserIdentity!);
         var result = await _mediator.Send(new GetAllByUserIdQuery(userIdFromToken), cancellationToken);
+        return Ok(result.Value);
+    }
+
+    [Authorize]
+    [HttpGet("car/{carId:guid}")]
+    public async Task<IActionResult> GetAllByCarId(Guid carId, CancellationToken cancellationToken)
+    {
+        var userIdFromToken = Guid.Parse(_identityService.UserIdentity!);
+        var result = await _mediator.Send(new GetAllByCarIdQuery(userIdFromToken), cancellationToken);
         return Ok(result.Value);
     }
 
