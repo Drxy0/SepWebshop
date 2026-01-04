@@ -17,6 +17,11 @@ internal sealed class RegisterUserCommandHandler(IApplicationDbContext context, 
             return Result.Failure<Guid>(UserErrors.EmailNotUnique);
         }
 
+        if (!IsPasswordStrongEnough(command.Password))
+        {
+            return Result.Failure<Guid>(UserErrors.WeakPassword);
+        }
+
         User user = new User
         {
             Name = command.Name,
@@ -30,5 +35,17 @@ internal sealed class RegisterUserCommandHandler(IApplicationDbContext context, 
         await context.SaveChangesAsync(cancellationToken);
 
         return user.Id;
+    }
+
+    private bool IsPasswordStrongEnough(string password)
+    {
+        if (password.Length <= 8) return false;
+        if (!password.Any(char.IsUpper)) return false;
+        if (!password.Any(char.IsLower)) return false;
+        if (!password.Any(char.IsDigit)) return false;
+        if (!password.Any(ch => !char.IsLetterOrDigit(ch))) return false;
+
+        return true;
+
     }
 }

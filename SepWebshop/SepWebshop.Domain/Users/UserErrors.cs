@@ -17,13 +17,16 @@ public static class UserErrors
     public static readonly Error EmailNotUnique = Error.Conflict(
         "Users.EmailNotUnique",
         "The provided email is not unique");
+    
+    public static readonly Error WeakPassword = Error.Problem(
+        "Users.WeakPassword",
+        "The provided password is not storng enogh");
 
-    public static readonly Error InvalidCredentials = Error.Conflict(
+    public static readonly Error InvalidCredentials = Error.Problem(
         "Users.InvalidCredentials",
         "Invalid credentials");
 
-    // NOTE: Idk if this should be an error or throw an exception in the handler
-    public static readonly Error InvalidRefreshToken = Error.Conflict( 
+    public static readonly Error InvalidRefreshToken = Error.Problem( 
         "Users.InvalidRefreshToken",
         "The refresh token is invalid");
 
