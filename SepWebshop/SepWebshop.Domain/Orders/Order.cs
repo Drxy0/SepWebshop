@@ -4,7 +4,7 @@ using SepWebshop.Domain.Users;
 
 namespace SepWebshop.Domain.Orders;
 
-public sealed class OrderDto
+public sealed class Order
 {
     public Guid Id { get; init; }
     
@@ -21,6 +21,8 @@ public sealed class OrderDto
     public DateTime LeaseEndDate { get; set; }
 
     public float TotalPrice { get; set; }
-    public bool IsCompleted { get; set; } = false;
-    public PaymentMethodType PaymentMethod { get; set; }
+    public OrderStatus OrderStatus { get; set; }
+    public PaymentMethodType? PaymentMethod { get; set; }
+
+    public DateTime CreatedAt { get; init; } = DateTime.UtcNow;
 }

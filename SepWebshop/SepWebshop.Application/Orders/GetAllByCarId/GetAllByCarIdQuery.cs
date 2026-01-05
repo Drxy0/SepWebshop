@@ -1,5 +1,5 @@
 ﻿using SepWebshop.Application.Abstractions.Messaging;
-using SepWebshop.Domain.Orders;
+using SepWebshop.Application.Orders.DTOs;
 
 namespace SepWebshop.Application.Orders.GetAllByCarId;
 

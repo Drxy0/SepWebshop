@@ -2,24 +2,20 @@
 using Microsoft.EntityFrameworkCore;
 using SepWebshop.Application.Abstractions.Data;
 using SepWebshop.Domain;
+using SepWebshop.Domain.Orders;
 
 namespace SepWebshop.Application.Orders.Delete;
 
-internal sealed class DeleteOrderCommandHandler(
-    IApplicationDbContext context
-) : IRequestHandler<DeleteOrderCommand, Result<Guid>>
+internal sealed class DeleteOrderCommandHandler(IApplicationDbContext context) : IRequestHandler<DeleteOrderCommand, Result<Guid>>
 {
-    public async Task<Result<Guid>> Handle(
-        DeleteOrderCommand request,
-        CancellationToken cancellationToken)
+    public async Task<Result<Guid>> Handle(DeleteOrderCommand request, CancellationToken cancellationToken)
     {
-        var order = await context.Orders
+        Order? order = await context.Orders
             .FirstOrDefaultAsync(o => o.Id == request.OrderId, cancellationToken);
 
         if (order is null)
         {
-            return Result.Failure<Guid>(
-                Error.NotFound("Order.NotFound", "Order not found"));
+            return Result.Failure<Guid>(OrderErrors.NotFound(request.OrderId));
         }
 
         context.Orders.Remove(order);

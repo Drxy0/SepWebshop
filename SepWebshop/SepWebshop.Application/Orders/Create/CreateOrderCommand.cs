@@ -8,7 +8,5 @@ public sealed record CreateOrderCommand(
     Guid CarId,
     Guid InsuranceId,
     DateTime LeaseStartDate,
-    DateTime LeaseEndDate,
-    float TotalPrice,
-    PaymentMethodType PaymentMethod
+    DateTime LeaseEndDate
 ) : ICommand<Guid>;

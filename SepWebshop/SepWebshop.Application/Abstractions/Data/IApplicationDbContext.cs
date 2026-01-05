@@ -14,7 +14,7 @@ public interface IApplicationDbContext
 
     DbSet<Car> Cars { get; }
     DbSet<Insurance> Insurances { get; }
-    DbSet<OrderDto> Orders { get; }
+    DbSet<Order> Orders { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default);

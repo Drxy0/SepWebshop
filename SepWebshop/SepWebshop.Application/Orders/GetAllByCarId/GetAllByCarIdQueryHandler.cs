@@ -1,8 +1,8 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 using SepWebshop.Application.Abstractions.Data;
+using SepWebshop.Application.Orders.DTOs;
 using SepWebshop.Domain;
-using SepWebshop.Domain.Orders;
 
 namespace SepWebshop.Application.Orders.GetAllByCarId;
 
@@ -21,7 +21,7 @@ internal class GetAllByCarIdQueryHandler(IApplicationDbContext context) : IReque
                         LeaseStartDate = o.LeaseStartDate,
                         LeaseEndDate = o.LeaseEndDate,
                         TotalPrice = o.TotalPrice,
-                        IsCompleted = o.IsCompleted,
+                        OrderStatus = o.OrderStatus,
                         PaymentMethod = o.PaymentMethod
                     })
                     .ToListAsync(cancellationToken);

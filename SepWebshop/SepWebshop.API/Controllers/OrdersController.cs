@@ -37,9 +37,7 @@ public sealed class OrdersController : ApiControllerBase
             request.CarId,
             request.InsuranceId,
             request.LeaseStartDate,
-            request.LeaseEndDate,
-            request.TotalPrice,
-            request.PaymentMethod);
+            request.LeaseEndDate);
 
         var result = await Mediator.Send(command, cancellationToken);
 
@@ -97,10 +95,7 @@ public sealed class OrdersController : ApiControllerBase
         var command = new UpdateOrderCommand(
             request.OrderId,
             request.LeaseStartDate,
-            request.LeaseEndDate,
-            request.TotalPrice,
-            request.IsCompleted,
-            request.PaymentMethod);
+            request.LeaseEndDate);
 
         var result = await Mediator.Send(command, cancellationToken);
 

@@ -2,4 +2,4 @@
 
 namespace SepWebshop.Application.Orders.Delete;
 
-public sealed record DeleteOrderCommand(Guid OrderId) : ICommand<Guid>; // TODO: idk if it should return guid
+public sealed record DeleteOrderCommand(Guid OrderId) : ICommand<Guid>;

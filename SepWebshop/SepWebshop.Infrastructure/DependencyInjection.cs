@@ -6,7 +6,9 @@ using Microsoft.IdentityModel.Tokens;
 using SepWebshop.Application.Abstractions.Authentication;
 using SepWebshop.Application.Abstractions.Data;
 using SepWebshop.Application.Abstractions.Email;
+using SepWebshop.Application.Orders.Services;
 using SepWebshop.Infrastructure.Authentication;
+using SepWebshop.Infrastructure.BackgroundTasks;
 using SepWebshop.Infrastructure.Email;
 using System.Security.Claims;
 using System.Text;
@@ -52,8 +54,13 @@ public static class DependencyInjection
                 };
             });
 
+        // Email
         services.Configure<SendGridOptions>(configuration.GetSection(SendGridOptions.SectionName));
         services.AddScoped<IEmailSender, SendGridEmailSender>();
+
+        // Background service for auto-cancelling orders
+        services.AddScoped<CancelExpiredOrdersService>();
+        services.AddHostedService<ExpiredOrdersBackgroundService>();
 
         return services;
     }

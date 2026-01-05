@@ -5,7 +5,5 @@ namespace SepWebshop.API.Contracts.Orders;
 public sealed record UpdateOrderRequest(
     Guid OrderId,
     DateTime LeaseStartDate,
-    DateTime LeaseEndDate,
-    float TotalPrice,
-    bool IsCompleted,
-    PaymentMethodType PaymentMethod);
+    DateTime LeaseEndDate
+);

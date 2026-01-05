@@ -15,5 +15,5 @@ public sealed class User
     public Guid? ConfirmationToken { get; set; }
 
     public List<RefreshToken> RefreshTokens { get; set; } = new();
-    public List<OrderDto> Orders { get; set; } = new();
+    public List<Order> Orders { get; set; } = new();
 }

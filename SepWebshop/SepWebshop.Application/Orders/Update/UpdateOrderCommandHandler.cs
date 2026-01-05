@@ -6,13 +6,12 @@ using SepWebshop.Domain.Orders;
 
 namespace SepWebshop.Application.Orders.Update;
 
-internal sealed class UpdateOrderCommandHandler(
-    IApplicationDbContext context
-) : IRequestHandler<UpdateOrderCommand, Result<Guid>>
+internal sealed class UpdateOrderCommandHandler(IApplicationDbContext context) : IRequestHandler<UpdateOrderCommand, Result<Guid>>
 {
     public async Task<Result<Guid>> Handle(UpdateOrderCommand request, CancellationToken cancellationToken)
     {
-        OrderDto? order = await context.Orders
+        Order? order = await context.Orders
+            .Include(o => o.Car)
             .FirstOrDefaultAsync(o => o.Id == request.OrderId, cancellationToken);
 
         if (order is null)
@@ -21,11 +20,23 @@ internal sealed class UpdateOrderCommandHandler(
                 Error.NotFound("Order.NotFound", "Order not found"));
         }
 
+        if (request.LeaseEndDate < request.LeaseStartDate ||
+            request.LeaseStartDate < DateTime.UtcNow ||
+            request.LeaseEndDate < DateTime.UtcNow)
+        {
+            return Result.Failure<Guid>(OrderErrors.InvalidLeaseTime);
+        }
+
+        int leaseDays = (request.LeaseEndDate - request.LeaseStartDate).Days;
+
+        if (leaseDays == 0)
+        {
+            leaseDays = 1;
+        }
+
         order.LeaseStartDate = request.LeaseStartDate;
         order.LeaseEndDate = request.LeaseEndDate;
-        order.TotalPrice = request.TotalPrice;
-        order.IsCompleted = request.IsCompleted;
-        order.PaymentMethod = request.PaymentMethod;
+        order.TotalPrice = leaseDays * order.Car.Price;
 
         try
         {
