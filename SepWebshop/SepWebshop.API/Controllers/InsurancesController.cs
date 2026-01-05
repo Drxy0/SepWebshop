@@ -12,14 +12,9 @@ namespace SepWebshop.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public sealed class InsurancesController : ControllerBase
+public sealed class InsurancesController : ApiCOn
 {
-    private readonly ISender _sender;
-
-    public InsurancesController(ISender sender)
-    {
-        _sender = sender;
-    }
+    public InsurancesController(ISender mediator) : base(mediator) { }
 
     [Authorize(Roles = "Admin")]
     [HttpPost]
@@ -32,7 +27,7 @@ public sealed class InsurancesController : ControllerBase
             DeductibleAmount: request.DeductibleAmount
         );
 
-        var result = await _sender.Send(command, cancellationToken);
+        var result = await  Mediator.Send(command, cancellationToken);
 
         if (result.IsFailure)
         {
@@ -45,7 +40,7 @@ public sealed class InsurancesController : ControllerBase
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)
     {
-        var result = await _sender.Send(new GetInsuranceByIdQuery(id), cancellationToken);
+        var result = await  Mediator.Send(new GetInsuranceByIdQuery(id), cancellationToken);
 
         if (result.IsFailure)
         {
@@ -58,7 +53,7 @@ public sealed class InsurancesController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
     {
-        var result = await _sender.Send(new GetAllInsurancesQuery(), cancellationToken);
+        var result = await  Mediator.Send(new GetAllInsurancesQuery(), cancellationToken);
 
         if (result.IsFailure)
         {
@@ -80,7 +75,7 @@ public sealed class InsurancesController : ControllerBase
             DeductibleAmount: request.DeductibleAmount
         );
 
-        var result = await _sender.Send(command, cancellationToken);
+        var result = await  Mediator.Send(command, cancellationToken);
 
         if (result.IsFailure)
         {
@@ -94,7 +89,7 @@ public sealed class InsurancesController : ControllerBase
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
     {
-        var result = await _sender.Send(new DeleteInsuranceCommand(id), cancellationToken);
+        var result = await  Mediator.Send(new DeleteInsuranceCommand(id), cancellationToken);
 
         if (result.IsFailure)
         {

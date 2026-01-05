@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SepWebshop.API.Abstractions;
 using SepWebshop.API.Contracts.Cars;
 using SepWebshop.Application.Cars.Create;
 using SepWebshop.Application.Cars.Delete;
@@ -12,14 +13,10 @@ namespace SepWebshop.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public sealed class CarsController : ControllerBase
+public sealed class CarsController : ApiControllerBase
 {
-    private readonly ISender _sender;
+    public CarsController(ISender mediator) : base(mediator) { }
 
-    public CarsController(ISender sender)
-    {
-        _sender = sender;
-    }
 
     [Authorize(Roles = "Admin")]
     [HttpPost]
@@ -32,7 +29,7 @@ public sealed class CarsController : ControllerBase
             PlateNumber: request.PlateNumber
         );
 
-        var result = await _sender.Send(command, cancellationToken);
+        var result = await Mediator.Send(command, cancellationToken);
 
         if (result.IsFailure)
         {
@@ -45,7 +42,7 @@ public sealed class CarsController : ControllerBase
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)
     {
-        var result = await _sender.Send(new GetCarByIdQuery(id), cancellationToken);
+        var result = await Mediator.Send(new GetCarByIdQuery(id), cancellationToken);
 
         if (result.IsFailure)
         {
@@ -58,7 +55,7 @@ public sealed class CarsController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
     {
-        var result = await _sender.Send(new GetAllCarsQuery(), cancellationToken);
+        var result = await Mediator.Send(new GetAllCarsQuery(), cancellationToken);
 
         if (result.IsFailure)
         {
@@ -80,7 +77,7 @@ public sealed class CarsController : ControllerBase
             PlateNumber: request.PlateNumber
         );
 
-        var result = await _sender.Send(command, cancellationToken);
+        var result = await Mediator.Send(command, cancellationToken);
 
         if (result.IsFailure)
         {
@@ -94,7 +91,7 @@ public sealed class CarsController : ControllerBase
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
     {
-        var result = await _sender.Send(new DeleteCarCommand(id), cancellationToken);
+        var result = await Mediator.Send(new DeleteCarCommand(id), cancellationToken);
 
         if (result.IsFailure)
         {

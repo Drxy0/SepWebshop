@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using SepWebshop.API.Abstractions;
 using SepWebshop.API.Contracts.Users;
 using SepWebshop.Application.Users.ConfirmUser;
 using SepWebshop.Application.Users.Login;
@@ -10,14 +11,9 @@ namespace SepWebshop.API.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class UsersController : ControllerBase
+public class UsersController : ApiControllerBase
 {
-    private readonly ISender _sender;
-
-    public UsersController(ISender sender)
-    {
-        _sender = sender;
-    }
+    public UsersController(ISender mediator) : base(mediator) { }
 
     [HttpPost("register")]
     public async Task<IActionResult> Register(RegisterUserRequest request, CancellationToken cToken)
@@ -28,7 +24,7 @@ public class UsersController : ControllerBase
             request.Surname,
             request.Password);
 
-        Result<string> result = await _sender.Send(command, cToken);
+        Result<string> result = await Mediator.Send(command, cToken);
 
         if (result.IsFailure)
         {
@@ -46,7 +42,7 @@ public class UsersController : ControllerBase
             request.Email,
             request.Password);
 
-        Result<Application.Users.AuthResponse> result = await _sender.Send(command, cToken);
+        Result<Application.Users.AuthResponse> result = await Mediator.Send(command, cToken);
 
         if (result.IsFailure)
         {
@@ -62,7 +58,7 @@ public class UsersController : ControllerBase
     {
         var command = new RefreshTokenCommand(request.refreshToken);
 
-        Result<Application.Users.AuthResponse> result = await _sender.Send(command, cToken);
+        Result<Application.Users.AuthResponse> result = await Mediator.Send(command, cToken);
         
         if (result.IsFailure)
         {
@@ -77,7 +73,7 @@ public class UsersController : ControllerBase
     {
         var command = new ConfirmEmailCommand(userId, token);
 
-        Result<string> result = await _sender.Send(command, cToken);
+        Result<string> result = await Mediator.Send(command, cToken);
 
         if (result.IsFailure)
         {

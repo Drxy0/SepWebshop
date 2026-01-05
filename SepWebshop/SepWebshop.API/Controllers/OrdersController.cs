@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SepWebshop.API.Abstractions;
 using SepWebshop.API.Contracts.Orders;
 using SepWebshop.Application.Abstractions.IdentityService;
 using SepWebshop.Application.Orders.Create;
@@ -14,14 +15,12 @@ namespace SepWebshop.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public sealed class OrdersController : ControllerBase
+public sealed class OrdersController : ApiControllerBase
 {
-    private readonly IMediator _mediator;
     private readonly IIdentityService _identityService;
 
-    public OrdersController(IMediator mediator, IIdentityService identityService)
+    public OrdersController(ISender mediator, IIdentityService identityService) : base(mediator)
     {
-        _mediator = mediator;
         _identityService = identityService;
     }
 
@@ -42,7 +41,7 @@ public sealed class OrdersController : ControllerBase
             request.TotalPrice,
             request.PaymentMethod);
 
-        var result = await _mediator.Send(command, cancellationToken);
+        var result = await Mediator.Send(command, cancellationToken);
 
         if (result.IsFailure)
         {
@@ -56,7 +55,7 @@ public sealed class OrdersController : ControllerBase
     [HttpGet("{orderId:guid}")]
     public async Task<IActionResult> GetById(Guid orderId, CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(new GetOrderByIdQuery(orderId), cancellationToken);
+        var result = await Mediator.Send(new GetOrderByIdQuery(orderId), cancellationToken);
 
         if (result.IsFailure)
         {
@@ -71,7 +70,7 @@ public sealed class OrdersController : ControllerBase
     public async Task<IActionResult> GetAllByUserId(Guid userId, CancellationToken cancellationToken)
     {
         var userIdFromToken = Guid.Parse(_identityService.UserIdentity!);
-        var result = await _mediator.Send(new GetAllByUserIdQuery(userIdFromToken), cancellationToken);
+        var result = await Mediator.Send(new GetAllByUserIdQuery(userIdFromToken), cancellationToken);
         return Ok(result.Value);
     }
 
@@ -79,7 +78,7 @@ public sealed class OrdersController : ControllerBase
     [HttpGet("car/{carId:guid}")]
     public async Task<IActionResult> GetAllByCarId(Guid carId, CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(new GetAllByCarIdQuery(carId), cancellationToken);
+        var result = await Mediator.Send(new GetAllByCarIdQuery(carId), cancellationToken);
         return Ok(result.Value);
     }
 
@@ -103,7 +102,7 @@ public sealed class OrdersController : ControllerBase
             request.IsCompleted,
             request.PaymentMethod);
 
-        var result = await _mediator.Send(command, cancellationToken);
+        var result = await Mediator.Send(command, cancellationToken);
 
         if (result.IsFailure)
         {
@@ -117,7 +116,7 @@ public sealed class OrdersController : ControllerBase
     [HttpDelete("{orderId:guid}")]
     public async Task<IActionResult> Delete(Guid orderId, CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(new DeleteOrderCommand(orderId), cancellationToken);
+        var result = await Mediator.Send(new DeleteOrderCommand(orderId), cancellationToken);
 
         if (result.IsFailure)
         {
