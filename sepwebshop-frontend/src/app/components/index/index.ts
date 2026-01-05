@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { CarsService } from '../../services/cars/cars';
 import { ICarResponse } from '../../models/interfaces/car';
 import { finalize } from 'rxjs';
-import { RentCar } from './rent-car/rent-car'; // Uvezi rent komponentu
+import { RentCar } from './rent-car/rent-car';
 
 @Component({
   selector: 'app-index',
