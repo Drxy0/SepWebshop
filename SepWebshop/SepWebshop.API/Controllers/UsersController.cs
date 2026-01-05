@@ -1,7 +1,7 @@
 ﻿using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SepWebshop.API.Contracts.Users;
+using SepWebshop.Application.Users.ConfirmUser;
 using SepWebshop.Application.Users.Login;
 using SepWebshop.Application.Users.RefreshToken;
 using SepWebshop.Application.Users.Register.Commands;
@@ -28,7 +28,7 @@ public class UsersController : ControllerBase
             request.Surname,
             request.Password);
 
-        Result<Guid> result = await _sender.Send(command, cToken);
+        Result<string> result = await _sender.Send(command, cToken);
 
         if (result.IsFailure)
         {
@@ -69,6 +69,21 @@ public class UsersController : ControllerBase
             return BadRequest(result.Error);
         }
         
+        return Ok(result.Value);
+    }
+
+    [HttpGet("confirm-email")]
+    public async Task<IActionResult> ConfirmEmail([FromQuery] Guid userId, [FromQuery] Guid token, CancellationToken cToken)
+    {
+        var command = new ConfirmEmailCommand(userId, token);
+
+        Result<string> result = await _sender.Send(command, cToken);
+
+        if (result.IsFailure)
+        {
+            return BadRequest(result.Error);
+        }
+
         return Ok(result.Value);
     }
 }

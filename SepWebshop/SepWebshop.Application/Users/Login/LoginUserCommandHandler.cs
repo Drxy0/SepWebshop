@@ -19,6 +19,11 @@ internal sealed class LoginUserCommandHandler(IApplicationDbContext context, IPa
             return Result.Failure<AuthResponse>(UserErrors.InvalidCredentials);
         }
 
+        if (!user.IsAccountActive)
+        {
+            return Result.Failure<AuthResponse>(UserErrors.EmailNotConfirmed);
+        }
+
         if (!passwordHasher.Verify(user.PasswordHash, command.Password))
         {
             return Result.Failure<AuthResponse>(UserErrors.InvalidCredentials);

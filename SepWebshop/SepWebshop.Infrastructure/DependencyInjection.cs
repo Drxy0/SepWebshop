@@ -5,7 +5,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using SepWebshop.Application.Abstractions.Authentication;
 using SepWebshop.Application.Abstractions.Data;
+using SepWebshop.Application.Abstractions.Email;
 using SepWebshop.Infrastructure.Authentication;
+using SepWebshop.Infrastructure.Email;
 using System.Security.Claims;
 using System.Text;
 
@@ -49,6 +51,9 @@ public static class DependencyInjection
                     RoleClaimType = ClaimTypes.Role
                 };
             });
+
+        services.Configure<SendGridOptions>(configuration.GetSection(SendGridOptions.SectionName));
+        services.AddScoped<IEmailSender, SendGridEmailSender>();
 
         return services;
     }

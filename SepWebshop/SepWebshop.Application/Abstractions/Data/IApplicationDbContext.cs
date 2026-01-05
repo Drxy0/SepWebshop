@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using SepWebshop.Domain.Cars;
 using SepWebshop.Domain.Insurances;
 using SepWebshop.Domain.Orders;
@@ -16,4 +17,6 @@ public interface IApplicationDbContext
     DbSet<OrderDto> Orders { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
+    Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default);
+
 }

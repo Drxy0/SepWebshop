@@ -11,6 +11,8 @@ public sealed class User
     public required string Surname { get; set; }
     public required string PasswordHash { get; init; }
     public bool IsAdmin { get; set; } = false;
+    public bool IsAccountActive { get; set; } = false;
+    public Guid? ConfirmationToken { get; set; }
 
     public List<RefreshToken> RefreshTokens { get; set; } = new();
     public List<OrderDto> Orders { get; set; } = new();

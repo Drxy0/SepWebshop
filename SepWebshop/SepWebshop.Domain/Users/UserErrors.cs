@@ -17,7 +17,19 @@ public static class UserErrors
     public static readonly Error EmailNotUnique = Error.Conflict(
         "Users.EmailNotUnique",
         "The provided email is not unique");
+
+    public static readonly Error EmailNotConfirmed = Error.Conflict(
+        "Users.EmailNotConfirmed",
+        "You must confirm your email before logging in");
     
+    public static readonly Error InvalidConfirmationToken = Error.Conflict(
+        "Users.InvalidConfirmationToken",
+        "Invalid confirmation token");
+
+    public static readonly Error EmailSendFailed = Error.Problem(
+        "Users.EmailSendFailed",
+        "Email failed to send");
+
     public static readonly Error WeakPassword = Error.Problem(
         "Users.WeakPassword",
         "The provided password is not storng enogh");
