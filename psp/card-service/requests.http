@@ -1,0 +1,51 @@
+### Initialize Payment
+POST http://localhost:8081/api/payment/init
+Content-Type: application/json
+
+{
+  "merchantId": "MERCHANT_001",
+  "amount": 100.00,
+  "currency": "USD",
+  "stan": "123456",
+  "pspTimestamp": 1704412800000
+}
+
+###
+
+### Process Card Payment - Valid Visa Card
+POST http://localhost:8081/api/payment/process
+Content-Type: application/json
+
+{
+  "paymentId": "YOUR_PAYMENT_ID_HERE",
+  "pan": "4532015112830366",
+  "cardHolderName": "John Doe",
+  "expiryDate": "12/25",
+  "securityCode": "123"
+}
+
+###
+
+### Process Card Payment - Valid MasterCard
+POST http://localhost:8081/api/payment/process
+Content-Type: application/json
+
+{
+  "paymentId": "YOUR_PAYMENT_ID_HERE",
+  "pan": "5425233430109903",
+  "cardHolderName": "Jane Smith",
+  "expiryDate": "06/26",
+  "securityCode": "456"
+}
+
+###
+
+### Get Transaction Status
+GET http://localhost:8081/api/payment/transaction/YOUR_PAYMENT_ID_HERE
+
+###
+
+### Health Check
+GET http://localhost:8081/api/payment/health
+
+###
