@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SepWebshop.API.Abstractions;
 using SepWebshop.API.Contracts.Insurances;
 using SepWebshop.Application.Insurances.Create;
 using SepWebshop.Application.Insurances.Delete;
@@ -12,7 +13,7 @@ namespace SepWebshop.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public sealed class InsurancesController : ApiCOn
+public sealed class InsurancesController : ApiControllerBase
 {
     public InsurancesController(ISender mediator) : base(mediator) { }
 
