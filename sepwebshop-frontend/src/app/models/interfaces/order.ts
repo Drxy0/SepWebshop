@@ -9,3 +9,7 @@ export interface IOrderResponse {
   isCompleted: boolean;
   paymentMethod: number;
 }
+
+export interface IOrderCreateResponse {
+  paymentUrl: string;
+}

@@ -136,14 +136,25 @@ export class RentCar implements OnInit {
       insuranceId: this.rentForm.value.insuranceId,
       leaseStartDate: new Date(this.rentForm.value.leaseStartDate!).toISOString(),
       leaseEndDate: new Date(this.rentForm.value.leaseEndDate!).toISOString(),
+      currency: 'USD',
     };
 
     this.ordersService.createOrder(payload).subscribe({
-      next: () => {
-        alert('Car rented successfully!');
-        this.onCancel.emit();
+      next: (response) => {
+        // Proveravamo da li je backend vratio URL
+        if (response && response.paymentUrl) {
+          console.log('Redirecting to PSP:', response.paymentUrl);
+
+          // Fizička redirekcija na drugu aplikaciju (PSP)
+          window.location.href = response.paymentUrl;
+        } else {
+          alert('Order created, but no redirect URL received.');
+        }
       },
-      error: () => alert('Conflict detected on server!'),
+      error: (err) => {
+        console.error('Order error:', err);
+        alert('Conflict detected on server or payment service is down!');
+      },
     });
   }
 
