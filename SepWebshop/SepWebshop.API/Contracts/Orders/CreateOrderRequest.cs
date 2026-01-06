@@ -6,5 +6,6 @@ public sealed record CreateOrderRequest(
     Guid CarId,
     Guid InsuranceId,
     DateTime LeaseStartDate,
-    DateTime LeaseEndDate
+    DateTime LeaseEndDate,
+    Currency Currency
 );

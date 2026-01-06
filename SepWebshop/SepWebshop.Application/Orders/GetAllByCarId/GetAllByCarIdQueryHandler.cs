@@ -21,6 +21,7 @@ internal class GetAllByCarIdQueryHandler(IApplicationDbContext context) : IReque
                         LeaseStartDate = o.LeaseStartDate,
                         LeaseEndDate = o.LeaseEndDate,
                         TotalPrice = o.TotalPrice,
+                        Currency = o.Currency,
                         OrderStatus = o.OrderStatus,
                         PaymentMethod = o.PaymentMethod
                     })

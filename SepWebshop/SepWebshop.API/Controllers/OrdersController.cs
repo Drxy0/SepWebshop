@@ -1,7 +1,9 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using SepWebshop.API.Abstractions;
+using SepWebshop.API.Configuration;
 using SepWebshop.API.Contracts.Orders;
 using SepWebshop.Application.Abstractions.IdentityService;
 using SepWebshop.Application.Orders.Create;
@@ -18,17 +20,18 @@ namespace SepWebshop.API.Controllers;
 public sealed class OrdersController : ApiControllerBase
 {
     private readonly IIdentityService _identityService;
+    private readonly PspOptions _pspOptions;
 
-    public OrdersController(ISender mediator, IIdentityService identityService) : base(mediator)
+    public OrdersController(ISender mediator, IIdentityService identityService, IOptions<PspOptions> pspOptions) 
+        : base(mediator)
     {
         _identityService = identityService;
+        _pspOptions = pspOptions.Value;
     }
 
     [Authorize]
     [HttpPost]
-    public async Task<IActionResult> Create(
-        [FromBody] CreateOrderRequest request,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> Create([FromBody] CreateOrderRequest request, CancellationToken cancellationToken)
     {
         var userIdFromToken = Guid.Parse(_identityService.UserIdentity!);
 
@@ -37,7 +40,8 @@ public sealed class OrdersController : ApiControllerBase
             request.CarId,
             request.InsuranceId,
             request.LeaseStartDate,
-            request.LeaseEndDate);
+            request.LeaseEndDate,
+            request.Currency);
 
         var result = await Mediator.Send(command, cancellationToken);
 
@@ -46,7 +50,11 @@ public sealed class OrdersController : ApiControllerBase
             return BadRequest(result.Error);
         }
 
-        return CreatedAtAction(nameof(GetById), new { orderId = result.Value }, result.Value);
+        string redirectUrl =
+            $"{_pspOptions.FrontendBaseUrl}/pay?orderId={result.Value}";
+
+        //return Redirect(redirectUrl);
+        return Ok(new { paymentUrl = redirectUrl });
     }
 
     [Authorize]
@@ -82,10 +90,7 @@ public sealed class OrdersController : ApiControllerBase
 
     [Authorize]
     [HttpPut("{orderId:guid}")]
-    public async Task<IActionResult> Update(
-        Guid orderId,
-        [FromBody] UpdateOrderRequest request,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> Update(Guid orderId, [FromBody] UpdateOrderRequest request, CancellationToken cancellationToken)
     {
         if (orderId != request.OrderId)
         {

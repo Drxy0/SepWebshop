@@ -12,6 +12,7 @@ internal sealed class UpdateOrderCommandHandler(IApplicationDbContext context) :
     {
         Order? order = await context.Orders
             .Include(o => o.Car)
+            .Include(o => o.Insurance)
             .FirstOrDefaultAsync(o => o.Id == request.OrderId, cancellationToken);
 
         if (order is null)
@@ -34,9 +35,15 @@ internal sealed class UpdateOrderCommandHandler(IApplicationDbContext context) :
             leaseDays = 1;
         }
 
+        float totalPrice =
+            leaseDays * order.Car.Price +
+            leaseDays * order.Insurance.PricePerDay +
+            order.Insurance.DeductibleAmount;
+
         order.LeaseStartDate = request.LeaseStartDate;
         order.LeaseEndDate = request.LeaseEndDate;
-        order.TotalPrice = leaseDays * order.Car.Price;
+        order.TotalPrice = totalPrice;
+        order.Currency = request.Currency;
 
         try
         {

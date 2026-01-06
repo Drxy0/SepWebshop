@@ -2,6 +2,7 @@
 using SepWebshop.Application.Abstractions.Data;
 using SepWebshop.Domain;
 using SepWebshop.Domain.Cars;
+using SepWebshop.Domain.Insurances;
 using SepWebshop.Domain.Orders;
 
 namespace SepWebshop.Application.Orders.Create;
@@ -18,8 +19,15 @@ internal sealed class CreateOrderCommandHandler(IApplicationDbContext context) :
             return Result.Failure<Guid>(CarErrors.NotFound(request.CarId));
         }
 
+        Insurance? insurance = await context.Insurances.FindAsync(request.InsuranceId, cancellationToken);
+
+        if (insurance is null)
+        {
+            return Result.Failure<Guid>(InsuranceErrors.NotFound(request.InsuranceId));
+        }
+
         if (request.LeaseEndDate < request.LeaseStartDate || 
-            request.LeaseStartDate < DateTime.UtcNow || 
+            request.LeaseStartDate < DateTime.UtcNow.AddDays(-1) || 
             request.LeaseEndDate < DateTime.UtcNow)
         {
             return Result.Failure<Guid>(OrderErrors.InvalidLeaseTime);
@@ -32,6 +40,11 @@ internal sealed class CreateOrderCommandHandler(IApplicationDbContext context) :
             leaseDays = 1;
         }
 
+        float totalPrice = 
+            leaseDays * car.Price + 
+            leaseDays * insurance.PricePerDay + 
+            insurance.DeductibleAmount;
+
         Order order = new()
         {
             Id = Guid.NewGuid(),
@@ -40,7 +53,8 @@ internal sealed class CreateOrderCommandHandler(IApplicationDbContext context) :
             InsuranceId = request.InsuranceId,
             LeaseStartDate = request.LeaseStartDate,
             LeaseEndDate = request.LeaseEndDate,
-            TotalPrice = leaseDays * car.Price
+            TotalPrice = totalPrice,
+            Currency = request.Currency
         };
 
         try
