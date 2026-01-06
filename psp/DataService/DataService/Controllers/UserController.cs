@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace DataService.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("d/[controller]")]
 public class UserController : ControllerBase
 {
     [HttpPost("login")]
