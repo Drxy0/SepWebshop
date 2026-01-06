@@ -100,7 +100,8 @@ public sealed class OrdersController : ApiControllerBase
         var command = new UpdateOrderCommand(
             request.OrderId,
             request.LeaseStartDate,
-            request.LeaseEndDate);
+            request.LeaseEndDate,
+            request.Currency);
 
         var result = await Mediator.Send(command, cancellationToken);
 
