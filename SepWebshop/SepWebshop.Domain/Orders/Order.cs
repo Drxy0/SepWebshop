@@ -21,6 +21,7 @@ public sealed class Order
     public DateTime LeaseEndDate { get; set; }
 
     public float TotalPrice { get; set; }
+    public Currency Currency { get; set; }
     public OrderStatus OrderStatus { get; set; }
     public PaymentMethodType? PaymentMethod { get; set; }
 

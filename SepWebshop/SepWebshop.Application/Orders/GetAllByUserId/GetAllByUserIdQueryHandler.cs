@@ -29,6 +29,7 @@ internal sealed class GetOrdersByUserIdQueryHandler : IRequestHandler<GetAllByUs
                 LeaseStartDate = o.LeaseStartDate,
                 LeaseEndDate = o.LeaseEndDate,
                 TotalPrice = o.TotalPrice,
+                Currency = o.Currency,
                 OrderStatus = o.OrderStatus,
                 PaymentMethod = o.PaymentMethod
             })

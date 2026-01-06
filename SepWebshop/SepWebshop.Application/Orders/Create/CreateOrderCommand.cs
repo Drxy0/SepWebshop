@@ -8,5 +8,6 @@ public sealed record CreateOrderCommand(
     Guid CarId,
     Guid InsuranceId,
     DateTime LeaseStartDate,
-    DateTime LeaseEndDate
+    DateTime LeaseEndDate,
+    Currency Currency
 ) : ICommand<Guid>;

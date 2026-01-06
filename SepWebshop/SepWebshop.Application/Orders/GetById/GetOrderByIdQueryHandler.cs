@@ -31,6 +31,7 @@ internal sealed class GetOrderByIdQueryHandler(IApplicationDbContext context) : 
             LeaseStartDate = order.LeaseStartDate,
             LeaseEndDate = order.LeaseEndDate,
             TotalPrice = order.TotalPrice,
+            Currency = order.Currency,
             OrderStatus = order.OrderStatus,
             PaymentMethod = order.PaymentMethod
         };
