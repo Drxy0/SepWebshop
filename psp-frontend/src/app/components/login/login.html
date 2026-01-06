@@ -1,0 +1,63 @@
+<div class="min-h-screen flex items-center justify-center bg-blue-400">
+  <form
+    [formGroup]="form"
+    (ngSubmit)="submit()"
+    class="bg-white p-8 rounded-xl shadow-md w-full max-w-md space-y-4"
+  >
+    <h2 class="text-2xl font-semibold text-center">Login to PSP</h2>
+
+    <!-- General error -->
+    <div *ngIf="generalError" class="bg-red-100 text-red-700 p-3 rounded text-sm">
+      {{ generalError }}
+    </div>
+
+    <!-- Email -->
+    <div>
+      <input
+        type="email"
+        placeholder="Email"
+        formControlName="email"
+        class="w-full border rounded px-3 py-2"
+      />
+
+      <p
+        *ngIf="form.controls.email.touched && form.controls.email.errors?.['required']"
+        class="text-red-500 text-sm mt-1"
+      >
+        Email is required.
+      </p>
+
+      <p
+        *ngIf="form.controls.email.touched && form.controls.email.errors?.['email']"
+        class="text-red-500 text-sm mt-1"
+      >
+        Invalid email format.
+      </p>
+    </div>
+
+    <!-- Password -->
+    <div>
+      <input
+        type="password"
+        placeholder="Password"
+        formControlName="password"
+        class="w-full border rounded px-3 py-2"
+      />
+
+      <p
+        *ngIf="form.controls.password.touched && form.controls.password.errors?.['required']"
+        class="text-red-500 text-sm mt-1"
+      >
+        Password is required.
+      </p>
+    </div>
+
+    <button
+      type="submit"
+      [disabled]="loading"
+      class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+    >
+      {{ loading ? 'Signing in...' : 'Sign in' }}
+    </button>
+  </form>
+</div>
