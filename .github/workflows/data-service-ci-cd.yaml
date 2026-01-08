@@ -98,10 +98,15 @@ jobs:
           --name AllowGitHubActions
 
       - name: Replace connection string in appsettings.json
+        shell: bash
         run: |
           echo "Updating appsettings.json with Azure SQL connection string..."
-          sed -i "s#\"DefaultConnection\": \".*\"#\"DefaultConnection\": \"Server=tcp:${{ vars.AZURE_SQL_SERVER_NAME }}.database.windows.net,1433;Initial Catalog=${{ vars.AZURE_SQL_DATA_SERVICE_DATABASE_NAME }};Persist Security Info=False;User ID=${{ steps.fetch-secrets.outputs.sql-admin }};Password=${{ steps.fetch-secrets.outputs.sql-password }};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;\"#g" \
-          ${{ env.WORKING_DIRECTORY }}/DataService/appsettings.json
+
+          CONN_STR="Server=tcp:${{ vars.AZURE_SQL_SERVER_NAME }}.database.windows.net,1433;Initial Catalog=${{ vars.AZURE_SQL_DATA_SERVICE_DATABASE_NAME }};Persist Security Info=False;User ID=${{ steps.fetch-secrets.outputs.sql-admin }};Password=${{ steps.fetch-secrets.outputs.sql-password }};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
+
+          FILE_PATH="${{ env.WORKING_DIRECTORY }}/DataService/appsettings.json"
+
+          jq --arg conn "$CONN_STR" '.ConnectionStrings.DefaultConnection = $conn' "$FILE_PATH" > temp.json && mv temp.json "$FILE_PATH"
 
       - name: Log in to Azure Container Registry
         run: |
