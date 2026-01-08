@@ -59,15 +59,13 @@
         },
         "serve": {
           "builder": "@angular/build:dev-server",
-          "options": {
-            "port": 4201
-          },
           "configurations": {
             "production": {
               "buildTarget": "psp-frontend:build:production"
             },
             "development": {
-              "buildTarget": "psp-frontend:build:development"
+              "buildTarget": "psp-frontend:build:development",
+              "port": 4201
             }
           },
           "defaultConfiguration": "development"
