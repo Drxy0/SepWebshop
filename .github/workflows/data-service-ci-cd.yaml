@@ -109,10 +109,11 @@ jobs:
           jq --arg conn "$CONN_STR" '.ConnectionStrings.DefaultConnection = $conn' "$FILE_PATH" > temp.json && mv temp.json "$FILE_PATH"
 
       - name: Log in to Azure Container Registry
-        run: |
-          echo "${{ env.REGISTRY_PASSWORD }}" | docker login ${{ env.REGISTRY_LOGIN_SERVER }} \
-            --username ${{ env.REGISTRY_USERNAME }} \
-            --password-stdin
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY_LOGIN_SERVER }}
+          username: ${{ secrets.ARM_CLIENT_ID }}
+          password: ${{ secrets.ARM_CLIENT_SECRET }}
 
       - name: Build Docker image
         id: build
