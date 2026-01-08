@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: psp-ingress
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    cert-manager.io/cluster-issuer: "letsencrypt-sepapp"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - sepapp.xyz
+      secretName: sepapp-tls
+  rules:
+    - host: sepapp.xyz
+    - http:
+        paths:
+          - path: /d
+            pathType: Prefix
+            backend:
+              service:
+                name: data-service-clusterip
+                port:
+                  number: 80

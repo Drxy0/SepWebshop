@@ -1,0 +1,95 @@
+name: Ingress Install
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Select environment"
+        required: true
+        default: dev
+        type: choice
+        options:
+          - dev
+          - prod
+
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+
+jobs:
+  install-ingress:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+            - name: Azure CLI login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Get AKS credentials
+        uses: azure/aks-set-context@v4
+        with:
+          resource-group: ${{ vars.AKS_RESOURCE_GROUP }}
+          cluster-name: ${{ vars.AKS_CLUSTER_NAME }}
+
+      - name: Install Helm
+        run: |
+          curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+
+      - name: Ensure NGINX Ingress Controller is installed
+        run: |
+          if ! kubectl get ns ingress-nginx >/dev/null 2>&1; then
+            echo "Ingress-NGINX not found. Installing..."
+            helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+            helm repo update
+            helm install ingress-nginx ingress-nginx/ingress-nginx \
+              --namespace ingress-nginx --create-namespace \
+              --set controller.publishService.enabled=true
+          else
+            echo "Ingress-NGINX already installed."
+          fi
+
+      - name: Wait for NGINX Ingress Controller
+        run: |
+          echo "Waiting for ingress-nginx-controller to be ready..."
+          kubectl rollout status deployment ingress-nginx-controller -n ingress-nginx
+          kubectl get pods -n ingress-nginx
+
+      - name: Verify ingress and external IP
+        run: |
+          kubectl get svc -n ingress-nginx
+          kubectl get ingress -A
+
+      - name: Install cert-manager
+        run: |
+          echo "Adding jetstack Helm repository..."
+          helm repo add jetstack https://charts.jetstack.io
+          helm repo update
+          
+          echo "Installing cert-manager..."
+          helm upgrade --install cert-manager jetstack/cert-manager \
+            --namespace cert-manager \
+            --create-namespace \
+            --version v1.19.2 \
+            --set installCRDs=true \
+            --wait
+
+      - name: Verify cert-manager installation
+        run: |
+          kubectl wait --for=condition=ready pod -l app.kubernetes.io/instance=cert-manager -n cert-manager --timeout=120s
+          kubectl get pods -n cert-manager
+
+      - name: Apply cert-manager ClusterIssuer
+        run: |
+          kubectl apply -f ./k8s/clusterissuer-sepapp.yaml
+
+      - name: Verify ClusterIssuer
+        run: |
+          kubectl wait --for=condition=Ready clusterissuer/letsencrypt-sepapp --timeout=60s
+          kubectl get clusterissuers -o wide

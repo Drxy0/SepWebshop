@@ -1,0 +1,68 @@
+name: Ingress Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Select environment"
+        required: true
+        default: dev
+        type: choice
+        options:
+          - dev
+          - prod
+
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+
+jobs:
+  deploy-ingress:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Azure CLI login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Get AKS credentials
+        uses: azure/aks-set-context@v4
+        with:
+          resource-group: ${{ vars.AKS_RESOURCE_GROUP }}
+          cluster-name: ${{ vars.AKS_CLUSTER_NAME }}
+
+      - name: Install Helm
+        run: |
+          curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+
+      - name: Apply Ingress manifest
+        run: |
+          kubectl apply -f ./k8s/ingress.yaml
+
+      - name: Verify Ingress
+        run: |
+          kubectl get ingress
+
+      - name: Verify ingress and external IP
+        run: |
+          kubectl get svc -n ingress-nginx
+          kubectl get ingress -A
+
+      - name: Verify TLS certificate
+        run: |
+          kubectl get certificates
+
+      - name: Verify Secrets
+        run: |
+          kubectl get secrets
+
+      - name: Describe TLS Secret
+        run: |
+          kubectl describe secret pspapp-tls

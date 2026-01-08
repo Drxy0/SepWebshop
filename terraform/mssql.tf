@@ -21,3 +21,9 @@ resource azurerm_mssql_database webshopdb {
   server_id = azurerm_mssql_server.main.id
   sku_name  = "Basic"
 }
+
+resource azurerm_mssql_database dataservicedb {
+  name      = "sqldb-${var.application_name}-dataservicedb-${var.environment_name}-${var.location_short}-${var.resource_version}"
+  server_id = azurerm_mssql_server.main.id
+  sku_name  = "Basic"
+}
