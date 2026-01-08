@@ -14,7 +14,7 @@ spec:
       secretName: sepapp-tls
   rules:
     - host: sepapp.xyz
-    - http:
+      http:
         paths:
           - path: /d
             pathType: Prefix
