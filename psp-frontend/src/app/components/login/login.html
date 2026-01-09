@@ -14,24 +14,17 @@
     <!-- Email -->
     <div>
       <input
-        type="email"
-        placeholder="Email"
-        formControlName="email"
+        type="text"
+        placeholder="Username"
+        formControlName="username"
         class="w-full border rounded px-3 py-2"
       />
 
       <p
-        *ngIf="form.controls.email.touched && form.controls.email.errors?.['required']"
+        *ngIf="form.controls.username.touched && form.controls.username.errors?.['required']"
         class="text-red-500 text-sm mt-1"
       >
-        Email is required.
-      </p>
-
-      <p
-        *ngIf="form.controls.email.touched && form.controls.email.errors?.['email']"
-        class="text-red-500 text-sm mt-1"
-      >
-        Invalid email format.
+        Username is required.
       </p>
     </div>
 

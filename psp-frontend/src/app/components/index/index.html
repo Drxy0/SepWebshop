@@ -1,0 +1,58 @@
+<div class="min-h-screen bg-gray-100 p-8">
+  <div class="max-w-2xl mx-auto bg-white rounded-xl shadow-md p-6">
+    <div class="flex flex-row justify-between items-center border-b pb-4 mb-6">
+      <h2 class="text-2xl font-bold text-gray-800">My Payment Methods</h2>
+      <button
+        (click)="logout()"
+        class="px-4 py-2 bg-red-50 text-red-600 border border-red-200 rounded-lg hover:bg-red-600 hover:text-white transition-all font-semibold shadow-sm"
+      >
+        Logout
+      </button>
+    </div>
+
+    <div *ngIf="loading() && methods().length === 0" class="text-center py-4">Loading...</div>
+
+    <div
+      *ngIf="message()"
+      class="bg-green-100 text-green-700 p-3 rounded mb-4 border border-green-200"
+    >
+      {{ message() }}
+    </div>
+
+    <div
+      *ngIf="errorMessage()"
+      class="bg-red-100 text-red-700 p-3 rounded mb-4 border border-red-200"
+    >
+      {{ errorMessage() }}
+    </div>
+
+    <div class="space-y-4">
+      <div
+        *ngFor="let method of methods()"
+        class="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50"
+        [class.border-blue-200]="method.selected"
+      >
+        <span class="text-lg font-medium text-gray-700">{{ method.name }}</span>
+
+        <label class="relative inline-flex items-center cursor-pointer">
+          <input
+            type="checkbox"
+            [(ngModel)]="method.selected"
+            (change)="errorMessage.set('')"
+            class="w-6 h-6 text-blue-600 rounded focus:ring-blue-500"
+          />
+        </label>
+      </div>
+    </div>
+
+    <div class="mt-8">
+      <button
+        (click)="saveChanges()"
+        [disabled]="loading()"
+        class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 disabled:opacity-50"
+      >
+        {{ loading() ? 'Saving...' : 'Save Changes' }}
+      </button>
+    </div>
+  </div>
+</div>
