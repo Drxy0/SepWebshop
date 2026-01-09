@@ -5,6 +5,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Router, RouterModule } from '@angular/router';
 import { User } from '../../services/user/user';
 import { Constants } from '../../constants/constants';
+import { ILoginRequest } from '../../models/interfaces/user';
 
 @Component({
   selector: 'app-login',
@@ -20,7 +21,7 @@ export class Login {
 
   constructor(private fb: FormBuilder, private user: User, private router: Router) {
     this.form = this.fb.group({
-      email: ['', [Validators.required, Validators.email]],
+      username: ['', [Validators.required]],
       password: ['', Validators.required],
     });
   }
@@ -36,21 +37,17 @@ export class Login {
     this.loading = true;
     this.form.disable();
 
-    this.user.loginUser(this.form.value as any).subscribe({
+    this.user.loginUser(this.form.value as ILoginRequest).subscribe({
       next: (res) => {
         this.loading = false;
         this.form.enable();
-
-        // save tokens
         localStorage.setItem(Constants.LOCAL_STORAGE_ACCESS_TOKEN, res.accessToken);
-
         this.router.navigate(['/index']);
       },
       error: (err: HttpErrorResponse) => {
         this.loading = false;
         this.form.enable();
-
-        this.generalError = err.error?.description || 'Invalid email or password1';
+        this.generalError = 'Invalid username or password';
       },
     });
   }

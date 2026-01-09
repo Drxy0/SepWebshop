@@ -1,15 +1,24 @@
-<div class="p-10 text-center">
+<div class="p-10 text-center min-h-screen bg-gray-50">
   <div
-    class="bg-gray-100 p-6 rounded-xl border-2 border-dashed border-gray-300 inline-block shadow-sm"
+    class="bg-white p-6 rounded-xl border border-gray-200 inline-block shadow-md w-full max-w-sm"
   >
-    <div class="mb-4 pb-4 border-b border-gray-200">
-      <p class="text-[10px] font-bold uppercase text-gray-400 tracking-widest">Merchant Gateway</p>
-      <p class="text-lg font-semibold text-gray-800">{{ merchantId() }}</p>
-    </div>
+    <div class="space-y-3">
+      <p class="text-sm font-medium text-gray-600 mb-2">Select payment method:</p>
 
-    <p class="text-gray-500 text-sm">Processing payment for:</p>
-    <p class="text-xl font-black text-blue-600 tracking-tight">Order ID: {{ orderId() }}</p>
+      <button
+        *ngFor="let method of availableMethods()"
+        (click)="onPay(method)"
+        class="w-full py-3 px-4 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 font-bold hover:bg-blue-600 hover:text-white hover:border-blue-600 transition-all flex justify-between items-center"
+      >
+        <span>{{ method }}</span>
+        <span class="text-lg">→</span>
+      </button>
+
+      <div *ngIf="availableMethods().length === 0" class="text-red-500 text-sm italic">
+        No payment methods available for this merchant.
+      </div>
+    </div>
   </div>
 
-  <p class="mt-4 text-xs text-gray-400 font-mono italic">pay works!</p>
+  <p class="mt-6 text-xs text-gray-400 font-mono italic">Secure Checkout Powered by PSP</p>
 </div>
