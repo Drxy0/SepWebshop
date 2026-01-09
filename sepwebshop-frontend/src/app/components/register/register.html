@@ -105,6 +105,22 @@
         Password is required.
       </p>
 
+      <p
+        *ngIf="form.controls.password.touched &&
+           form.controls.password.errors?.['minlength']"
+        class="text-red-500 text-sm mt-1"
+      >
+        Password must be longer than 8 characters.
+      </p>
+
+      <p
+        *ngIf="form.controls.password.touched &&
+           form.controls.password.errors?.['pattern']"
+        class="text-red-500 text-sm mt-1"
+      >
+        Password must contain uppercase, lowercase, number and special character.
+      </p>
+
       <p *ngFor="let err of fieldErrors['Password']" class="text-red-500 text-sm mt-1">
         {{ err }}
       </p>

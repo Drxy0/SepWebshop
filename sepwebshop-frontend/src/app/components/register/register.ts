@@ -23,7 +23,14 @@ export class Register {
       email: ['', [Validators.required, Validators.email]],
       name: ['', Validators.required],
       surname: ['', Validators.required],
-      password: ['', Validators.required],
+      password: [
+        '',
+        [
+          Validators.required,
+          Validators.minLength(8),
+          Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9]).+$/),
+        ],
+      ],
     });
   }
 

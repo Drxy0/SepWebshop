@@ -17,8 +17,10 @@ export class User {
 
   constructor(private http: HttpClient) {}
 
-  registerUser(obj: IRegisterRequest): Observable<void> {
-    return this.http.post<void>(environment.api_url + Constants.API_METHOD.REGISTER_USER, obj);
+  registerUser(obj: IRegisterRequest): Observable<string> {
+    return this.http.post(environment.api_url + Constants.API_METHOD.REGISTER_USER, obj, {
+      responseType: 'text',
+    });
   }
 
   loginUser(obj: ILoginRequest): Observable<ILoginResponse> {

@@ -32,7 +32,7 @@ public static class UserErrors
 
     public static readonly Error WeakPassword = Error.Problem(
         "Users.WeakPassword",
-        "The provided password is not storng enogh");
+        "The password provided is not strong enough. It must be at least 8 characters long and include at least one uppercase letter, one number, and one special character.");
 
     public static readonly Error InvalidCredentials = Error.Problem(
         "Users.InvalidCredentials",

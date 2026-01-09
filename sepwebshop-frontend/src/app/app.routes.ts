@@ -17,7 +17,7 @@ export const routes: Routes = [
   {
     path: 'login',
     component: Login,
-    canActivate: [logInGuard],
+    canActivate: [],
   },
   {
     path: 'index',
@@ -27,7 +27,7 @@ export const routes: Routes = [
   {
     path: 'register',
     component: Register,
-    canActivate: [logInGuard],
+    canActivate: [],
   },
   {
     path: 'admin/cars',
