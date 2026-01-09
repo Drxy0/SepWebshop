@@ -29,6 +29,7 @@ export class RentCar implements OnInit {
 
   insurances = signal<IInsuranceResponse[]>([]);
   bookedDates = signal<IOrderResponse[]>([]);
+  isSubmitting = signal<boolean>(false);
   minDate: string = '';
 
   // Signal koji čuva konkretne termine koji su u konfliktu sa trenutnim unosom
@@ -131,6 +132,8 @@ export class RentCar implements OnInit {
       return;
     }
 
+    this.isSubmitting.set(true);
+
     const payload = {
       carId: this.selectedCar?.id,
       insuranceId: this.rentForm.value.insuranceId,
@@ -149,11 +152,13 @@ export class RentCar implements OnInit {
           window.location.href = response.paymentUrl;
         } else {
           alert('Order created, but no redirect URL received.');
+          this.isSubmitting.set(false);
         }
       },
       error: (err) => {
         console.error('Order error:', err);
         alert('Conflict detected on server or payment service is down!');
+        this.isSubmitting.set(false);
       },
     });
   }
