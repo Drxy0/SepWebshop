@@ -34,6 +34,7 @@ resource azurerm_linux_web_app backend {
     "PSP__FrontendBaseUrl" = "https://${azurerm_linux_web_app.psp_frontend.default_hostname}"
     
     "PSP__MerchantId"      = "MERCHANT_001"
+    // "PSP__MerchantPassword" = "" // TODO
     "Jwt__Issuer"          = "SepWebshop"
     "Jwt__Audience"        = "SepWebshopClients"
     "AllowedHosts"         = "*"

@@ -1,8 +1,8 @@
-using SepWebshop.API.Configuration;
 using SepWebshop.API.Extensions;
 using SepWebshop.API.Services;
 using SepWebshop.Application;
 using SepWebshop.Application.Abstractions.IdentityService;
+using SepWebshop.Application.Abstractions.Payment;
 using SepWebshop.Infrastructure;
 using System.Text.Json.Serialization;
 

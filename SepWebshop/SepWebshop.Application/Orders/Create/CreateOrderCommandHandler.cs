@@ -1,5 +1,7 @@
 ﻿using MediatR;
+using Microsoft.Extensions.Options;
 using SepWebshop.Application.Abstractions.Data;
+using SepWebshop.Application.Abstractions.Payment;
 using SepWebshop.Domain;
 using SepWebshop.Domain.Cars;
 using SepWebshop.Domain.Insurances;
@@ -7,8 +9,13 @@ using SepWebshop.Domain.Orders;
 
 namespace SepWebshop.Application.Orders.Create;
 
-internal sealed class CreateOrderCommandHandler(IApplicationDbContext context) : IRequestHandler<CreateOrderCommand, Result<Guid>>
+internal sealed class CreateOrderCommandHandler(
+    IApplicationDbContext context,
+    IPaymentService paymentService,
+    IOptions<PspOptions> pspOptions) : IRequestHandler<CreateOrderCommand, Result<Guid>>
 {
+    private readonly PspOptions _pspOptions = pspOptions.Value;
+
     public async Task<Result<Guid>> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
     {
 
@@ -66,6 +73,25 @@ internal sealed class CreateOrderCommandHandler(IApplicationDbContext context) :
         {
             return Result.Failure<Guid>(
                 Error.Failure("Order.DatabaseError", ex.Message));
+        }
+
+        // Send order data to PSP
+        string merchantOrderId = order.Id.ToString("N");
+        DateTime merchantTimestamp = DateTime.UtcNow;
+
+        var paymentInitResult = await paymentService.InitializePaymentAsync(
+            merchantId: _pspOptions.MerchantId,
+            merchantPassword: _pspOptions.MerchantPassword,
+            amount: (double)totalPrice,
+            currency: order.Currency,
+            merchantOrderId: merchantOrderId,
+            merchantTimestamp: merchantTimestamp,
+            cancellationToken: cancellationToken);
+
+        if (!paymentInitResult.IsSuccess)
+        {
+            return Result.Failure<Guid>(
+                Error.Failure("Order.PaymentInitializationFailed", "Failed to initialize payment with PSP"));
         }
 
         return order.Id;

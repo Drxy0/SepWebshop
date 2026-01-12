@@ -3,9 +3,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using SepWebshop.API.Abstractions;
-using SepWebshop.API.Configuration;
 using SepWebshop.API.Contracts.Orders;
 using SepWebshop.Application.Abstractions.IdentityService;
+using SepWebshop.Application.Abstractions.Payment;
 using SepWebshop.Application.Orders.Create;
 using SepWebshop.Application.Orders.Delete;
 using SepWebshop.Application.Orders.GetAllByCarId;
@@ -51,9 +51,8 @@ public sealed class OrdersController : ApiControllerBase
         }
 
         string redirectUrl =
-            $"{_pspOptions.FrontendBaseUrl}/pay?orderId={result.Value}&merchantId={_pspOptions.MerchantId}";
+            $"{_pspOptions.FrontendBaseUrl}/pay?orderId={result.Value}";
 
-        //return Redirect(redirectUrl);
         return Ok(new { paymentUrl = redirectUrl });
     }
 

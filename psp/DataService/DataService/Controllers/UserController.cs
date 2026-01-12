@@ -1,8 +1,6 @@
 ﻿using DataService.Contracts;
 using DataService.Services.Interfaces;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace DataService.Controllers;
 

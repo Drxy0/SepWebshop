@@ -12,6 +12,8 @@ public class DataServiceDbContext : DbContext
     public DbSet<User> Users { get; set; }
     public DbSet<PaymentMethod> PaymentMethods { get; set; }
 
+    public DbSet<Payment> Payments { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<User>()

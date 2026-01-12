@@ -11,10 +11,14 @@ namespace DataService.Controllers
     public class PaymentController : ControllerBase
     {
         private readonly IUserService _userService;
-        public PaymentController(IUserService userService)
+        private readonly IPaymentService _paymentService;
+
+        public PaymentController(IUserService userService, IPaymentService paymentService)
         {
             _userService = userService;
+            _paymentService = paymentService;
         }
+
         [Authorize]
         [HttpGet("payment-methods")]
         public async Task<IActionResult> GetMyMethods()
@@ -47,6 +51,7 @@ namespace DataService.Controllers
 
             return result ? Ok(new { Message = "Methods updated" }) : BadRequest();
         }
+        
         [HttpGet("methods/{merchantId}")]
         public async Task<IActionResult> GetMethodsByMerchant(string merchantId)
         {
@@ -56,6 +61,17 @@ namespace DataService.Controllers
                 return NotFound(new { Message = "Merchant not found or no payment methods enabled." });
 
             return Ok(methods);
+        }
+
+        [HttpPost("init")]
+        public async Task<IActionResult> InitializePayment([FromBody] InitializePaymentRequest request)
+        {
+            var initResult = await _paymentService.InitializePaymentAsync(request);
+            if (!initResult.IsSuccess)
+            {
+                return BadRequest(new { Message = "Failed to initialize payment." });
+            }
+            return Ok(new { PaymentId = initResult.PaymentId });
         }
     }
 }
