@@ -63,8 +63,8 @@ public static class DependencyInjection
         // Payment Service - Configure HttpClient
         services.AddHttpClient<IPaymentService, PaymentService>(client =>
         {
-            var baseUrl = configuration["Payment:BaseUrl"]
-                ?? throw new InvalidOperationException("Payment:BaseUrl not configured");
+            var baseUrl = configuration["PSP:PaymentInitEndpoint"]
+                ?? throw new InvalidOperationException("Payment:PaymentInitEndpoint not configured");
             client.BaseAddress = new Uri(baseUrl);
             client.Timeout = TimeSpan.FromSeconds(30);
         });

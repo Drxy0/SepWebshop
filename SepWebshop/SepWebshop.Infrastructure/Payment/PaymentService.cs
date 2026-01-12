@@ -32,9 +32,9 @@ public sealed class PaymentService : IPaymentService
                 MerchantId = merchantId,
                 MerchantPassword = merchantPassword,
                 Amount = (double)amount,
-                Currency = currency.ToString(),
+                Currency = currency,
                 MerchantOrderId = merchantOrderId,
-                MerchantTimestamp = new DateTimeOffset(merchantTimestamp).ToUnixTimeMilliseconds()
+                MerchantTimestamp = merchantTimestamp
             };
 
             HttpResponseMessage response = await _httpClient.PostAsJsonAsync(
@@ -52,12 +52,7 @@ public sealed class PaymentService : IPaymentService
             PaymentInitResponse? result = await response.Content.ReadFromJsonAsync<PaymentInitResponse>(
                 cancellationToken: cancellationToken);
 
-            if (result?.Status == "SUCCESS")
-            {
-                return new PaymentInitializationResult(PaymentId: result.PaymentId, IsSuccess: true);
-            }
-
-            return new PaymentInitializationResult(PaymentId: null, IsSuccess: false);
+            return new PaymentInitializationResult(PaymentId: result?.PaymentId, IsSuccess: true);
         }
         catch (HttpRequestException)
         {
@@ -77,15 +72,14 @@ internal sealed record PaymentInitRequest
     public required string MerchantId { get; init; }
     public required string MerchantPassword { get; init; }
     public required double Amount { get; init; }
-    public required string Currency { get; init; }
+    public Currency Currency { get; init; }
     public required string MerchantOrderId { get; init; }
-    public required long MerchantTimestamp { get; init; }
+    public DateTime MerchantTimestamp { get; init; }
 }
 
 internal sealed record PaymentInitResponse
 {
     public string? PaymentId { get; init; }
     public string? PaymentUrl { get; init; }
-    public string? Status { get; init; }
     public string? Message { get; init; }
 }
