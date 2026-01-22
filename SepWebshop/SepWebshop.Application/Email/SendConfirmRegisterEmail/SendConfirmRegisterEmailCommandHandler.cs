@@ -9,7 +9,7 @@ internal sealed class SendConfirmRegisterEmailCommandHandler(IEmailSender emailS
 {
     public async Task<Result<Unit>> Handle(SendConfirmRegisterEmailCommand request, CancellationToken cancellationToken)
     {
-        try
+        /*try
         {
             string htmlBody = ConfirmEmailHtmlBody(request);
 
