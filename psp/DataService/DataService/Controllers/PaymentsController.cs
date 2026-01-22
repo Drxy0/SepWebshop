@@ -8,12 +8,12 @@ namespace DataService.Controllers
 {
     [ApiController]
     [Route("d/[controller]")]
-    public class PaymentController : ControllerBase
+    public class PaymentsController : ControllerBase
     {
         private readonly IUserService _userService;
         private readonly IPaymentService _paymentService;
 
-        public PaymentController(IUserService userService, IPaymentService paymentService)
+        public PaymentsController(IUserService userService, IPaymentService paymentService)
         {
             _userService = userService;
             _paymentService = paymentService;
