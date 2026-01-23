@@ -42,7 +42,11 @@ public class PaymentService : IPaymentService
             $"&currency={(int)request.Currency}&stan={request.Stan}" +
             $"&timestamp={timestamp:o}";
 
-        if (!HmacValidator.Validate(payload, signature, psp.HMACKey))
+        // TODO:
+        // var hmacKey = await keyVaultClient.GetSecretAsync(psp.HMACKeySecretName);
+        // if (!HmacValidator.Validate(payload, signature, hmacKey)) 
+
+        if (!HmacValidator.Validate(payload, signature, psp.HMACKeySecretName)) 
         {
             return new InitializePaymentServiceResult(InitializePaymentResult.InvalidSignature, null);
         }
@@ -161,7 +165,7 @@ public class PaymentService : IPaymentService
             .FirstOrDefaultAsync(b => b.Id == paymentRequest.MerchantId);
 
 
-        if (merchant.Account == null)
+        if (merchant?.Account is null)
         {
             paymentRequest.Status = PaymentRequestStatus.Failed;
             await _context.SaveChangesAsync();

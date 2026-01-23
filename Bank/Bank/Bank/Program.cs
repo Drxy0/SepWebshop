@@ -26,6 +26,15 @@ builder.Services.AddDbContext<BankDbContext>(options =>
 builder.Services.AddHttpClient<IPSPClient, PspClient>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("FrontendPolicy", policy =>
+    {
+        policy.WithOrigins("http://localhost:4200", "https://localhost:7090") // frontend and Swagger UI
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
 
 var app = builder.Build();
 
@@ -38,6 +47,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseCors("FrontendPolicy");
 app.UseAuthorization();
 
 app.MapControllers();

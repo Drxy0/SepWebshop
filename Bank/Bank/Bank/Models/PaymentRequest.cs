@@ -13,7 +13,7 @@ public class PaymentRequest
 
     public Currency Currency { get; set; }
 
-    public string Stan { get; set; }
+    public required string Stan { get; set; }
 
     public DateTime PspTimestamp { get; set; }
 

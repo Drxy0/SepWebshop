@@ -9,7 +9,8 @@ import {
 } from '@angular/forms';
 import { CardBrand } from './card-payment.models';
 import { detectCardBrand, isExpiryValid, isValidLuhn } from './card-payment.util';
-import { CardPaymentRequestDto, PaymentService } from '../services/payment.service';
+import { PaymentService } from '../services/payment.service';
+import { CardPaymentRequestDto } from '../services/payment.models';
 
 @Component({
   selector: 'app-card-payment',
@@ -95,7 +96,22 @@ export class CardPayment implements OnInit {
     this.submitting.set(true);
     this.errorSignal.set(null);
 
-    this.paymentService.submitPayment(this.paymentRequestId, this.form.getRawValue())
+    const raw = this.form.getRawValue();
+
+    const [monthStr, yearStr] = raw.expiry.split('/');
+    const expiryMonth = parseInt(monthStr, 10);
+    const expiryYear = parseInt(yearStr, 10);
+
+    const paymentData = {
+      cardNumber: raw.cardNumber,
+      cardHolderName: raw.cardHolder,
+      expiryMonth,
+      expiryYear,
+      cardHolder: raw.cardHolder,
+      cvv: raw.cvv
+    };
+
+    this.paymentService.submitPayment(this.paymentRequestId, paymentData)
       .subscribe({
         next: (redirectUrl: string) => {
           window.location.href = redirectUrl;
@@ -106,4 +122,5 @@ export class CardPayment implements OnInit {
         }
       });
   }
+
 }

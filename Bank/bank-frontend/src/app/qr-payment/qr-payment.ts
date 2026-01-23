@@ -2,7 +2,8 @@ import { Component, signal, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { catchError, of, finalize } from 'rxjs';
-import { PaymentService, QrPaymentResponseDto } from '../services/payment.service';
+import { PaymentService } from '../services/payment.service';
+import { QrPaymentResponseDto } from '../services/payment.models';
 
 @Component({
   selector: 'app-qr-payment',

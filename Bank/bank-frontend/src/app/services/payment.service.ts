@@ -1,22 +1,13 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-
-export interface CardPaymentRequestDto {
-  amount: number;
-  currency: string;
-}
-
-export interface QrPaymentResponseDto {
-  paymentRequestId: string;
-  qrCodeBase64: string;
-}
+import { CardPaymentRequestDto, PayByCardRequest, QrPaymentResponseDto } from './payment.models';
 
 @Injectable({
   providedIn: 'root',
 })
 export class PaymentService {
-  private baseUrl = 'https://localhost:7278/api/payments';
+  private baseUrl = 'https://localhost:7090/api/bank/payments';
 
   constructor(private http: HttpClient) {}
 
@@ -26,7 +17,7 @@ export class PaymentService {
     );
   }
 
-  submitPayment(paymentRequestId: string, paymentData: any): Observable<string> {
+  submitPayment(paymentRequestId: string, paymentData: PayByCardRequest): Observable<string> {
     return this.http.post<string>(
       `${this.baseUrl}/${paymentRequestId}/pay`,
       paymentData,
