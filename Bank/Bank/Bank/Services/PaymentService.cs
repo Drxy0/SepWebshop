@@ -269,4 +269,34 @@ public class PaymentService : IPaymentService
         return paymentRequest;
     }
 
+    public async Task<QRPaymentResponseDto> GenerateQrPayment(Guid paymentRequestId)
+    {
+        PaymentRequest? paymentRequest = await _context.PaymentRequests
+                .Include(p => p.Merchant)
+                .ThenInclude(m => m.Account)
+                .FirstOrDefaultAsync(p => p.PaymentRequestId == paymentRequestId);
+
+        if (paymentRequest == null)
+            throw new Exception("Payment request not found");
+
+        if (paymentRequest.Status != PaymentRequestStatus.Pending)
+            throw new Exception("Payment request not valid");
+
+        if (paymentRequest.ExpiresAt < DateTime.UtcNow)
+            throw new Exception("Payment request expired");
+
+        var ipsData = new QRIpsData(
+            Currency: paymentRequest.Currency,
+            Amount: paymentRequest.Amount,
+            MerchantAccount: paymentRequest.Merchant.Account.AccountNumber.Replace("-", ""),
+            MerchantName: paymentRequest.Merchant.Name,
+            Purpose: "Placanje robe",
+            PaymentCode: "289"
+        );
+
+        var payload = QRIpsPayloadGenerator.Generate(ipsData);
+        var qrBase64 = QrImageGenerator.GenerateBase64(payload);
+
+        return new QRPaymentResponseDto(paymentRequestId, qrBase64);
+    }
 }

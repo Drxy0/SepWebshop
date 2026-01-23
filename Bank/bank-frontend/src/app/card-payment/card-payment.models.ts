@@ -6,8 +6,3 @@ export interface CardFormData {
   cvv: string;
   cardHolder: string;
 }
-
-export interface CardPaymentRequestDto {
-  amount: number;
-  currency: string;
-}

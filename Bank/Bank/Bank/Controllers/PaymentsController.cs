@@ -64,4 +64,12 @@ public class PaymentsController : ControllerBase
 
         return Ok(redirectUrl);
     }
+
+
+    [HttpPost("{paymentRequestId}/qr")]
+    public async Task<ActionResult<QRPaymentResponseDto>> GenerateQrPayment(Guid paymentRequestId)
+    {
+        var result = await _paymentService.GenerateQrPayment(paymentRequestId);
+        return Ok(result);
+    }
 }

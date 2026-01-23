@@ -14,5 +14,5 @@ public interface IPaymentService
     Task<string> ExecuteCardPayment(Guid paymentRequestId, PayByCardRequest request);
 
     Task<PaymentRequestDto> GetPaymentRequest(Guid paymentRequestId);
-
+    Task<QRPaymentResponseDto> GenerateQrPayment(Guid paymentRequestId);
 }

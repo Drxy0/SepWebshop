@@ -1,24 +1,25 @@
-import { Component, OnInit, computed, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
 import {
   ReactiveFormsModule,
   FormBuilder,
   FormGroup,
   FormControl
 } from '@angular/forms';
-import { CardBrand, CardPaymentRequestDto } from './card-payment.models';
-import { TranslateModule } from '@ngx-translate/core';
+import { CardBrand } from './card-payment.models';
+import { detectCardBrand, isExpiryValid, isValidLuhn } from './card-payment.util';
+import { CardPaymentRequestDto, PaymentService } from '../services/payment.service';
 
 @Component({
   selector: 'app-card-payment',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, TranslateModule],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './card-payment.html',
   styleUrl: './card-payment.scss'
 })
 export class CardPayment implements OnInit {
+  private paymentService = inject(PaymentService);
 
   paymentSignal = signal<CardPaymentRequestDto | null>(null);
   loadingSignal = signal(true);
@@ -26,7 +27,6 @@ export class CardPayment implements OnInit {
   submitting = signal(false);
   hasAttempted = signal(false);
 
-  // Add computed properties for template access
   loading = computed(() => this.loadingSignal());
   payment = computed(() => this.paymentSignal());
   error = computed(() => this.errorSignal());
@@ -42,7 +42,6 @@ export class CardPayment implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private http: HttpClient,
     private fb: FormBuilder
   ) {
     this.form = this.fb.nonNullable.group({
@@ -57,28 +56,20 @@ export class CardPayment implements OnInit {
     this.paymentRequestId =
       this.route.snapshot.paramMap.get('paymentRequestId')!;
 
-    this.http
-      .get<CardPaymentRequestDto>(
-        `https://localhost:7278/api/payments/${this.paymentRequestId}`
-      )
-      .subscribe({
-        next: res => {
-          this.paymentSignal.set(res);
-          this.loadingSignal.set(false);
-        },
-        error: () => {
-          this.errorSignal.set('Payment request not found');
-          this.loadingSignal.set(false);
-        }
-      });
+    this.paymentService.getPaymentRequest(this.paymentRequestId).subscribe({
+      next: res => {
+        this.paymentSignal.set(res);
+        this.loadingSignal.set(false);
+      },
+      error: () => {
+        this.errorSignal.set('Payment request not found');
+        this.loadingSignal.set(false);
+      }
+    });
   }
 
-  // --------------------
-  // Computed
-  // --------------------
-
-  brand = computed<CardBrand>(() =>
-    this.detectCardBrand(this.form.controls.cardNumber.value)
+  cardBrand = computed<CardBrand>(() =>
+    detectCardBrand(this.form.controls.cardNumber.value)
   );
 
   isFormValid = computed(() => {
@@ -86,9 +77,9 @@ export class CardPayment implements OnInit {
 
     return (
       v.cardHolder.trim().length > 2 &&
-      this.isValidLuhn(v.cardNumber) &&
-      this.brand() !== 'UNKNOWN' &&
-      this.isExpiryValid(v.expiry) &&
+      isValidLuhn(v.cardNumber) &&
+      this.cardBrand() !== 'UNKNOWN' &&
+      isExpiryValid(v.expiry) &&
       /^\d{3}$/.test(v.cvv)
     );
   });
@@ -97,10 +88,6 @@ export class CardPayment implements OnInit {
     !this.isFormValid() || this.submitting() || this.hasAttempted()
   );
 
-  // --------------------
-  // Submit
-  // --------------------
-
   handleSubmit() {
     if (this.submitDisabled()) return;
 
@@ -108,13 +95,9 @@ export class CardPayment implements OnInit {
     this.submitting.set(true);
     this.errorSignal.set(null);
 
-    this.http
-      .post<string>(
-        `https://localhost:7278/api/payments/${this.paymentRequestId}/pay`,
-        this.form.getRawValue()
-      )
+    this.paymentService.submitPayment(this.paymentRequestId, this.form.getRawValue())
       .subscribe({
-        next: redirectUrl => {
+        next: (redirectUrl: string) => {
           window.location.href = redirectUrl;
         },
         error: () => {
@@ -122,41 +105,5 @@ export class CardPayment implements OnInit {
           this.submitting.set(false);
         }
       });
-  }
-
-  // --------------------
-  // Helpers
-  // --------------------
-
-  detectCardBrand(cardNumber: string): CardBrand {
-    const digits = cardNumber.replace(/\s+/g, '');
-    if (/^4\d*/.test(digits)) return 'VISA';
-    if (/^(5[1-5]|2[2-7])/.test(digits)) return 'MASTERCARD';
-    return 'UNKNOWN';
-  }
-
-  isExpiryValid(expiry: string): boolean {
-    if (!/^\d{2}\/\d{2}$/.test(expiry)) return false;
-    const [month, year] = expiry.split('/').map(Number);
-    if (month < 1 || month > 12) return false;
-    const now = new Date();
-    const expiryDate = new Date(2000 + year, month);
-    return expiryDate > now;
-  }
-
-  isValidLuhn(cardNumber: string): boolean {
-    const digits = cardNumber.replace(/\s+/g, '');
-    let sum = 0;
-    let alternate = false;
-    for (let i = digits.length - 1; i >= 0; i--) {
-      let n = Number(digits[i]);
-      if (alternate) {
-        n *= 2;
-        if (n > 9) n -= 9;
-      }
-      sum += n;
-      alternate = !alternate;
-    }
-    return sum % 10 === 0;
   }
 }
