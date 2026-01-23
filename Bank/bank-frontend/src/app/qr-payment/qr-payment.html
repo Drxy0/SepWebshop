@@ -1,0 +1,28 @@
+<div class="payment-container">
+  @if (!loading() && !error() && qr()) {
+    <div class="payment-card">
+      <h2>Scan QR code to pay</h2>
+      <img
+        [src]="qr()?.qrCodeBase64"
+        alt="QR code for payment"
+        width="260"
+        height="260"
+      />
+      <p>
+        Open your mobile banking app and scan the QR code to complete the payment.
+      </p>
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="loading-state"></div>
+  }
+
+  @if (error()) {
+    <div class="error-state" [attr.data-error]="error()"></div>
+  }
+
+  @if (!loading() && !error() && !qr()) {
+    <div class="no-qr-state"></div>
+  }
+</div>

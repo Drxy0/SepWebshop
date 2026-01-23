@@ -79,7 +79,7 @@ internal sealed class CreateOrderCommandHandler(
         string merchantOrderId = order.Id.ToString("N");
         DateTime merchantTimestamp = DateTime.UtcNow;
 
-        var paymentInitResult = await paymentService.InitializePaymentAsync(
+        PaymentInitializationResult paymentInitResult = await paymentService.InitializePaymentAsync(
             merchantId: _pspOptions.MerchantId,
             merchantPassword: _pspOptions.MerchantPassword,
             amount: (double)totalPrice,

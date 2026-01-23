@@ -1,0 +1,95 @@
+.payment-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 98vh;
+  background: #f8fafc;
+  font-family: 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.payment-card {
+  background: white;
+  border-radius: 1rem;
+  padding: 2rem;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+  width: 100%;
+  max-width: 320px;
+  box-sizing: border-box;
+  text-align: center;
+
+  h2 {
+    color: #1e40af;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+  }
+
+  p {
+    color: #64748b;
+    font-size: 0.9rem;
+    margin-top: 1rem;
+  }
+
+  img {
+    border-radius: 0.5rem;
+    border: 1px solid #e2e8f0;
+  }
+}
+
+.loading-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: #f8fafc;
+  font-family: 'Segoe UI', 'Roboto', sans-serif;
+
+  &::before {
+    content: 'Loading QR code...';
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 500;
+    color: #475569;
+    padding: 2rem;
+  }
+}
+
+.error-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: #f8fafc;
+  font-family: 'Segoe UI', 'Roboto', sans-serif;
+
+  &::before {
+    content: attr(data-error);
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 500;
+    color: #dc2626;
+    background: #fef2f2;
+    border-radius: 0.75rem;
+    padding: 2rem;
+    max-width: 400px;
+    width: 100%;
+  }
+}
+
+.no-qr-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: #f8fafc;
+  font-family: 'Segoe UI', 'Roboto', sans-serif;
+
+  &::before {
+    content: 'QR code not available';
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 500;
+    color: #475569;
+    padding: 2rem;
+  }
+}
