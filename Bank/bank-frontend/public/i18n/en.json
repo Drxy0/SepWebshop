@@ -1,0 +1,18 @@
+{
+  "LOADING": "Loading...",
+  "PAYMENT_NOT_FOUND": "Payment not found",
+  "SECURE_CARD_PAYMENT": "Secure Card Payment",
+  "TOTAL_AMOUNT": "Total amount",
+  "CARDHOLDER_NAME": "Cardholder name",
+  "ENTER_CARDHOLDER_NAME": "Enter card holder name...",
+  "CARD_NUMBER": "Card number",
+  "ENTER_CARD_NUMBER": "Enter card number...",
+  "EXPIRY_DATE": "Expiry date",
+  "EXPIRY_PLACEHOLDER": "MM/YY",
+  "CVV": "CVV",
+  "ENTER_SECURITY_CODE": "Enter security code...",
+  "PAY_SECURELY": "Pay securely",
+  "PROCESSING": "Processing...",
+  "VISA": "Visa",
+  "MASTERCARD": "MasterCard"
+}
