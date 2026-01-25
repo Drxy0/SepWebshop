@@ -1,7 +1,7 @@
 export const Constants = {
   API_METHOD: {
     LOGIN_USER: 'User/login',
-    PAYMENT_METHODS: 'Payment/payment-methods',
+    PAYMENT_METHODS: 'Payments/payment-methods',
   },
   ALERT_MESSAGES: {
     UNKONOW_ERROR: 'An unknown error occurred',

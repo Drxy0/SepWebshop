@@ -15,13 +15,13 @@ export class User {
   loginUser(obj: ILoginRequest): Observable<ILoginResponse> {
     return this.http.post<ILoginResponse>(
       environment.data_service_api_url + Constants.API_METHOD.LOGIN_USER,
-      obj
+      obj,
     );
   }
 
   getPaymentMethods(): Observable<IPaymentMethod[]> {
     return this.http.get<IPaymentMethod[]>(
-      environment.data_service_api_url + Constants.API_METHOD.PAYMENT_METHODS
+      environment.data_service_api_url + Constants.API_METHOD.PAYMENT_METHODS,
     );
   }
 
@@ -33,7 +33,7 @@ export class User {
 
   getActiveMethods(merchantId: string): Observable<string[]> {
     return this.http.get<string[]>(
-      `${environment.data_service_api_url}Payment/methods/${merchantId}`
+      `${environment.data_service_api_url}Payments/methods/${merchantId}`,
     );
   }
 }

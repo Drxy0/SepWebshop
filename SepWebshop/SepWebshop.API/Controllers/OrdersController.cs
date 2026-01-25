@@ -51,7 +51,7 @@ public sealed class OrdersController : ApiControllerBase
         }
 
         string redirectUrl =
-            $"{_pspOptions.FrontendBaseUrl}/pay?orderId={result.Value}";
+            $"{_pspOptions.FrontendBaseUrl}/pay?orderId={result.Value}&merchantId={_pspOptions.MerchantId}";
 
         return Ok(new { paymentUrl = redirectUrl });
     }
