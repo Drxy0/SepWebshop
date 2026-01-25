@@ -7,3 +7,7 @@ export interface IPaymentMethod {
 export interface IUpdatePaymentRequest {
   paymentMethodIds: number[];
 }
+
+export interface IInitPaymentResponse {
+  bankUrl: string;
+}

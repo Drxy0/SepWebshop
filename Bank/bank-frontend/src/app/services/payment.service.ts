@@ -2,33 +2,27 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { CardPaymentRequestDto, PayByCardRequest, QrPaymentResponseDto } from './payment.models';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class PaymentService {
-  private baseUrl = 'https://localhost:7090/api/bank/payments';
+  private baseUrl = environment.bank_api_url + 'api/bank/payments';
 
   constructor(private http: HttpClient) {}
 
   getPaymentRequest(paymentRequestId: string): Observable<CardPaymentRequestDto> {
-    return this.http.get<CardPaymentRequestDto>(
-      `${this.baseUrl}/${paymentRequestId}`
-    );
+    return this.http.get<CardPaymentRequestDto>(`${this.baseUrl}/${paymentRequestId}`);
   }
 
   submitPayment(paymentRequestId: string, paymentData: PayByCardRequest): Observable<string> {
-    return this.http.post<string>(
-      `${this.baseUrl}/${paymentRequestId}/pay`,
-      paymentData,
-      { responseType: 'text' as 'json' }
-    );
+    return this.http.post<string>(`${this.baseUrl}/${paymentRequestId}/pay`, paymentData, {
+      responseType: 'text' as 'json',
+    });
   }
 
   getQrCode(paymentRequestId: string): Observable<QrPaymentResponseDto> {
-  return this.http.post<QrPaymentResponseDto>(
-    `${this.baseUrl}/${paymentRequestId}/qr`,
-    {}
-  );
-}
+    return this.http.post<QrPaymentResponseDto>(`${this.baseUrl}/${paymentRequestId}/qr`, {});
+  }
 }

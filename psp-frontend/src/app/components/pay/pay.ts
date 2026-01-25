@@ -2,6 +2,7 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { User } from '../../services/user/user';
 import { CommonModule } from '@angular/common';
+import { PaymentService } from '../../services/payment/payment-service';
 
 @Component({
   selector: 'app-pay',
@@ -12,6 +13,7 @@ import { CommonModule } from '@angular/common';
 export class Pay implements OnInit {
   private route = inject(ActivatedRoute);
   private userService = inject(User);
+  private paymentService = inject(PaymentService);
 
   orderId = signal<string | null>(null);
   merchantId = signal<string | null>(null);
@@ -40,7 +42,21 @@ export class Pay implements OnInit {
   }
 
   onPay(method: string) {
-    console.log(`Starting payment for ${this.orderId()} using ${method}`);
-    // Ovde bi išla logika za procesuiranje uplate
+    const oId = this.orderId();
+
+    if (method === 'QR' && oId) {
+      const cleanOrderId = oId.replace(/-/g, '');
+
+      this.paymentService.initializeQrPayment(cleanOrderId).subscribe({
+        next: (response) => {
+          window.location.href = response.bankUrl;
+        },
+        error: (err) => {
+          console.error('Greška pri inicijalizaciji QR plaćanja:', err);
+        },
+      });
+    } else {
+      console.log(`Starting payment for ${this.orderId()} using ${method}`);
+    }
   }
 }

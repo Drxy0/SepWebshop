@@ -1,10 +1,12 @@
 ﻿using DataService.Contracts;
+using DataService.Models;
 
 namespace DataService.Services.Interfaces;
 
 public interface IPaymentService
 {
     Task<PaymentInitializationResult> InitializePaymentAsync(InitializePaymentRequest request);
+    Task<Payment?> GetPaymentByOrderIdAsync(string merchantOrderId);
 }
 
 public sealed record PaymentInitializationResult(

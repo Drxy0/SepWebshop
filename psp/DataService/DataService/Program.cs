@@ -1,4 +1,5 @@
 using DataService.Helpers;
+using DataService.Models;
 using DataService.Persistance;
 using DataService.Services;
 using DataService.Services.Interfaces;
@@ -17,6 +18,9 @@ builder.Services.AddControllers()
         o.JsonSerializerOptions.Converters.Add(
             new JsonStringEnumConverter());
     });
+
+builder.Services.Configure<CarWebShopOptions>(
+    builder.Configuration.GetSection(CarWebShopOptions.SectionName));
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

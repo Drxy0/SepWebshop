@@ -67,11 +67,25 @@ namespace DataService.Controllers
         public async Task<IActionResult> InitializePayment([FromBody] InitializePaymentRequest request)
         {
             var initResult = await _paymentService.InitializePaymentAsync(request);
+
             if (!initResult.IsSuccess)
             {
-                return BadRequest(new { Message = "Failed to initialize payment." });
+                return BadRequest(new { Message = "Invalid Merchant credentials or payment failed." });
             }
+
             return Ok(new { PaymentId = initResult.PaymentId });
+        }
+        [HttpGet("{merchantOrderId}")]
+        public async Task<IActionResult> GetPayment(string merchantOrderId)
+        {
+            var payment = await _paymentService.GetPaymentByOrderIdAsync(merchantOrderId);
+
+            if (payment == null)
+            {
+                return NotFound(new { Message = $"Payment with Order ID '{merchantOrderId}' not found." });
+            }
+
+            return Ok(payment);
         }
     }
 }
