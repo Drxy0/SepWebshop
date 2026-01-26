@@ -1,4 +1,5 @@
 ﻿using DataService.Contracts;
+using DataService.Models;
 using DataService.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -75,10 +76,11 @@ namespace DataService.Controllers
 
             return Ok(new { PaymentId = initResult.PaymentId });
         }
+
         [HttpGet("{merchantOrderId}")]
         public async Task<IActionResult> GetPayment(string merchantOrderId)
         {
-            var payment = await _paymentService.GetPaymentByOrderIdAsync(merchantOrderId);
+            GetPaymentResponse? payment = await _paymentService.GetPaymentByOrderIdAsync(merchantOrderId);
 
             if (payment == null)
             {

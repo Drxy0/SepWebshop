@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\QrService.Application\QrService.Application.csproj" />
+    <ProjectReference Include="..\QrService.Infrastructure\QrService.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

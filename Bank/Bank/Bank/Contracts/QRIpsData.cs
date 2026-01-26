@@ -4,7 +4,7 @@ namespace Bank.Contracts;
 
 public sealed record QRIpsData(
     Currency Currency,
-    decimal Amount,
+    double Amount,
     string MerchantAccount,
     string MerchantName,
     string Purpose,

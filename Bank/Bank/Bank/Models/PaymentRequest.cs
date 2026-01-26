@@ -4,12 +4,12 @@ public class PaymentRequest
 {
     public Guid PaymentRequestId { get; set; }
 
-    public Guid MerchantId { get; set; }
+    public required string MerchantId { get; set; }
     public Merchant Merchant { get; set; }
 
     public Guid PspId { get; set; }
 
-    public decimal Amount { get; set; }
+    public double Amount { get; set; }
 
     public Currency Currency { get; set; }
 

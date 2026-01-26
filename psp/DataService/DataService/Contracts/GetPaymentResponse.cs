@@ -1,9 +1,8 @@
-﻿using QrService.Domain.Enums;
+﻿using DataService.Models;
 
+namespace DataService.Contracts;
 
-namespace QrService.Domain.DTOs;
-
-public class DataServicePaymentResponse
+public class GetPaymentResponse
 {
     public Guid Id { get; set; }
     public required string MerchantId { get; set; }

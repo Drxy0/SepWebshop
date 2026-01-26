@@ -4,7 +4,7 @@ namespace Bank.Contracts;
 
 public sealed record PaymentRequestDto(
     Guid PaymentRequestId,
-    decimal Amount,
+    double Amount,
     Currency Currency,
     PaymentRequestStatus Status,
     DateTime ExpiresAt

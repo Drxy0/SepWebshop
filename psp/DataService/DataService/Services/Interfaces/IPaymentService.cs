@@ -6,7 +6,7 @@ namespace DataService.Services.Interfaces;
 public interface IPaymentService
 {
     Task<PaymentInitializationResult> InitializePaymentAsync(InitializePaymentRequest request);
-    Task<Payment?> GetPaymentByOrderIdAsync(string merchantOrderId);
+    Task<GetPaymentResponse?> GetPaymentByOrderIdAsync(string merchantOrderId);
 }
 
 public sealed record PaymentInitializationResult(

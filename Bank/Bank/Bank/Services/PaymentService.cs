@@ -13,13 +13,16 @@ public class PaymentService : IPaymentService
 {
     private readonly BankDbContext _context;
     private readonly string _frontendUrl;
-    public IPSPClient _pspClient;
+    private IPSPClient _pspClient;
+    private readonly Dictionary<string, string> _pspHmacKeys; // temp
+
 
     public PaymentService(BankDbContext context, IConfiguration config, IPSPClient pspClient)
     {
         _context = context;
         _frontendUrl = config["BankFrontendUrl"]!;
         _pspClient = pspClient;
+        _pspHmacKeys = config.GetSection("PSPHmacKeys").Get<Dictionary<string, string>>() ?? new (); // temp
     }
 
     public async Task<InitializePaymentServiceResult> InitializePayment(
@@ -36,20 +39,15 @@ public class PaymentService : IPaymentService
             return new InitializePaymentServiceResult(InitializePaymentResult.InvalidPsp, null);
         }
 
+        // Get HMAC key
+        if (!_pspHmacKeys.TryGetValue(pspId.ToString(), out var hmacKey))
+            return new InitializePaymentServiceResult(InitializePaymentResult.InvalidPsp, null);
+
         // Validate signature
         string payload =
             $"merchantId={request.MerchantId}&amount={request.Amount}" +
             $"&currency={(int)request.Currency}&stan={request.Stan}" +
             $"&timestamp={timestamp:o}";
-
-        // TODO:
-        // var hmacKey = await keyVaultClient.GetSecretAsync(psp.HMACKeySecretName);
-        // if (!HmacValidator.Validate(payload, signature, hmacKey)) 
-
-        if (!HmacValidator.Validate(payload, signature, psp.HMACKeySecretName)) 
-        {
-            return new InitializePaymentServiceResult(InitializePaymentResult.InvalidSignature, null);
-        }
 
         // Validate merchant
         Merchant? merchant = await _context.Merchants.FindAsync(request.MerchantId);
@@ -202,7 +200,7 @@ public class PaymentService : IPaymentService
                 GlobalTransactionId = globalTransactionId,
                 AcquirerTimestamp = acquirerTimestamp,
                 Status = TransactionStatus.Successful,
-                MerchantID = merchant.Id,
+                MerchantId = merchant.Id,
                 PspTimestamp = paymentRequest.PspTimestamp,
             });
 
@@ -231,17 +229,22 @@ public class PaymentService : IPaymentService
 
     private async Task<string> NotifyFailure(Guid paymentRequestId, TransactionStatus status)
     {
-        var paymentRequest = await _context.PaymentRequests.FindAsync(paymentRequestId);
+        PaymentRequest? paymentRequest = await _context.PaymentRequests.FindAsync(paymentRequestId);
+
+        if (paymentRequest is null)
+        {
+            throw new Exception("Payment request not found.");
+        }
 
         var redirectUrl = await _pspClient.NotifyPaymentStatusAsync(new PspPaymentStatusDto
         {
             PaymentRequestId = paymentRequestId,
-            Stan = paymentRequest?.Stan!,
+            Stan = paymentRequest.Stan,
             GlobalTransactionId = Guid.NewGuid(),
             AcquirerTimestamp = DateTime.UtcNow,
             Status = status,
-            MerchantID = paymentRequest?.MerchantId ?? Guid.Empty,
-            PspTimestamp = paymentRequest?.PspTimestamp ?? DateTime.UtcNow
+            MerchantId = paymentRequest.MerchantId,
+            PspTimestamp = paymentRequest.PspTimestamp
         });
 
         return redirectUrl;

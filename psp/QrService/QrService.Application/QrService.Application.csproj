@@ -15,7 +15,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\QrService.Domain\QrService.Domain.csproj" />
-    <ProjectReference Include="..\QrService.Infrastructure\QrService.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

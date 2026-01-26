@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using QrService.Application.Common.Exceptions;
 
-namespace QrService.API.Middlewear
+namespace QrService.API.Middleware
 {
     public class ExceptionHandlingMiddleware
     {

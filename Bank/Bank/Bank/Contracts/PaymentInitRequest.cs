@@ -3,8 +3,8 @@
 namespace Bank.Contracts;
 
 public sealed record PaymentInitRequest(
-    Guid MerchantId,
-    decimal Amount,
+    string MerchantId,
+    double Amount,
     Currency Currency,
     string Stan,
     DateTime PspTimestamp

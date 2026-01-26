@@ -1,4 +1,4 @@
-using QrService.API.Middlewear;
+using QrService.API.Middleware;
 using QrService.Application;
 using QrService.Infrastructure;
 using System.Text.Json.Serialization;
@@ -10,14 +10,12 @@ var configuration = builder.Configuration;
 builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddApplicationServices();
 
-// Add services to the container.
-
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
-        // Dodaje podršku za pretvaranje stringova u enume
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
     });
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

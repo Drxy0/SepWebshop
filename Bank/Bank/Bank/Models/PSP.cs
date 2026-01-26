@@ -4,5 +4,5 @@ public class PSP
 {
     public Guid Id { get; set; }
     public required string Name { get; set; }
-    public required string HMACKeySecretName { get; set; } // Name of the key in Azure Key Vault
+    public required string HMACKeySecretName { get; set; } // TODO: Name of the key in Azure Key Vault
 }
