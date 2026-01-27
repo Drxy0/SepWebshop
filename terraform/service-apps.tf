@@ -49,7 +49,7 @@ resource azurerm_linux_web_app frontend {
     ip_restriction_default_action = "Allow"
     minimum_tls_version           = 1.2
     always_on                     = true
-    app_command_line              = "npx serve -s ."
+    app_command_line              = "pm2 serve /home/site/wwwroot --no-daemon --spa"
     application_stack {
       node_version = "22-lts"
     }
@@ -66,7 +66,7 @@ resource azurerm_linux_web_app psp_frontend {
     ip_restriction_default_action = "Allow"
     minimum_tls_version           = 1.2
     always_on                     = true
-    app_command_line              = "npx serve -s ."
+    app_command_line              = "pm2 serve /home/site/wwwroot --no-daemon --spa"
     application_stack {
       node_version = "22-lts"
     }
@@ -83,7 +83,7 @@ resource azurerm_linux_web_app bank_frontend {
     ip_restriction_default_action = "Allow"
     minimum_tls_version           = 1.2
     always_on                     = true
-    app_command_line              = "npx serve -s ."
+    app_command_line              = "pm2 serve /home/site/wwwroot --no-daemon --spa"
     application_stack {
       node_version = "22-lts"
     }
