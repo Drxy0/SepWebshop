@@ -41,7 +41,7 @@ internal sealed class RegisterUserCommandHandler(IApplicationDbContext context, 
             context.Users.Add(user);
             await context.SaveChangesAsync(cancellationToken);
 
-            /*string confirmationLink = GenerateConfirmationLink(user.Id, confirmationToken);
+            string confirmationLink = GenerateConfirmationLink(user.Id, confirmationToken);
             Result<Unit> emailResult = await mediator.Send(
                 new SendConfirmRegisterEmailCommand(user.Email, confirmationLink),
                 cancellationToken
@@ -51,7 +51,7 @@ internal sealed class RegisterUserCommandHandler(IApplicationDbContext context, 
             {
                 await transaction.RollbackAsync(cancellationToken);
                 return Result.Failure<string>(UserErrors.EmailSendFailed);
-            }*/
+            }
 
             await transaction.CommitAsync(cancellationToken);
             return Result.Success("Registration successful, please check your email");

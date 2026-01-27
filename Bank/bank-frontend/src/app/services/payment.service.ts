@@ -17,12 +17,12 @@ export class PaymentService {
   }
 
   submitPayment(paymentRequestId: string, paymentData: PayByCardRequest): Observable<string> {
-    return this.http.post<string>(`${this.baseUrl}/${paymentRequestId}/pay`, paymentData, {
+    return this.http.post<string>(`${this.baseUrl}/card/${paymentRequestId}`, paymentData, {
       responseType: 'text' as 'json',
     });
   }
 
   getQrCode(paymentRequestId: string): Observable<QrPaymentResponseDto> {
-    return this.http.post<QrPaymentResponseDto>(`${this.baseUrl}/${paymentRequestId}/qr`, {});
+    return this.http.post<QrPaymentResponseDto>(`${this.baseUrl}/qr/${paymentRequestId}`, {});
   }
 }

@@ -1,5 +1,4 @@
-﻿using Azure;
-using Bank.Clients;
+﻿using Bank.Clients;
 using Bank.Contracts;
 using Bank.Helpers;
 using Bank.Models;
@@ -73,8 +72,8 @@ public class PaymentService : IPaymentService
         await _context.SaveChangesAsync();
 
         string paymentUrl = isQrPayment
-            ? $"{_frontendUrl}/payQr/{paymentRequest.PaymentRequestId}"
-            : $"{_frontendUrl}/payCard/{paymentRequest.PaymentRequestId}";
+            ? $"{_frontendUrl}/pay/qr/{paymentRequest.PaymentRequestId}"
+            : $"{_frontendUrl}/pay/card/{paymentRequest.PaymentRequestId}";
 
         return new InitializePaymentServiceResult(
             Result: InitializePaymentResult.Success,
@@ -289,8 +288,8 @@ public class PaymentService : IPaymentService
         if (paymentRequest.Status != PaymentRequestStatus.Pending)
             throw new Exception("Payment request not valid");
 
-        if (paymentRequest.ExpiresAt < DateTime.UtcNow)
-            throw new Exception("Payment request expired");
+        //if (paymentRequest.ExpiresAt < DateTime.UtcNow) // TODO: uncomment
+        //    throw new Exception("Payment request expired");
 
         var ipsData = new QRIpsData(
             Currency: paymentRequest.Currency,

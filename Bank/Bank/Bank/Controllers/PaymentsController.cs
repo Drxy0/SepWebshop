@@ -57,7 +57,7 @@ public class PaymentsController : ControllerBase
         return Ok(paymentRequest);
     }
 
-    [HttpPost("{paymentRequestId:guid}/pay")]
+    [HttpPost("/card/{paymentRequestId:guid}")]
     public async Task<IActionResult> ExecutePayment(Guid paymentRequestId, [FromBody] PayByCardRequest request)
     {
         var redirectUrl = await _paymentService.ExecuteCardPayment(paymentRequestId, request);
@@ -66,7 +66,7 @@ public class PaymentsController : ControllerBase
     }
 
 
-    [HttpPost("{paymentRequestId}/qr")]
+    [HttpPost("/qr/{paymentRequestId}")]
     public async Task<ActionResult<QRPaymentResponseDto>> GenerateQrPayment(Guid paymentRequestId)
     {
         var result = await _paymentService.GenerateQrPayment(paymentRequestId);
