@@ -4,6 +4,7 @@ using Bank.Persistance;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Bank.Migrations
 {
     [DbContext(typeof(BankDbContext))]
-    partial class BankDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260127145704_AddAccountType")]
+    partial class AddAccountType
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -44,7 +47,7 @@ namespace Bank.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Accounts", (string)null);
+                    b.ToTable("Accounts");
                 });
 
             modelBuilder.Entity("Bank.Models.DebitCard", b =>
@@ -77,7 +80,7 @@ namespace Bank.Migrations
 
                     b.HasIndex("AccountId");
 
-                    b.ToTable("DebitCards", (string)null);
+                    b.ToTable("DebitCards");
                 });
 
             modelBuilder.Entity("Bank.Models.Merchant", b =>
@@ -97,7 +100,7 @@ namespace Bank.Migrations
                     b.HasIndex("AccountId")
                         .IsUnique();
 
-                    b.ToTable("Merchants", (string)null);
+                    b.ToTable("Merchants");
                 });
 
             modelBuilder.Entity("Bank.Models.PSP", b =>
@@ -116,7 +119,7 @@ namespace Bank.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("PSPs", (string)null);
+                    b.ToTable("PSPs");
                 });
 
             modelBuilder.Entity("Bank.Models.PaymentRequest", b =>
@@ -155,7 +158,7 @@ namespace Bank.Migrations
 
                     b.HasIndex("MerchantId");
 
-                    b.ToTable("PaymentRequests", (string)null);
+                    b.ToTable("PaymentRequests");
                 });
 
             modelBuilder.Entity("Bank.Models.Transaction", b =>
@@ -188,7 +191,7 @@ namespace Bank.Migrations
 
                     b.HasIndex("PaymentRequestId");
 
-                    b.ToTable("Transactions", (string)null);
+                    b.ToTable("Transactions");
                 });
 
             modelBuilder.Entity("Bank.Models.DebitCard", b =>

@@ -20,4 +20,6 @@ public class PaymentRequest
     public PaymentRequestStatus Status { get; set; }
 
     public DateTime ExpiresAt { get; set; }
+
+    public ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
 }

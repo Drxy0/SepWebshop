@@ -27,16 +27,13 @@ namespace Bank.Persistance
                     .WithOne(dc => dc.Account)
                     .HasForeignKey(dc => dc.AccountId)
                     .IsRequired();
-
-                entity.Property(a => a.Balance)
-                    .HasPrecision(18, 4);
             });
 
-            modelBuilder.Entity<PaymentRequest>(entity =>
-            {
-                entity.Property(p => p.Amount)
-                    .HasPrecision(18, 4);
-            });
+            modelBuilder.Entity<PaymentRequest>()
+                .HasMany(p => p.Transactions)
+                .WithOne(t => t.PaymentRequest)
+                .HasForeignKey(t => t.PaymentRequestId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Merchant>(entity =>
             {

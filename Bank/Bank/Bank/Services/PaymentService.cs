@@ -1,5 +1,6 @@
 ﻿using Bank.Clients;
 using Bank.Contracts;
+using Bank.Contracts.QR;
 using Bank.Helpers;
 using Bank.Models;
 using Bank.Persistance;
@@ -285,24 +286,325 @@ public class PaymentService : IPaymentService
         if (paymentRequest == null)
             throw new Exception("Payment request not found");
 
-        if (paymentRequest.Status != PaymentRequestStatus.Pending)
-            throw new Exception("Payment request not valid");
-
-        //if (paymentRequest.ExpiresAt < DateTime.UtcNow) // TODO: uncomment
-        //    throw new Exception("Payment request expired");
-
         var ipsData = new QRIpsData(
             Currency: paymentRequest.Currency,
             Amount: paymentRequest.Amount,
             MerchantAccount: paymentRequest.Merchant.Account.AccountNumber.Replace("-", ""),
             MerchantName: paymentRequest.Merchant.Name,
             Purpose: "Placanje robe",
-            PaymentCode: "289"
+            PaymentCode: "289",
+            Stan: paymentRequest.Stan
         );
 
         var payload = QRIpsPayloadGenerator.Generate(ipsData);
         var qrBase64 = QrImageGenerator.GenerateBase64(payload);
 
-        return new QRPaymentResponseDto(paymentRequestId, qrBase64);
+        return new QRPaymentResponseDto(
+            paymentRequestId,
+            qrBase64,
+            paymentRequest.Status,
+            paymentRequest.Stan,
+            paymentRequest.ExpiresAt
+        );
+    }
+
+    // This method simulates what would happen when a real customer scans and pays via their banking app
+    // In reality, IPS (National Bank of Serbia service) would trigger the ProcessIpsCallback method
+    public async Task<QRPaymentResponseDto> ProcessQrPayment(Guid paymentRequestId, string? customerAccountNumber = null)
+    {
+        var paymentRequest = await _context.PaymentRequests
+            .Include(p => p.Merchant)
+                .ThenInclude(m => m.Account)
+            .FirstOrDefaultAsync(p => p.PaymentRequestId == paymentRequestId);
+
+        if (paymentRequest == null)
+            throw new Exception("Payment request not found");
+
+        // Check if already processed
+        if (paymentRequest.Status != PaymentRequestStatus.Pending)
+        {
+            return new QRPaymentResponseDto(
+                paymentRequestId,
+                null,
+                paymentRequest.Status,
+                paymentRequest.Stan,
+                paymentRequest.ExpiresAt
+            );
+        }
+
+        // Check if expired
+        if (paymentRequest.ExpiresAt < DateTime.UtcNow)
+        {
+            paymentRequest.Status = PaymentRequestStatus.Expired;
+            await _context.SaveChangesAsync();
+            return new QRPaymentResponseDto(
+                paymentRequestId,
+                null,
+                PaymentRequestStatus.Expired,
+                paymentRequest.Stan,
+                paymentRequest.ExpiresAt
+            );
+        }
+
+        // Complete payment
+        return await CompleteQrPayment(paymentRequestId, customerAccountNumber);
+    }
+
+    private async Task<QRPaymentResponseDto> CompleteQrPayment(Guid paymentRequestId, string? customerAccountNumber)
+    {
+        using var transaction = await _context.Database.BeginTransactionAsync();
+
+        try
+        {
+            var paymentRequest = await _context.PaymentRequests
+                .Include(p => p.Merchant)
+                    .ThenInclude(m => m.Account)
+                .FirstOrDefaultAsync(p => p.PaymentRequestId == paymentRequestId);
+
+            if (paymentRequest == null || paymentRequest.Status != PaymentRequestStatus.Pending)
+                throw new Exception("Payment request not valid");
+
+            // Find customer account for deduction
+            Account? customerAccount = null;
+            if (!string.IsNullOrEmpty(customerAccountNumber))
+            {
+                customerAccount = await _context.Accounts
+                    .FirstOrDefaultAsync(a => a.AccountNumber == customerAccountNumber);
+            }
+
+            // If no specific account or not found, use a default for simulation
+            if (customerAccount == null)
+            {
+                // Create or use a test customer account
+                customerAccount = await _context.Accounts
+                    .FirstOrDefaultAsync(a => a.Type == AccountType.Customer && a.Balance >= paymentRequest.Amount);
+
+                if (customerAccount == null)
+                {
+                    // Create test customer account
+                    customerAccount = new Account
+                    {
+                        Id = Guid.NewGuid(),
+                        AccountNumber = "123-456789-78",
+                        AccountHolderName = "Test Customer",
+                        Balance = 100000,
+                        Type = AccountType.Customer
+                    };
+                    _context.Accounts.Add(customerAccount);
+                }
+            }
+
+            // Check balance
+            if (customerAccount.Balance < paymentRequest.Amount)
+            {
+                paymentRequest.Status = PaymentRequestStatus.Failed;
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return new QRPaymentResponseDto(
+                    paymentRequestId,
+                    null,
+                    PaymentRequestStatus.Failed,
+                    paymentRequest.Stan,
+                    paymentRequest.ExpiresAt
+                );
+            }
+
+            // Transfer funds
+            customerAccount.Balance -= paymentRequest.Amount;
+            paymentRequest.Merchant.Account.Balance += paymentRequest.Amount;
+
+            // Record transaction
+            var globalTransactionId = Guid.NewGuid();
+            var acquirerTimestamp = DateTime.UtcNow;
+
+            _context.Transactions.Add(new Transaction
+            {
+                PaymentRequestId = paymentRequestId,
+                GlobalTransactionId = globalTransactionId,
+                AcquirerTimestamp = acquirerTimestamp,
+                Status = TransactionStatus.Successful,
+                Reference = $"QR-PAY-{Guid.NewGuid()}",
+                Description = $"QR payment completed via mobile app"
+            });
+
+            paymentRequest.Status = PaymentRequestStatus.Success;
+
+            await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+
+            // Notify PSP
+            await _pspClient.NotifyPaymentStatusAsync(new PspPaymentStatusDto
+            {
+                PaymentRequestId = paymentRequestId,
+                Stan = paymentRequest.Stan,
+                GlobalTransactionId = globalTransactionId,
+                AcquirerTimestamp = acquirerTimestamp,
+                Status = TransactionStatus.Successful,
+                MerchantId = paymentRequest.MerchantId,
+                PspTimestamp = paymentRequest.PspTimestamp,
+            });
+
+            return new QRPaymentResponseDto(
+                paymentRequestId,
+                null,
+                PaymentRequestStatus.Success,
+                paymentRequest.Stan,
+                paymentRequest.ExpiresAt
+            );
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
+    }
+
+    // This is the callback that would be triggered by IPS (National Bank of Serbia)
+    // when a real customer completes payment through their official banking app
+    public async Task ProcessIpsCallback(IpsCallbackDto callbackData)
+    {
+        using var transaction = await _context.Database.BeginTransactionAsync();
+
+        try
+        {
+            // Find payment request by STAN (used as reference)
+            var paymentRequest = await _context.PaymentRequests
+                .Include(p => p.Merchant)
+                    .ThenInclude(m => m.Account)
+                .FirstOrDefaultAsync(p => p.Stan == callbackData.Reference);
+
+            if (paymentRequest == null)
+                throw new Exception($"Payment request not found for reference: {callbackData.Reference}");
+
+            if (paymentRequest.Status != PaymentRequestStatus.Pending)
+            {
+                await transaction.CommitAsync();
+                return; // Already processed
+            }
+
+            if (callbackData.Status == IpsPaymentStatus.Success)
+            {
+                // Handle successful payment from IPS
+                if (!string.IsNullOrEmpty(callbackData.PayerAccountNumber))
+                {
+                    var customerAccount = await _context.Accounts
+                        .FirstOrDefaultAsync(a => a.AccountNumber == callbackData.PayerAccountNumber);
+
+                    if (customerAccount != null && customerAccount.Balance >= paymentRequest.Amount)
+                    {
+                        customerAccount.Balance -= paymentRequest.Amount;
+                    }
+                    else
+                    {
+                        throw new Exception("Customer account not found or insufficient balance");
+                    }
+                }
+                else
+                {
+                    // Simulate: find any customer account with sufficient balance
+                    Account? customerAccount = await _context.Accounts
+                        .Where(a => a.Type == AccountType.Customer && a.Balance >= paymentRequest.Amount)
+                        .FirstOrDefaultAsync();
+
+                    if (customerAccount != null)
+                    {
+                        customerAccount.Balance -= paymentRequest.Amount;
+                    }
+                    else
+                    {
+                        // Create simulation account if none exists
+                        Account defaultCustomer = new Account
+                        {
+                            AccountNumber = "123-456789-78",
+                            AccountHolderName = "Test Customer",
+                            Balance = 100000,
+                            Type = AccountType.Customer
+                        };
+
+                        _context.Accounts.Add(defaultCustomer);
+                        defaultCustomer.Balance -= paymentRequest.Amount;
+                    }
+                }
+
+                // Credit merchant
+                paymentRequest.Merchant.Account.Balance += paymentRequest.Amount;
+
+                // Record transaction
+                _context.Transactions.Add(new Transaction
+                {
+                    PaymentRequestId = paymentRequest.PaymentRequestId,
+                    GlobalTransactionId = Guid.NewGuid(),
+                    AcquirerTimestamp = DateTime.UtcNow,
+                    Status = TransactionStatus.Successful,
+                    Reference = callbackData.TransactionId,
+                    Description = $"IPS QR Payment completed"
+                });
+
+                paymentRequest.Status = PaymentRequestStatus.Success;
+            }
+            else
+            {
+                // Record failed transaction
+                _context.Transactions.Add(new Transaction
+                {
+                    PaymentRequestId = paymentRequest.PaymentRequestId,
+                    GlobalTransactionId = Guid.NewGuid(),
+                    AcquirerTimestamp = DateTime.UtcNow,
+                    Status = TransactionStatus.Failed,
+                    Reference = callbackData.TransactionId,
+                    Description = $"IPS QR Payment failed: {callbackData.Reason}"
+                });
+
+                paymentRequest.Status = PaymentRequestStatus.Failed;
+            }
+
+            await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+
+            // Notify PSP about the result
+            await _pspClient.NotifyPaymentStatusAsync(new PspPaymentStatusDto
+            {
+                PaymentRequestId = paymentRequest.PaymentRequestId,
+                Stan = paymentRequest.Stan,
+                GlobalTransactionId = Guid.NewGuid(),
+                AcquirerTimestamp = DateTime.UtcNow,
+                Status = callbackData.Status == IpsPaymentStatus.Success
+                            ? TransactionStatus.Successful
+                            : TransactionStatus.Failed,
+                MerchantId = paymentRequest.MerchantId,
+                PspTimestamp = paymentRequest.PspTimestamp,
+            });
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
+    }
+
+    // Frontend calls this method to poll for payment status updates
+    public async Task<QrPaymentStatusDto> GetQrPaymentStatus(Guid paymentRequestId)
+    {
+        PaymentRequest? paymentRequest = await _context.PaymentRequests
+            .Include(p => p.Transactions)
+            .FirstOrDefaultAsync(p => p.PaymentRequestId == paymentRequestId);
+
+        if (paymentRequest == null)
+            throw new Exception("Payment request not found.");
+
+        var latestTransaction = paymentRequest.Transactions
+            .OrderByDescending(t => t.AcquirerTimestamp)
+            .FirstOrDefault();
+
+        return new QrPaymentStatusDto(
+            PaymentRequestId: paymentRequest.PaymentRequestId,
+            Status: paymentRequest.Status,
+            Amount: paymentRequest.Amount,
+            Currency: paymentRequest.Currency,
+            ExpiresAt: paymentRequest.ExpiresAt,
+            TransactionId: latestTransaction?.Reference,
+            CompletedAt: latestTransaction?.AcquirerTimestamp
+        );
     }
 }

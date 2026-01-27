@@ -1,6 +1,6 @@
 ﻿using Bank.Models;
 
-namespace Bank.Contracts;
+namespace Bank.Contracts.QR;
 
 public sealed record QRIpsData(
     Currency Currency,
@@ -8,5 +8,6 @@ public sealed record QRIpsData(
     string MerchantAccount,
     string MerchantName,
     string Purpose,
-    string PaymentCode
+    string PaymentCode,
+    string? Stan = null  // payment reference (STAN)
 );

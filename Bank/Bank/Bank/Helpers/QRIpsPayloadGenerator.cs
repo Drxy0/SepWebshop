@@ -1,4 +1,4 @@
-﻿using Bank.Contracts;
+﻿using Bank.Contracts.QR;
 using System.Globalization;
 
 namespace Bank.Helpers;
@@ -21,6 +21,10 @@ public static class QRIpsPayloadGenerator
             $"SF:289|" +
             $"S:Placanje robe";
 
+        if (!string.IsNullOrEmpty(data.Stan))
+        {
+            payload += $"|RO:{data.Stan}";
+        }
 
         return payload;
     }

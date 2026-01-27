@@ -10,7 +10,7 @@ import {
 import { CardBrand } from './card-payment.models';
 import { detectCardBrand, isExpiryValid, isValidLuhn } from './card-payment.util';
 import { PaymentService } from '../services/payment.service';
-import { CardPaymentRequestDto } from '../services/payment.models';
+import { CardPaymentRequestDto, PayByCardRequest } from '../services/payment.models';
 
 @Component({
   selector: 'app-card-payment',
@@ -98,17 +98,12 @@ export class CardPayment implements OnInit {
 
     const raw = this.form.getRawValue();
 
-    const [monthStr, yearStr] = raw.expiry.split('/');
-    const expiryMonth = parseInt(monthStr, 10);
-    const expiryYear = parseInt(yearStr, 10);
-
-    const paymentData = {
+    // Convert expiry from "MM/YY" format to match backend expectations
+    const paymentData: PayByCardRequest = {
       cardNumber: raw.cardNumber,
-      cardHolderName: raw.cardHolder,
-      expiryMonth,
-      expiryYear,
-      cardHolder: raw.cardHolder,
-      cvv: raw.cvv
+      expirationDate: raw.expiry, // Keep as "MM/YY" format
+      cvv: raw.cvv,
+      cardHolderName: raw.cardHolder
     };
 
     this.paymentService.submitPayment(this.paymentRequestId, paymentData)
