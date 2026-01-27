@@ -27,3 +27,15 @@ resource azurerm_mssql_database dataservicedb {
   server_id = azurerm_mssql_server.main.id
   sku_name  = "Basic"
 }
+
+resource azurerm_mssql_database qrservicedb {
+  name      = "sqldb-${var.application_name}-qrservicedb-${var.environment_name}-${var.location_short}-${var.resource_version}"
+  server_id = azurerm_mssql_server.main.id
+  sku_name  = "Basic"
+}
+
+resource azurerm_mssql_database bankdb {
+  name      = "sqldb-${var.application_name}-bankdb-${var.environment_name}-${var.location_short}-${var.resource_version}"
+  server_id = azurerm_mssql_server.main.id
+  sku_name  = "Basic"
+}

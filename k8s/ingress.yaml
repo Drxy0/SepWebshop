@@ -23,3 +23,10 @@ spec:
                 name: data-service-clusterip
                 port:
                   number: 80
+          - path: /q
+            pathType: Prefix
+            backend:
+              service:
+                name: qr-service-clusterip
+                port:
+                  number: 80
