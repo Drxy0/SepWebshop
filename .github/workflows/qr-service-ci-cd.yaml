@@ -86,7 +86,7 @@ jobs:
       - name: Apply EF Core migrations
         run: |
           echo "Applying EF Core migrations…"
-          dotnet ef database update --project ${{ env.WORKING_DIRECTORY }}/QrService/QrService.csproj --connection "Server=tcp:${{ vars.AZURE_SQL_SERVER_NAME }}.database.windows.net,1433;Initial Catalog=${{ vars.AZURE_SQL_QR_SERVICE_DATABASE_NAME }};Persist Security Info=False;User ID=${{ steps.fetch-secrets.outputs.sql-admin }};Password=${{ steps.fetch-secrets.outputs.sql-password }};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
+          dotnet ef database update --project ${{ env.WORKING_DIRECTORY }}/QrService.API/QrService.API.csproj --connection "Server=tcp:${{ vars.AZURE_SQL_SERVER_NAME }}.database.windows.net,1433;Initial Catalog=${{ vars.AZURE_SQL_QR_SERVICE_DATABASE_NAME }};Persist Security Info=False;User ID=${{ steps.fetch-secrets.outputs.sql-admin }};Password=${{ steps.fetch-secrets.outputs.sql-password }};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
 
       - name: Remove Agent IP from SQL firewall
         if: always()
@@ -104,7 +104,7 @@ jobs:
 
           CONN_STR="Server=tcp:${{ vars.AZURE_SQL_SERVER_NAME }}.database.windows.net,1433;Initial Catalog=${{ vars.AZURE_SQL_QR_SERVICE_DATABASE_NAME }};Persist Security Info=False;User ID=${{ steps.fetch-secrets.outputs.sql-admin }};Password=${{ steps.fetch-secrets.outputs.sql-password }};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
 
-          FILE_PATH="${{ env.WORKING_DIRECTORY }}/QrService/appsettings.json"
+          FILE_PATH="${{ env.WORKING_DIRECTORY }}/QrService.API/appsettings.json"
 
           jq --arg conn "$CONN_STR" '.ConnectionStrings.DefaultConnection = $conn' "$FILE_PATH" > temp.json && mv temp.json "$FILE_PATH"
 
