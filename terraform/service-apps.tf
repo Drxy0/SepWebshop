@@ -33,11 +33,9 @@ resource azurerm_linux_web_app backend {
   app_settings = {
     "PSP__FrontendBaseUrl" = "https://${azurerm_linux_web_app.psp_frontend.default_hostname}"
     
-    "PSP__MerchantId"      = "MERCHANT_001"
-    // "PSP__MerchantPassword" = "" // TODO
-    "Jwt__Issuer"          = "SepWebshop"
-    "Jwt__Audience"        = "SepWebshopClients"
-    "AllowedHosts"         = "*"
+    "PSP__PaymentInitEndpoint" = "https://sepapp.xyz/d/Payments/init"
+
+    "SendGrid__ApiKey" = "${data.azurerm_key_vault_secret.sendgrid_api_key.value}"
   }
 }
 
