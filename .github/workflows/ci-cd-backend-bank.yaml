@@ -66,7 +66,7 @@ jobs:
       - name: Apply EF Core migrations
         run: |
           echo "Applying EF Core migrations…"
-          dotnet ef database update --project ${{ env.WORKING_DIRECTORY }}Bank/Bank.csproj --connection "Server=tcp:${{ vars.AZURE_SQL_SERVER_NAME }}.database.windows.net,1433;Initial Catalog=${{ vars.AZURE_SQL_BANK_DATABASE_NAME }};Persist Security Info=False;User ID=${{ steps.fetch-secrets.outputs.sql-admin }};Password=${{ steps.fetch-secrets.outputs.sql-password }};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
+          dotnet ef database update --project ${{ env.WORKING_DIRECTORY }}/Bank/Bank.csproj --connection "Server=tcp:${{ vars.AZURE_SQL_SERVER_NAME }}.database.windows.net,1433;Initial Catalog=${{ vars.AZURE_SQL_BANK_DATABASE_NAME }};Persist Security Info=False;User ID=${{ steps.fetch-secrets.outputs.sql-admin }};Password=${{ steps.fetch-secrets.outputs.sql-password }};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
 
       - name: Remove Agent IP from SQL firewall
         if: always()
