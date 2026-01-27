@@ -115,6 +115,6 @@ resource azurerm_linux_web_app bank_backend {
     value = "Data Source=sql-${var.application_name}-${var.environment_name}-${var.location_short}-${var.resource_version}.database.windows.net,1433;Initial Catalog=sqldb-${var.application_name}-bankdb-${var.environment_name}-${var.location_short}-${var.resource_version};Persist Security Info=False;User ID=${data.azurerm_key_vault_secret.admin_login.value};Password=${data.azurerm_key_vault_secret.admin_password.value};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
   }
   app_settings = {
-
+    "BankFrontendUrl" = "https://${azurerm_linux_web_app.bank_frontend.default_hostname}"
   }
 }
