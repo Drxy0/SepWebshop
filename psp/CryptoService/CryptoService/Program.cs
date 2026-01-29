@@ -1,8 +1,13 @@
 using CryptoService.Clients;
+<<<<<<< HEAD
 using CryptoService.Clients.Interfaces;
 using CryptoService.Persistance;
 using CryptoService.Services;
 using CryptoService.Services.Interfaces;
+=======
+using CryptoService.Persistance;
+using CryptoService.Services;
+>>>>>>> 5cbd7fe (Add base implementation)
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 
@@ -28,7 +33,10 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<ICryptoPaymentService, CryptoPaymentService>();
 builder.Services.AddHttpClient();
 builder.Services.AddHttpClient<IBinanceClient, BinanceClient>();
+<<<<<<< HEAD
 builder.Services.AddHttpClient<ITestnetWallet, TestnetWallet>();
+=======
+>>>>>>> 5cbd7fe (Add base implementation)
 
 var app = builder.Build();
 

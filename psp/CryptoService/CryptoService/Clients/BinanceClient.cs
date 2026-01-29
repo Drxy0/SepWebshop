@@ -1,5 +1,9 @@
+<<<<<<< HEAD
 ﻿using CryptoService.Clients.Interfaces;
 using CryptoService.DTOs.Binance;
+=======
+﻿using CryptoService.DTOs.Binance;
+>>>>>>> 5cbd7fe (Add base implementation)
 
 namespace CryptoService.Clients;
 

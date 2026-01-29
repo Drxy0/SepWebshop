@@ -1,6 +1,9 @@
 ﻿using CryptoService.DTOs;
 using CryptoService.Services;
+<<<<<<< HEAD
 using CryptoService.Services.Interfaces;
+=======
+>>>>>>> 5cbd7fe (Add base implementation)
 using Microsoft.AspNetCore.Mvc;
 
 namespace CryptoService.Controllers
@@ -47,6 +50,7 @@ namespace CryptoService.Controllers
 
             return Ok(status);
         }
+<<<<<<< HEAD
 
 
         [HttpPost("{paymentId:guid}/process")]
@@ -62,5 +66,7 @@ namespace CryptoService.Controllers
                 return BadRequest(new { Error = ex.Message });
             }
         }
+=======
+>>>>>>> 5cbd7fe (Add base implementation)
     }
 }

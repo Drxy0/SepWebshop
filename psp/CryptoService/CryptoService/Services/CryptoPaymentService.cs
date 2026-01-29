@@ -1,8 +1,15 @@
+<<<<<<< HEAD
 ﻿using CryptoService.Clients.Interfaces;
 using CryptoService.DTOs;
 using CryptoService.Models;
 using CryptoService.Persistance;
 using CryptoService.Services.Interfaces;
+=======
+﻿using CryptoService.Clients;
+using CryptoService.DTOs;
+using CryptoService.Models;
+using CryptoService.Persistance;
+>>>>>>> 5cbd7fe (Add base implementation)
 using Microsoft.EntityFrameworkCore;
 using NBitcoin;
 
@@ -13,6 +20,7 @@ public class CryptoPaymentService : ICryptoPaymentService
     private readonly CryptoDbContext _db;
     private readonly HttpClient _httpClient;
     private readonly IBinanceClient _binanceClient;
+<<<<<<< HEAD
     private readonly ITestnetWallet _testnetWallet;
 
     private const string BlockstreamTestnetBase = "https://blockstream.info/testnet/api";
@@ -20,10 +28,17 @@ public class CryptoPaymentService : ICryptoPaymentService
     private readonly BitcoinAddress _shopWalletAddress;
 
     public CryptoPaymentService(CryptoDbContext db, HttpClient httpClient, IBinanceClient binanceClient, ITestnetWallet testnetWallet, IConfiguration config)
+=======
+
+    private const string BlockstreamTestnetBase = "https://blockstream.info/testnet/api";
+
+    public CryptoPaymentService(CryptoDbContext db, HttpClient httpClient, IBinanceClient binanceClient)
+>>>>>>> 5cbd7fe (Add base implementation)
     {
         _db = db;
         _httpClient = httpClient;
         _binanceClient = binanceClient;
+<<<<<<< HEAD
         _testnetWallet = testnetWallet;
         _shopWalletSecret = new BitcoinSecret(config["BitcoinTestnetWalletWif"], Network.TestNet); // TODO: Make method that generates a wallet and a secret, save both
         _shopWalletAddress = _shopWalletSecret.GetAddress(ScriptPubKeyType.Segwit);
@@ -32,6 +47,10 @@ public class CryptoPaymentService : ICryptoPaymentService
     /// <summary>
     /// Generate a payment record, transaction gets associated with this later
     /// </summary>
+=======
+    }
+
+>>>>>>> 5cbd7fe (Add base implementation)
     public async Task<CreateCryptoPaymentResponse> CreatePaymentAsync(CreateCryptoPaymentRequest request, CancellationToken cancellationToken)
     {
         string symbol = GetBinanceSymbol(request.FiatCurrency);
@@ -64,6 +83,10 @@ public class CryptoPaymentService : ICryptoPaymentService
             payment.Id,
             payment.BitcoinAddress,
             payment.BitcoinAmount,
+<<<<<<< HEAD
+=======
+            "testnet",
+>>>>>>> 5cbd7fe (Add base implementation)
             payment.ExpiresAt);
     }
 
@@ -80,7 +103,11 @@ public class CryptoPaymentService : ICryptoPaymentService
 
         if (payment.TransactionId is not null)
         {
+<<<<<<< HEAD
             BitcoinTransactionDto? tx = await _httpClient.GetFromJsonAsync<BitcoinTransactionDto>(
+=======
+            var tx = await _httpClient.GetFromJsonAsync<BitcoinTransactionDto>(
+>>>>>>> 5cbd7fe (Add base implementation)
                     $"{BlockstreamTestnetBase}/tx/{payment.TransactionId}",
                     cancellationToken);
 
@@ -109,6 +136,7 @@ public class CryptoPaymentService : ICryptoPaymentService
         _ => throw new Exception($"Currency {currency} not supported by Binance")
     };
 
+<<<<<<< HEAD
     /// <summary>
     /// Simulate sending BTC, generates a mock transaction ID and marks payment as confirmed
     /// </summary>
@@ -181,4 +209,6 @@ public class CryptoPaymentService : ICryptoPaymentService
         var (wif, address) = _testnetWallet.GenerateWifWallet();
         return new GenerateWalletResponse(wif, address);
     }
+=======
+>>>>>>> 5cbd7fe (Add base implementation)
 }
