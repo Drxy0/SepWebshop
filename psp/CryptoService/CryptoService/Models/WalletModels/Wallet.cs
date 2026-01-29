@@ -4,7 +4,6 @@ public sealed class Wallet
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
-    public string Network { get; set; } = "testnet";
     public string? Mnemonic { get; set; } // Encrypted
     public string? EncryptedSeed { get; set; }
     public string? PublicMasterKey { get; set; }

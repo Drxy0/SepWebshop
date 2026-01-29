@@ -16,13 +16,17 @@ public class CryptoPaymentService : ICryptoPaymentService
     private readonly ITestnetWallet _testnetWallet;
 
     private const string BlockstreamTestnetBase = "https://blockstream.info/testnet/api";
+    private readonly BitcoinSecret _shopWalletSecret;
+    private readonly BitcoinAddress _shopWalletAddress;
 
-    public CryptoPaymentService(CryptoDbContext db, HttpClient httpClient, IBinanceClient binanceClient, ITestnetWallet testnetWallet)
+    public CryptoPaymentService(CryptoDbContext db, HttpClient httpClient, IBinanceClient binanceClient, ITestnetWallet testnetWallet, IConfiguration config)
     {
         _db = db;
         _httpClient = httpClient;
         _binanceClient = binanceClient;
         _testnetWallet = testnetWallet;
+        _shopWalletSecret = new BitcoinSecret(config["BitcoinTestnetWalletWif"], Network.TestNet); // TODO: Make method that generates a wallet and a secret, save both
+        _shopWalletAddress = _shopWalletSecret.GetAddress(ScriptPubKeyType.Segwit);
     }
 
     /// <summary>
@@ -60,7 +64,6 @@ public class CryptoPaymentService : ICryptoPaymentService
             payment.Id,
             payment.BitcoinAddress,
             payment.BitcoinAmount,
-            "testnet",
             payment.ExpiresAt);
     }
 
@@ -117,21 +120,22 @@ public class CryptoPaymentService : ICryptoPaymentService
         if (payment.Status != CryptoPaymentStatus.Pending)
             throw new InvalidOperationException("Payment is already processed");
 
-        // 1. Generate a temporary student testnet wallet
-        (BitcoinSecret? secret, BitcoinAddress? studentAddress) = _testnetWallet.GenerateWallet();
+        // 1. Generate or load a funded testnet wallet (you must fund it via a Testnet faucet)
+        (BitcoinSecret secret, BitcoinAddress studentAddress) = _testnetWallet.GenerateWallet();
         Console.WriteLine($"Fund this testnet address using a faucet: {studentAddress}");
 
-        // 2. Wait until testnet wallet has funds (manual step) or simulate delay in demo
+        string txId = await _testnetWallet.SendPaymentAsync(
+            _shopWalletSecret,
+            payment.BitcoinAddress,
+            payment.BitcoinAmount,
+            cancellationToken
+        );
 
-        // 3. Send BTC to the shop address
-        string txId = await _testnetWallet.SendPaymentAsync(secret, payment.BitcoinAddress, payment.BitcoinAmount);
-
-        // 4. Store transaction ID
         payment.TransactionId = txId;
-        payment.Status = CryptoPaymentStatus.Confirmed; // optionally mark immediately
-
+        payment.Status = CryptoPaymentStatus.Confirmed;
         await _db.SaveChangesAsync(cancellationToken);
 
+        Console.WriteLine($"Payment processed. TXID: {txId}");
         return txId;
     }
 
@@ -172,4 +176,9 @@ public class CryptoPaymentService : ICryptoPaymentService
             confirmations);
     }
 
+    public async Task<GenerateWalletResponse> GenerateWalletAsync()
+    {
+        var (wif, address) = _testnetWallet.GenerateWifWallet();
+        return new GenerateWalletResponse(wif, address);
+    }
 }

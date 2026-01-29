@@ -4,6 +4,7 @@ using CryptoService.Persistance;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CryptoService.Migrations
 {
     [DbContext(typeof(CryptoDbContext))]
-    partial class CryptoDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260129202256_RenameColumns")]
+    partial class RenameColumns
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -28,17 +31,17 @@ namespace CryptoService.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("BitcoinAddress")
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CryptoCurrencyAddress")
                         .IsRequired()
                         .HasMaxLength(128)
                         .HasColumnType("nvarchar(128)");
 
-                    b.Property<decimal>("BitcoinAmount")
+                    b.Property<decimal>("CryptoCurrencyAmount")
                         .HasPrecision(18, 8)
                         .HasColumnType("decimal(18,8)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
 
                     b.Property<DateTime>("ExpiresAt")
                         .HasColumnType("datetime2");
@@ -50,6 +53,11 @@ namespace CryptoService.Migrations
                     b.Property<string>("FiatCurrency")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Network")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("nvarchar(16)");
 
                     b.Property<Guid>("OrderId")
                         .HasColumnType("uniqueidentifier");
@@ -63,7 +71,7 @@ namespace CryptoService.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BitcoinAddress")
+                    b.HasIndex("CryptoCurrencyAddress")
                         .IsUnique();
 
                     b.ToTable("CryptoPayments");
