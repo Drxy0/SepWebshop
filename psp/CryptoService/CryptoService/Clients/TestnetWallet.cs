@@ -70,8 +70,6 @@ public class TestnetWallet : ITestnetWallet
         return tx.GetHash().ToString();
     }
 
-
-
     // 3. Check transaction status
     public async Task<bool> IsConfirmedAsync(string txId, CancellationToken cancellationToken = default)
     {
@@ -80,6 +78,7 @@ public class TestnetWallet : ITestnetWallet
 
         return tx?.status?.confirmed ?? false;
     }
+
 
     public async Task<decimal> GetBalanceAsync(BitcoinAddress address, CancellationToken cancellationToken = default)
     {

@@ -51,6 +51,14 @@ namespace CryptoService.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+<<<<<<< HEAD
+=======
+                    b.Property<string>("Network")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("nvarchar(16)");
+
+>>>>>>> 69563e27af42f2b9bb3170db53e264e459d0c617
                     b.Property<Guid>("OrderId")
                         .HasColumnType("uniqueidentifier");
 

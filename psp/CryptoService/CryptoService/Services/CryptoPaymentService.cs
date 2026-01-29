@@ -25,6 +25,7 @@ public class CryptoPaymentService : ICryptoPaymentService
         _httpClient = httpClient;
         _binanceClient = binanceClient;
         _testnetWallet = testnetWallet;
+      
         _shopWalletSecret = new BitcoinSecret(config["BitcoinTestnetWalletWif"], Network.TestNet); // TODO: Make method that generates a wallet and a secret, save both
         _shopWalletAddress = _shopWalletSecret.GetAddress(ScriptPubKeyType.Segwit);
     }
@@ -136,6 +137,7 @@ public class CryptoPaymentService : ICryptoPaymentService
         await _db.SaveChangesAsync(cancellationToken);
 
         Console.WriteLine($"Payment processed. TXID: {txId}");
+
         return txId;
     }
 

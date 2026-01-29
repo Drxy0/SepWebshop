@@ -12,7 +12,6 @@ namespace CryptoService.Clients.Interfaces
 
         /// Checks if a transaction on testnet has been confirmed
         Task<bool> IsConfirmedAsync(string txId, CancellationToken cancellationToken = default);
-
         (string Wif, string Address) GenerateWifWallet();
     }
 }
