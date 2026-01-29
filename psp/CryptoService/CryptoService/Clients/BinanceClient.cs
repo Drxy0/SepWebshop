@@ -1,4 +1,5 @@
-﻿using CryptoService.DTOs.Binance;
+﻿using CryptoService.Clients.Interfaces;
+using CryptoService.DTOs.Binance;
 
 namespace CryptoService.Clients;
 
