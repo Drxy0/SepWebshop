@@ -17,10 +17,6 @@ public class CryptoDbContext : DbContext
                   .IsRequired()
                   .HasMaxLength(128);
 
-            entity.Property(x => x.Network)
-                  .IsRequired()
-                  .HasMaxLength(16);
-
             entity.Property(x => x.BitcoinAmount)
                   .HasPrecision(18, 8);
 

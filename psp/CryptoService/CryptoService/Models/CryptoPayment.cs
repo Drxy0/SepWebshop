@@ -14,8 +14,6 @@ public sealed class CryptoPayment
 
     public string BitcoinAddress { get; set; } = null!;
 
-    public string Network { get; set; } = "testnet";
-
     public CryptoPaymentStatus Status { get; set; }
 
     public string? TransactionId { get; set; }

@@ -1,11 +1,11 @@
 ﻿using CryptoService.DTOs;
 
-namespace CryptoService.Services.Interfaces
-{
-    public interface ICryptoPaymentService
-    {
-        Task<CreateCryptoPaymentResponse> CreatePaymentAsync(CreateCryptoPaymentRequest request, CancellationToken cancellationToken);
+namespace CryptoService.Services.Interfaces;
 
-        Task<CryptoPaymentStatusResponse?> GetStatusAsync(Guid paymentId, CancellationToken cancellationToken);
-    }
+public interface ICryptoPaymentService
+{
+    Task<CreateCryptoPaymentResponse> CreatePaymentAsync(CreateCryptoPaymentRequest request, CancellationToken cancellationToken);
+    Task<CryptoPaymentStatusResponse?> GetStatusAsync(Guid paymentId, CancellationToken cancellationToken);
+    Task<string> ProcessPaymentAsync(Guid paymentId, CancellationToken cancellationToken); // add this
+    Task<CryptoPaymentStatusResponse?> CheckPaymentStatusAsync(Guid paymentId, CancellationToken cancellationToken);
 }

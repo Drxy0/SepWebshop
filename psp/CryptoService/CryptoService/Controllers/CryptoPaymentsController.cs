@@ -1,4 +1,5 @@
 ﻿using CryptoService.DTOs;
+using CryptoService.Services;
 using CryptoService.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -45,6 +46,21 @@ namespace CryptoService.Controllers
             }
 
             return Ok(status);
+        }
+
+
+        [HttpPost("{paymentId:guid}/process")]
+        public async Task<ActionResult<string>> ProcessPayment(Guid paymentId, CancellationToken cancellationToken)
+        {
+            try
+            {
+                string txId = await _cryptoPaymentService.ProcessPaymentAsync(paymentId, cancellationToken);
+                return Ok(new { TransactionId = txId });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Error = ex.Message });
+            }
         }
     }
 }
