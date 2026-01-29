@@ -361,8 +361,10 @@ public class PaymentService : IPaymentService
                     .ThenInclude(m => m.Account)
                 .FirstOrDefaultAsync(p => p.PaymentRequestId == paymentRequestId);
 
-            if (paymentRequest == null || paymentRequest.Status != PaymentRequestStatus.Pending)
+            if (paymentRequest is null || paymentRequest.Status != PaymentRequestStatus.Pending)
+            {
                 throw new Exception("Payment request not valid");
+            }
 
             // Find customer account for deduction
             Account? customerAccount = null;
@@ -434,16 +436,23 @@ public class PaymentService : IPaymentService
             await transaction.CommitAsync();
 
             // Notify PSP
-            await _pspClient.NotifyPaymentStatusAsync(new PspPaymentStatusDto
+            try
             {
-                PaymentRequestId = paymentRequestId,
-                Stan = paymentRequest.Stan,
-                GlobalTransactionId = globalTransactionId,
-                AcquirerTimestamp = acquirerTimestamp,
-                Status = TransactionStatus.Successful,
-                MerchantId = paymentRequest.MerchantId,
-                PspTimestamp = paymentRequest.PspTimestamp,
-            });
+                await _pspClient.NotifyPaymentStatusAsync(new PspPaymentStatusDto
+                {
+                    PaymentRequestId = paymentRequestId,
+                    Stan = paymentRequest.Stan,
+                    GlobalTransactionId = globalTransactionId,
+                    AcquirerTimestamp = acquirerTimestamp,
+                    Status = TransactionStatus.Successful,
+                    MerchantId = paymentRequest.MerchantId,
+                    PspTimestamp = paymentRequest.PspTimestamp,
+                });
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine($"\n\n------------------------\nError notifying PSP: {ex.Message}");
+            }
 
             return new QRPaymentResponseDto(
                 paymentRequestId,

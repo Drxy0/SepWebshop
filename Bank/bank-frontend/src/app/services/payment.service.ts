@@ -32,9 +32,7 @@ export class PaymentService {
 
   // For simulation only - in production, this would be triggered by IPS callback
   processQrPayment(paymentRequestId: string, customerAccountNumber?: string): Observable<QrPaymentResponseDto> {
-    return this.http.post<QrPaymentResponseDto>(
-      `${this.baseUrl}/qr/${paymentRequestId}/process`, 
-      { customerAccountNumber }
+    return this.http.post<QrPaymentResponseDto>(`${this.baseUrl}/qr/${paymentRequestId}/process`, { customerAccountNumber }
     );
   }
 }
