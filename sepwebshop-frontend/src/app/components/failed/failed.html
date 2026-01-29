@@ -1,0 +1,50 @@
+<div class="min-h-screen flex items-center justify-center bg-gray-50 p-6">
+  <div
+    class="bg-white p-8 rounded-2xl shadow-xl border border-orange-100 max-w-md w-full text-center"
+  >
+    <div
+      class="w-20 h-20 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center mx-auto mb-6"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="h-10 w-10"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+        />
+      </svg>
+    </div>
+
+    <h2 class="text-2xl font-bold text-gray-800 mb-2">Transaction Failed</h2>
+    <p class="text-gray-600 mb-8">
+      Your payment could not be completed. This usually happens due to insufficient funds, an
+      expired card, or a temporary block by your bank.
+    </p>
+
+    <div class="space-y-3">
+      <button
+        (click)="tryAnotherMethod()"
+        class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-lg shadow-orange-200"
+      >
+        Try Another Method
+      </button>
+
+      <button
+        routerLink="/index"
+        class="w-full bg-white border border-gray-200 text-gray-600 font-semibold py-3 px-6 rounded-xl hover:bg-gray-50 transition-colors"
+      >
+        Cancel and Return
+      </button>
+    </div>
+
+    <p class="mt-6 text-xs text-gray-400">
+      If funds were deducted, they will be refunded automatically within 24 hours.
+    </p>
+  </div>
+</div>

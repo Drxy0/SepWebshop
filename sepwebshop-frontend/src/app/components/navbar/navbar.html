@@ -1,4 +1,4 @@
-<nav class="bg-gray-800 text-white px-6 py-3">
+<nav *ngIf="auth.isLoggedIn() && showNavbar" class="bg-gray-800 text-white px-6 py-3">
   <div class="flex justify-between items-center">
     <!-- Logo -->
     <span class="font-bold text-lg">SepWebshop</span>
