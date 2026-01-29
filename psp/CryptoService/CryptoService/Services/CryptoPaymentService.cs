@@ -1,7 +1,8 @@
-﻿using CryptoService.Clients;
+﻿using CryptoService.Clients.Interfaces;
 using CryptoService.DTOs;
 using CryptoService.Models;
 using CryptoService.Persistance;
+using CryptoService.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using NBitcoin;
 
@@ -12,16 +13,21 @@ public class CryptoPaymentService : ICryptoPaymentService
     private readonly CryptoDbContext _db;
     private readonly HttpClient _httpClient;
     private readonly IBinanceClient _binanceClient;
+    private readonly ITestnetWallet _testnetWallet;
 
     private const string BlockstreamTestnetBase = "https://blockstream.info/testnet/api";
 
-    public CryptoPaymentService(CryptoDbContext db, HttpClient httpClient, IBinanceClient binanceClient)
+    public CryptoPaymentService(CryptoDbContext db, HttpClient httpClient, IBinanceClient binanceClient, ITestnetWallet testnetWallet)
     {
         _db = db;
         _httpClient = httpClient;
         _binanceClient = binanceClient;
+        _testnetWallet = testnetWallet;
     }
 
+    /// <summary>
+    /// Generate a payment record, transaction gets associated with this later
+    /// </summary>
     public async Task<CreateCryptoPaymentResponse> CreatePaymentAsync(CreateCryptoPaymentRequest request, CancellationToken cancellationToken)
     {
         string symbol = GetBinanceSymbol(request.FiatCurrency);
@@ -71,7 +77,7 @@ public class CryptoPaymentService : ICryptoPaymentService
 
         if (payment.TransactionId is not null)
         {
-            var tx = await _httpClient.GetFromJsonAsync<BitcoinTransactionDto>(
+            BitcoinTransactionDto? tx = await _httpClient.GetFromJsonAsync<BitcoinTransactionDto>(
                     $"{BlockstreamTestnetBase}/tx/{payment.TransactionId}",
                     cancellationToken);
 
@@ -99,5 +105,71 @@ public class CryptoPaymentService : ICryptoPaymentService
         Currency.JPY => "BTCJPY",
         _ => throw new Exception($"Currency {currency} not supported by Binance")
     };
+
+    /// <summary>
+    /// Simulate sending BTC, generates a mock transaction ID and marks payment as confirmed
+    /// </summary>
+
+    public async Task<string> ProcessPaymentAsync(Guid paymentId, CancellationToken cancellationToken)
+    {
+        var payment = await _db.CryptoPayments.FirstOrDefaultAsync(x => x.Id == paymentId, cancellationToken);
+        if (payment is null) throw new Exception("Payment not found");
+        if (payment.Status != CryptoPaymentStatus.Pending)
+            throw new InvalidOperationException("Payment is already processed");
+
+        // 1. Generate a temporary student testnet wallet
+        (BitcoinSecret? secret, BitcoinAddress? studentAddress) = _testnetWallet.GenerateWallet();
+        Console.WriteLine($"Fund this testnet address using a faucet: {studentAddress}");
+
+        // 2. Wait until testnet wallet has funds (manual step) or simulate delay in demo
+
+        // 3. Send BTC to the shop address
+        string txId = await _testnetWallet.SendPaymentAsync(secret, payment.BitcoinAddress, payment.BitcoinAmount);
+
+        // 4. Store transaction ID
+        payment.TransactionId = txId;
+        payment.Status = CryptoPaymentStatus.Confirmed; // optionally mark immediately
+
+        await _db.SaveChangesAsync(cancellationToken);
+
+        return txId;
+    }
+
+
+    /// <summary>
+    /// Checks transaction status on testnet API (Blockstream)
+    /// </summary>
+    public async Task<CryptoPaymentStatusResponse?> CheckPaymentStatusAsync(Guid paymentId, CancellationToken cancellationToken)
+    {
+        CryptoPayment? payment = await _db.CryptoPayments.FirstOrDefaultAsync(x => x.Id == paymentId, cancellationToken);
+        if (payment is null) return null;
+
+        int confirmations = 0;
+
+        if (!string.IsNullOrEmpty(payment.TransactionId))
+        {
+            try
+            {
+                bool confirmed = await _testnetWallet.IsConfirmedAsync(payment.TransactionId);
+
+                if (confirmed)
+                {
+                    confirmations = 1; // simplified for school project
+                    payment.Status = CryptoPaymentStatus.Confirmed;
+                    await _db.SaveChangesAsync(cancellationToken);
+                }
+            }
+            catch
+            {
+                // Transaction not found yet on testnet, keep pending
+            }
+        }
+        return new CryptoPaymentStatusResponse(
+            payment.Id,
+            payment.Status,
+            payment.BitcoinAmount,
+            payment.TransactionId,
+            confirmations);
+    }
 
 }
