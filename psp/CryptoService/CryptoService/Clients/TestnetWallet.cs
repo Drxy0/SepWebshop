@@ -26,6 +26,7 @@ public class TestnetWallet : ITestnetWallet
     {
         BitcoinAddress senderAddress = senderSecret.GetAddress(ScriptPubKeyType.Segwit);
 
+<<<<<<< HEAD
         // 1. Get UTXOs for the sender
         List<BlockstreamUtxo>? utxos = await _httpClient.GetFromJsonAsync<List<BlockstreamUtxo>>(
             $"https://blockstream.info/testnet/api/address/{senderAddress}/utxo", cancellationToken);
@@ -63,6 +64,36 @@ public class TestnetWallet : ITestnetWallet
             new StringContent(rawTx),
             cancellationToken
         );
+=======
+        // Get UTXOs
+        List<BlockstreamUtxo>? utxos = await _httpClient.GetFromJsonAsync<List<BlockstreamUtxo>>(
+            $"https://blockstream.info/testnet/api/address/{senderAddress}/utxo",
+            cancellationToken);
+
+        if (utxos == null || !utxos.Any())
+            throw new Exception("No funds in wallet. Fund using a testnet faucet.");
+
+        TransactionBuilder txBuilder = Network.TestNet.CreateTransactionBuilder();
+
+        Coin[] coins = utxos.Select(u => new Coin(
+            uint256.Parse(u.txid),
+            (uint)u.vout,
+            Money.Satoshis(u.value),
+            senderAddress.ScriptPubKey
+        )).ToArray();
+
+        txBuilder.AddCoins(coins);
+        txBuilder.AddKeys(senderSecret);
+        txBuilder.Send(BitcoinAddress.Create(destinationAddress, Network.TestNet), Money.Coins(amountBtc));
+        txBuilder.SendFees(Money.Satoshis(1000)); // small fee
+        txBuilder.SetChange(senderAddress);
+
+        var tx = txBuilder.BuildTransaction(true);
+
+        // Broadcast
+        var rawTx = tx.ToHex();
+        var response = await _httpClient.PostAsync("https://blockstream.info/testnet/api/tx", new StringContent(rawTx), cancellationToken);
+>>>>>>> 69563e2 (Add wallet, start)
 
         if (!response.IsSuccessStatusCode)
             throw new Exception("Failed to broadcast transaction: " + await response.Content.ReadAsStringAsync());
@@ -71,7 +102,10 @@ public class TestnetWallet : ITestnetWallet
     }
 
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 69563e2 (Add wallet, start)
     // 3. Check transaction status
     public async Task<bool> IsConfirmedAsync(string txId, CancellationToken cancellationToken = default)
     {
@@ -80,6 +114,7 @@ public class TestnetWallet : ITestnetWallet
 
         return tx?.status?.confirmed ?? false;
     }
+<<<<<<< HEAD
 
     public async Task<decimal> GetBalanceAsync(BitcoinAddress address, CancellationToken cancellationToken = default)
     {
@@ -120,6 +155,8 @@ public class TestnetWallet : ITestnetWallet
         return (secret.ToWif(), address.ToString());
     }
 
+=======
+>>>>>>> 69563e2 (Add wallet, start)
 }
 
 // Helper classes for deserialization

@@ -1,9 +1,13 @@
 ﻿using CryptoService.DTOs;
+<<<<<<< HEAD
 using CryptoService.Services;
 <<<<<<< HEAD
 using CryptoService.Services.Interfaces;
 =======
 >>>>>>> 5cbd7fe (Add base implementation)
+=======
+using CryptoService.Services.Interfaces;
+>>>>>>> 69563e2 (Add wallet, start)
 using Microsoft.AspNetCore.Mvc;
 
 namespace CryptoService.Controllers

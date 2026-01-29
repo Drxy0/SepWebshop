@@ -4,6 +4,10 @@ public sealed class Wallet
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
+<<<<<<< HEAD
+=======
+    public string Network { get; set; } = "testnet";
+>>>>>>> 69563e2 (Add wallet, start)
     public string? Mnemonic { get; set; } // Encrypted
     public string? EncryptedSeed { get; set; }
     public string? PublicMasterKey { get; set; }
