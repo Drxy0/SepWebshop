@@ -18,7 +18,7 @@ public sealed class BankClient : IBankClient
     {
         _httpClient = httpClient;
         _configuration = configuration;
-        _backBackendUrl = configuration["BankBackendUrl"] ?? throw new Exception("BankBackendUrl env variable is missing");
+        _backBackendUrl = configuration["ApiSettings:BankBackendUrl"] ?? throw new Exception("BankBackendUrl env variable is missing");
     }
 
     public async Task<BankInitPaymentResponse> InitQrPaymentAsync(BankInitPaymentRequest payment, CancellationToken cancellationToken)

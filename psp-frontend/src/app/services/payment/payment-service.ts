@@ -14,7 +14,7 @@ export class PaymentService {
     const url = `${environment.qr_service_api_url}Payment/init`;
 
     const body = {
-      merachanOrderId: merchantOrderId,
+      merchantOrderId: merchantOrderId,
     };
 
     return this.http.post<IInitPaymentResponse>(url, body);
