@@ -18,7 +18,7 @@ public static class ConfigureServices
             options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
         });
 
-        services.AddScoped<IPaymentRepository, PaymentRepository>();
+        services.AddTransient<IPaymentRepository, PaymentRepository>();
         services.AddScoped<IBankClient, BankClient>();
 
         services.AddHttpClient("DataServiceClient", client =>
