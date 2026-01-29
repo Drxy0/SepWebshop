@@ -23,6 +23,10 @@ namespace Bank.Persistance
 
             modelBuilder.Entity<Account>(entity =>
             {
+                entity.Property(a => a.AccountNumber)
+                    .IsRequired()
+                    .HasColumnType("char(18)");
+
                 entity.HasMany(a => a.DebitCards)
                     .WithOne(dc => dc.Account)
                     .HasForeignKey(dc => dc.AccountId)
