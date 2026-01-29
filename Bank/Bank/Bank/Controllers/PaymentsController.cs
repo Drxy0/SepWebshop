@@ -84,7 +84,7 @@ public class PaymentsController : ControllerBase
                 paymentRequestId,
                 request.CustomerAccountNumber);
 
-            return Ok(result);
+            return Ok(result); // Change result to an url
         }
         catch (Exception ex)
         {

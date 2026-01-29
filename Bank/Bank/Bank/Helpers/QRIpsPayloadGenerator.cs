@@ -15,16 +15,12 @@ public static class QRIpsPayloadGenerator
             $"K:PR|" +
             $"V:01|" +
             $"C:1|" +
-            $"R:{data.MerchantAccount}|" +
+            //$"R:{data.MerchantAccount}|" +
+            $"R:105000000000000029|" +
             $"N:{data.MerchantName}|" +
             $"I:RSD{amount}|" +
             $"SF:289|" +
             $"S:Placanje robe";
-
-        if (!string.IsNullOrEmpty(data.Stan))
-        {
-            payload += $"|RO:{data.Stan}";
-        }
 
         return payload;
     }
