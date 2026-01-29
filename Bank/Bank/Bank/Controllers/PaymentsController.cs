@@ -92,6 +92,7 @@ public class PaymentsController : ControllerBase
         }
     }
 
+    // TODO: ovo bi trebalo da simulira pravi IPS, vjerovatno treba obrisati 
     [HttpPost("qr/ips-callback")]
     [AllowAnonymous]
     public async Task<IActionResult> HandleIpsCallback([FromBody] IpsCallbackDto callbackData)
