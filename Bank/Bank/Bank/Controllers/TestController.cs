@@ -66,7 +66,7 @@ public class TestController : ControllerBase
 
         var merchant = new Merchant
         {
-            Id = "MERCHANT_TEST",
+            Id = "MERCHANT_001",
             Name = "Test Shop",
             AccountId = merchantAccount.Id,
             Account = merchantAccount
