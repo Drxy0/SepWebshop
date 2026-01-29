@@ -1,5 +1,5 @@
 ﻿using CryptoService.DTOs;
-using CryptoService.Services;
+using CryptoService.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CryptoService.Controllers

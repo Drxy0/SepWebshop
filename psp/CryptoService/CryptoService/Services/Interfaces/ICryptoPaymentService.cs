@@ -1,6 +1,6 @@
 ﻿using CryptoService.DTOs;
 
-namespace CryptoService.Services
+namespace CryptoService.Services.Interfaces
 {
     public interface ICryptoPaymentService
     {

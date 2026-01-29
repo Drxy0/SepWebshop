@@ -1,4 +1,4 @@
-﻿namespace CryptoService.Clients;
+﻿namespace CryptoService.Clients.Interfaces;
 
 public interface IBinanceClient
 {
