@@ -23,7 +23,7 @@ public class TestController : ControllerBase
     {
         var customerAccount = new Account
         {
-            AccountNumber = "123-456789-78",
+            AccountNumber = "105000000000000039",
             AccountHolderName = "Marko Markovic",
             Balance = 50000,
             Type = AccountType.Customer
@@ -58,7 +58,7 @@ public class TestController : ControllerBase
     {
         var merchantAccount = new Account
         {
-            AccountNumber = "555-123456-99",
+            AccountNumber = "105000000000000029",
             AccountHolderName = "Test Shop d.o.o.",
             Balance = 0,
             Type = AccountType.Merchant

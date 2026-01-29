@@ -15,8 +15,7 @@ public static class QRIpsPayloadGenerator
             $"K:PR|" +
             $"V:01|" +
             $"C:1|" +
-            //$"R:{data.MerchantAccount}|" + // TODO: set 
-            $"R:105000000000000029|" +
+            $"R:{data.MerchantAccount}|" +
             $"N:{data.MerchantName}|" +
             $"I:RSD{amount}|" +
             $"SF:289|" +
