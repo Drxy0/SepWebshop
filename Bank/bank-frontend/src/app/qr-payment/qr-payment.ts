@@ -96,8 +96,8 @@ export class QrPayment implements OnInit, OnDestroy {
     const paymentRequestId = this.qr()?.paymentRequestId;
     if (!paymentRequestId) return;
     
-    // Poll every 2 seconds
-    this.pollingSubscription = interval(2000).subscribe(() => {
+    // Poll every 60 seconds
+    this.pollingSubscription = interval(60_000).subscribe(() => {
       this.checkPaymentStatus(paymentRequestId);
     });
   }

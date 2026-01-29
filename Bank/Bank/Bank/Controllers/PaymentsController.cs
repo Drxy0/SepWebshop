@@ -98,10 +98,6 @@ public class PaymentsController : ControllerBase
     {
         try
         {
-            // TODO: Add signature validation here
-            // string expectedSignature = CalculateSignature(callbackData);
-            // if (callbackData.Signature != expectedSignature) return Unauthorized();
-
             await _paymentService.ProcessIpsCallback(callbackData);
             return Ok(new { success = true });
         }
