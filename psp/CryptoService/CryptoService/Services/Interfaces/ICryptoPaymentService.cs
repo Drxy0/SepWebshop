@@ -6,6 +6,6 @@ public interface ICryptoPaymentService
 {
     Task<CreateCryptoPaymentResponse> CreatePaymentAsync(CreateCryptoPaymentRequest request, CancellationToken cancellationToken);
     Task<CryptoPaymentStatusResponse?> GetStatusAsync(Guid paymentId, CancellationToken cancellationToken);
-    Task<string> ProcessPaymentAsync(Guid paymentId, CancellationToken cancellationToken); // add this
     Task<CryptoPaymentStatusResponse?> CheckPaymentStatusAsync(Guid paymentId, CancellationToken cancellationToken);
+    Task<GenerateWalletResponse> GenerateShopWalletAsync(); // for initial setup
 }

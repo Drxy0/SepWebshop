@@ -1,8 +1,4 @@
 ﻿using CryptoService.DTOs;
-<<<<<<< HEAD
-using CryptoService.Services;
-=======
->>>>>>> 69563e27af42f2b9bb3170db53e264e459d0c617
 using CryptoService.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -20,53 +16,50 @@ namespace CryptoService.Controllers
         }
 
         /// <summary>
-        /// Create a new crypto payment (invoice)
+        /// Create a new crypto payment invoice
+        /// Returns BTC address and amount for customer to pay
         /// </summary>
         [HttpPost]
-        public async Task<ActionResult<CreateCryptoPaymentResponse>> CreatePayment([FromBody] CreateCryptoPaymentRequest request, CancellationToken cancellationToken)
+        public async Task<ActionResult<CreateCryptoPaymentResponse>> CreatePayment(
+            [FromBody] CreateCryptoPaymentRequest request,
+            CancellationToken cancellationToken)
         {
             if (request.FiatAmount <= 0)
-            {
                 return BadRequest("Fiat amount must be greater than zero.");
-            }
 
-            CreateCryptoPaymentResponse response = await _cryptoPaymentService.CreatePaymentAsync(request, cancellationToken);
-
+            var response = await _cryptoPaymentService.CreatePaymentAsync(request, cancellationToken);
             return Ok(response);
         }
 
         /// <summary>
-        /// Get the status of a crypto payment
+        /// Get current status of a payment (from database only)
         /// </summary>
         [HttpGet("{paymentId:guid}")]
-        public async Task<ActionResult<CryptoPaymentStatusResponse>> GetPaymentStatus(Guid paymentId, CancellationToken cancellationToken)
+        public async Task<ActionResult<CryptoPaymentStatusResponse>> GetPaymentStatus(
+            Guid paymentId,
+            CancellationToken cancellationToken)
         {
-            CryptoPaymentStatusResponse? status = await _cryptoPaymentService.GetStatusAsync(paymentId, cancellationToken);
-
+            var status = await _cryptoPaymentService.GetStatusAsync(paymentId, cancellationToken);
             if (status is null)
-            {
                 return NotFound();
-            }
 
             return Ok(status);
         }
-<<<<<<< HEAD
 
-
-        [HttpPost("{paymentId:guid}/process")]
-        public async Task<ActionResult<string>> ProcessPayment(Guid paymentId, CancellationToken cancellationToken)
+        /// <summary>
+        /// Check blockchain for payment confirmation
+        /// Call this after customer sends BTC from their wallet
+        /// </summary>
+        [HttpPost("{paymentId:guid}/check")]
+        public async Task<ActionResult<CryptoPaymentStatusResponse>> CheckPayment(
+            Guid paymentId,
+            CancellationToken cancellationToken)
         {
-            try
-            {
-                string txId = await _cryptoPaymentService.ProcessPaymentAsync(paymentId, cancellationToken);
-                return Ok(new { TransactionId = txId });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { Error = ex.Message });
-            }
+            var status = await _cryptoPaymentService.CheckPaymentStatusAsync(paymentId, cancellationToken);
+            if (status is null)
+                return NotFound();
+
+            return Ok(status);
         }
-=======
->>>>>>> 69563e27af42f2b9bb3170db53e264e459d0c617
     }
 }
