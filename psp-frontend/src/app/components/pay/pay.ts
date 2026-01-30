@@ -3,6 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { User } from '../../services/user/user';
 import { CommonModule } from '@angular/common';
 import { PaymentService } from '../../services/payment/payment-service';
+import { finalize } from 'rxjs';
 
 @Component({
   selector: 'app-pay',
@@ -19,6 +20,10 @@ export class Pay implements OnInit {
   merchantId = signal<string | null>(null);
   availableMethods = signal<string[]>([]);
 
+  isLoadingMethods = signal<boolean>(false);
+  isProcessingPayment = signal<boolean>(false);
+  selectedMethod = signal<string | null>(null);
+
   ngOnInit() {
     const params = this.route.snapshot.queryParamMap;
     this.orderId.set(params.get('orderId'));
@@ -31,20 +36,28 @@ export class Pay implements OnInit {
   }
 
   loadMerchantMethods(id: string) {
-    this.userService.getActiveMethods(id).subscribe({
-      next: (methods) => {
-        this.availableMethods.set(methods);
-      },
-      error: (err) => {
-        console.error('Error fetching merchant methods:', err);
-      },
-    });
+    this.isLoadingMethods.set(true);
+    this.userService
+      .getActiveMethods(id)
+      .pipe(finalize(() => this.isLoadingMethods.set(false)))
+      .subscribe({
+        next: (methods) => {
+          this.availableMethods.set(methods);
+        },
+        error: (err) => {
+          console.error('Error fetching merchant methods:', err);
+        },
+      });
   }
 
   onPay(method: string) {
     const oId = this.orderId();
+    if (this.isProcessingPayment()) return;
+
+    this.selectedMethod.set(method);
 
     if (method === 'QR' && oId) {
+      this.isProcessingPayment.set(true);
       const cleanOrderId = oId.replace(/-/g, '');
 
       this.paymentService.initializeQrPayment(cleanOrderId).subscribe({
@@ -53,6 +66,8 @@ export class Pay implements OnInit {
         },
         error: (err) => {
           console.error('Greška pri inicijalizaciji QR plaćanja:', err);
+          this.isProcessingPayment.set(false);
+          this.selectedMethod.set(null);
         },
       });
     } else {
