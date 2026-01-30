@@ -12,7 +12,7 @@ public sealed class CryptoPayment
 
     public decimal BitcoinAmount { get; set; }
 
-    public string BitcoinAddress { get; set; } = null!;
+    public required string BitcoinAddress { get; set; } // address of the receiver (webshop)
 
     public CryptoPaymentStatus Status { get; set; }
 

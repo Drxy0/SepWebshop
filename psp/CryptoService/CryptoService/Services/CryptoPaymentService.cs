@@ -5,6 +5,7 @@ using CryptoService.Persistance;
 using CryptoService.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using NBitcoin;
+using QRCoder;
 
 namespace CryptoService.Services;
 
@@ -13,7 +14,6 @@ public class CryptoPaymentService : ICryptoPaymentService
     private readonly CryptoDbContext _db;
     private readonly HttpClient _httpClient;
     private readonly IBinanceClient _binanceClient;
-    private readonly IWalletHelper _walletHelper;
 
     private readonly BitcoinSecret _shopWalletSecret;
     private readonly BitcoinAddress _shopWalletAddress;
@@ -24,13 +24,11 @@ public class CryptoPaymentService : ICryptoPaymentService
         CryptoDbContext db,
         HttpClient httpClient,
         IBinanceClient binanceClient,
-        IWalletHelper walletHelper,
         IConfiguration config)
     {
         _db = db;
         _httpClient = httpClient;
         _binanceClient = binanceClient;
-        _walletHelper = walletHelper;
 
         // Load Blockstream URL from config
         _blockstreamApiUrl = config["BlockstreamUrl"] ?? throw new InvalidOperationException("BlockstreamUrl not configured");
@@ -54,15 +52,12 @@ public class CryptoPaymentService : ICryptoPaymentService
     /// </summary>
     public async Task<CreateCryptoPaymentResponse> CreatePaymentAsync(CreateCryptoPaymentRequest request, CancellationToken cancellationToken)
     {
-        // 1. Get real-time BTC price
         string symbol = GetBinanceSymbol(request.FiatCurrency);
         decimal btcPrice = await _binanceClient.GetBitcoinPriceAsync(symbol, cancellationToken);
         decimal btcAmount = decimal.Round(request.FiatAmount / btcPrice, 8);
 
-        // 2. Use shop's main address for all payments
         BitcoinAddress paymentAddress = _shopWalletAddress;
 
-        // 3. Store payment
         var payment = new CryptoPayment
         {
             Id = Guid.NewGuid(),
@@ -106,7 +101,7 @@ public class CryptoPaymentService : ICryptoPaymentService
 
             if (tx?.Status.Confirmed == true && tx.Status.BlockHeight.HasValue)
             {
-                confirmations = 1; // simplified
+                confirmations = 1;
                 payment.Status = CryptoPaymentStatus.Confirmed;
             }
         }
@@ -124,8 +119,7 @@ public class CryptoPaymentService : ICryptoPaymentService
     /// </summary>
     public async Task<CryptoPaymentStatusResponse?> CheckPaymentStatusAsync(Guid paymentId, CancellationToken cancellationToken)
     {
-        CryptoPayment? payment = await _db.CryptoPayments
-            .FirstOrDefaultAsync(x => x.Id == paymentId, cancellationToken);
+        CryptoPayment? payment = await _db.CryptoPayments.FirstOrDefaultAsync(x => x.Id == paymentId, cancellationToken);
 
         if (payment is null) return null;
 
@@ -135,11 +129,14 @@ public class CryptoPaymentService : ICryptoPaymentService
         {
             try
             {
-                bool confirmed = await _walletHelper.IsConfirmedAsync(payment.TransactionId, cancellationToken);
+                // Check if transaction is confirmed on blockchain
+                BitcoinTransactionDto? tx = await _httpClient.GetFromJsonAsync<BitcoinTransactionDto>(
+                    $"{_blockstreamApiUrl}/tx/{payment.TransactionId}",
+                    cancellationToken);
 
-                if (confirmed)
+                if (tx?.Status.Confirmed == true)
                 {
-                    confirmations = 1; // simplified for school project
+                    confirmations = 1;
                     payment.Status = CryptoPaymentStatus.Confirmed;
                     await _db.SaveChangesAsync(cancellationToken);
                 }
@@ -165,6 +162,23 @@ public class CryptoPaymentService : ICryptoPaymentService
         BitcoinAddress address = secret.GetAddress(ScriptPubKeyType.Segwit);
 
         return await Task.FromResult(new GenerateWalletResponse(secret.ToWif(), address.ToString()));
+    }
+
+    public async Task<byte[]> GeneratePaymentQrCodeAsync(Guid paymentId, CancellationToken cancellationToken)
+    {
+        var payment = await _db.CryptoPayments
+            .FirstOrDefaultAsync(x => x.Id == paymentId, cancellationToken);
+
+        if (payment is null)
+            throw new Exception("Payment not found");
+
+        string bitcoinUri = $"bitcoin:{payment.BitcoinAddress}?amount={payment.BitcoinAmount}&label=Order-{payment.OrderId}";
+
+        using var qrGenerator = new QRCodeGenerator();
+        using var qrCodeData = qrGenerator.CreateQrCode(bitcoinUri, QRCodeGenerator.ECCLevel.Q);
+        using var qrCode = new PngByteQRCode(qrCodeData);
+
+        return qrCode.GetGraphic(20);
     }
 
     private string GetBinanceSymbol(Currency currency) => currency switch
