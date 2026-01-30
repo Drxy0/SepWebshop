@@ -1,15 +1,18 @@
 ﻿using CryptoService.Clients.Interfaces;
+using Microsoft.Extensions.Configuration;
 using NBitcoin;
 
 namespace CryptoService.Clients;
 
-public class TestnetWallet : ITestnetWallet
+public class WalletHelper : IWalletHelper
 {
     private readonly HttpClient _httpClient;
+    private readonly string _blockstreamApiUrl;
 
-    public TestnetWallet(HttpClient httpClient)
+    public WalletHelper(HttpClient httpClient, IConfiguration config)
     {
         _httpClient = httpClient;
+<<<<<<< HEAD
     }
 
     // 1. Generate wallet
@@ -130,46 +133,41 @@ public class TestnetWallet : ITestnetWallet
         Console.WriteLine($"[Wallet] Balance: {btc} BTC");
 
         return btc;
+=======
+        _blockstreamApiUrl = config["BlockstreamUrl"]
+            ?? throw new InvalidOperationException("BlockstreamUrl not configured");
+>>>>>>> 5ab45fd (Finish crypto backend)
     }
 
     /// <summary>
-    /// Generates a new Testnet wallet and returns the WIF (private key) and address.
+    /// Check if a transaction is confirmed on the blockchain
     /// </summary>
-    public (string Wif, string Address) GenerateWifWallet()
+    public async Task<bool> IsConfirmedAsync(string txId, CancellationToken cancellationToken = default)
     {
-        // Create a new random key
-        Key key = new Key();
+        try
+        {
+            BlockstreamTx? tx = await _httpClient.GetFromJsonAsync<BlockstreamTx>(
+                $"{_blockstreamApiUrl}/tx/{txId}", cancellationToken);
 
-        // Get the BitcoinSecret (WIF) for Testnet
-        BitcoinSecret secret = key.GetBitcoinSecret(Network.TestNet);
-
-        // Get the SegWit address
-        BitcoinAddress address = secret.GetAddress(ScriptPubKeyType.Segwit);
-
-        // Log info
-        Console.WriteLine($"[Wallet] Generated new Testnet wallet:");
-        Console.WriteLine($"[Wallet] Address: {address}");
-        Console.WriteLine($"[Wallet] WIF: {secret}");
-
-        // Return as strings
-        return (secret.ToWif(), address.ToString());
+            return tx?.status?.confirmed ?? false;
+        }
+        catch
+        {
+            return false; // Transaction not found yet
+        }
     }
+<<<<<<< HEAD
 
 =======
 >>>>>>> 69563e2 (Add wallet, start)
+=======
+>>>>>>> 5ab45fd (Finish crypto backend)
 }
 
 // Helper classes for deserialization
-public class BlockstreamUtxo
-{
-    public string txid { get; set; }
-    public int vout { get; set; }
-    public long value { get; set; } // in satoshis
-}
-
 public class BlockstreamTx
 {
-    public BlockstreamTxStatus status { get; set; }
+    public BlockstreamTxStatus status { get; set; } = new();
 }
 
 public class BlockstreamTxStatus
