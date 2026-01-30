@@ -41,12 +41,15 @@ builder.Services.AddHttpClient();
 builder.Services.AddHttpClient<IBinanceClient, BinanceClient>();
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 builder.Services.AddHttpClient<ITestnetWallet, TestnetWallet>();
 =======
 >>>>>>> 5cbd7fe (Add base implementation)
 =======
 builder.Services.AddHttpClient<ITestnetWallet, TestnetWallet>();
 >>>>>>> 69563e2 (Add wallet, start)
+=======
+>>>>>>> b85b831 (Add qr code endpoint)
 
 var app = builder.Build();
 
