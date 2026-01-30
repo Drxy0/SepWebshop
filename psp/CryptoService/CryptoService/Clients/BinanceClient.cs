@@ -1,14 +1,5 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
 ﻿using CryptoService.Clients.Interfaces;
 using CryptoService.DTOs.Binance;
-=======
-﻿using CryptoService.DTOs.Binance;
->>>>>>> 5cbd7fe (Add base implementation)
-=======
-﻿using CryptoService.Clients.Interfaces;
-using CryptoService.DTOs.Binance;
->>>>>>> 69563e2 (Add wallet, start)
 
 namespace CryptoService.Clients;
 

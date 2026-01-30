@@ -1,19 +1,8 @@
 using CryptoService.Clients;
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 69563e2 (Add wallet, start)
 using CryptoService.Clients.Interfaces;
 using CryptoService.Persistance;
 using CryptoService.Services;
 using CryptoService.Services.Interfaces;
-<<<<<<< HEAD
-=======
-using CryptoService.Persistance;
-using CryptoService.Services;
->>>>>>> 5cbd7fe (Add base implementation)
-=======
->>>>>>> 69563e2 (Add wallet, start)
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 
@@ -39,17 +28,6 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<ICryptoPaymentService, CryptoPaymentService>();
 builder.Services.AddHttpClient();
 builder.Services.AddHttpClient<IBinanceClient, BinanceClient>();
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-builder.Services.AddHttpClient<ITestnetWallet, TestnetWallet>();
-=======
->>>>>>> 5cbd7fe (Add base implementation)
-=======
-builder.Services.AddHttpClient<ITestnetWallet, TestnetWallet>();
->>>>>>> 69563e2 (Add wallet, start)
-=======
->>>>>>> b85b831 (Add qr code endpoint)
 
 var app = builder.Build();
 

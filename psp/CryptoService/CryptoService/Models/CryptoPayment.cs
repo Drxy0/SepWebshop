@@ -14,11 +14,6 @@ public sealed class CryptoPayment
 
     public required string BitcoinAddress { get; set; } // address of the receiver (webshop)
 
-<<<<<<< HEAD
-=======
-    public string Network { get; set; } = "testnet";
-
->>>>>>> 5cbd7fe (Add base implementation)
     public CryptoPaymentStatus Status { get; set; }
 
     public string? TransactionId { get; set; }

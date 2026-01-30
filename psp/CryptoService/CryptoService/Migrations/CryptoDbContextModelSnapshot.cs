@@ -51,17 +51,6 @@ namespace CryptoService.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-                    b.Property<string>("Network")
-                        .IsRequired()
-                        .HasMaxLength(16)
-                        .HasColumnType("nvarchar(16)");
-
->>>>>>> 5cbd7fe (Add base implementation)
-=======
->>>>>>> 5ab45fd (Finish crypto backend)
                     b.Property<Guid>("OrderId")
                         .HasColumnType("uniqueidentifier");
 

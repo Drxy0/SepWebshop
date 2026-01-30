@@ -1,16 +1,5 @@
 ﻿using CryptoService.DTOs;
-<<<<<<< HEAD
-<<<<<<< HEAD
-using CryptoService.Services;
-<<<<<<< HEAD
-=======
->>>>>>> 5ab45fd (Finish crypto backend)
 using CryptoService.Services.Interfaces;
-=======
->>>>>>> 5cbd7fe (Add base implementation)
-=======
-using CryptoService.Services.Interfaces;
->>>>>>> 69563e2 (Add wallet, start)
 using Microsoft.AspNetCore.Mvc;
 
 namespace CryptoService.Controllers
@@ -57,13 +46,6 @@ namespace CryptoService.Controllers
 
             return Ok(status);
         }
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 5cbd7fe (Add base implementation)
-=======
->>>>>>> 5ab45fd (Finish crypto backend)
-=======
 
         [HttpGet("{paymentId:guid}/qrcode")]
         public async Task<IActionResult> GetPaymentQrCode(Guid paymentId, CancellationToken cancellationToken)
@@ -78,6 +60,5 @@ namespace CryptoService.Controllers
                 return BadRequest(new { Error = ex.Message });
             }
         }
->>>>>>> b85b831 (Add qr code endpoint)
     }
 }
