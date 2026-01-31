@@ -1,5 +1,6 @@
 ﻿using CryptoService.Clients.Interfaces;
 using CryptoService.DTOs.Binance;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace CryptoService.Clients;
 
@@ -12,7 +13,7 @@ public sealed class BinanceClient : IBinanceClient
         _httpClient = httpClient;
     }
 
-    public async Task<decimal> GetBitcoinPriceAsync(string symbol, CancellationToken cancellationToken)
+    public async Task<(bool, decimal)> GetBitcoinPriceAsync(string symbol, CancellationToken cancellationToken)
     {
         // Binance public price endpoint
         string url = $"https://api.binance.com/api/v3/ticker/price?symbol={symbol.ToUpper()}";
@@ -24,13 +25,18 @@ public sealed class BinanceClient : IBinanceClient
         response.EnsureSuccessStatusCode();
 
         BinancePriceDto result = await response.Content.ReadFromJsonAsync<BinancePriceDto>(cancellationToken)
-                     ?? throw new Exception("Failed to deserialize Binance response");
+
+        if (result is null)
+        {
+            //Failed to deserialize Binance response
+            return (false, 0);
+        }
 
         if (!decimal.TryParse(result.Price, out var price))
         {
-            throw new Exception("Invalid price returned from Binance");
+            return (false, 0);
         }
 
-        return price;
+        return (true, price);
     }
 }

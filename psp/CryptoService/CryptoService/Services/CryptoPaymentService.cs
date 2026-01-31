@@ -50,10 +50,24 @@ public class CryptoPaymentService : ICryptoPaymentService
     /// <summary>
     /// Generate a payment record with shop's main address for customer to pay
     /// </summary>
-    public async Task<CreateCryptoPaymentResponse> CreatePaymentAsync(CreateCryptoPaymentRequest request, CancellationToken cancellationToken)
+    public async Task<CreateCryptoPaymentResponse?> CreatePaymentAsync(CreateCryptoPaymentRequest request, CancellationToken cancellationToken)
     {
-        string symbol = GetBinanceSymbol(request.FiatCurrency);
-        decimal btcPrice = await _binanceClient.GetBitcoinPriceAsync(symbol, cancellationToken);
+        string? symbol = GetBinanceSymbol(request.FiatCurrency);
+
+        if (symbol is null)
+        {
+            // Couldn't find fiat currency
+            return null;
+        }
+
+        (bool getPriceSuccess, decimal btcPrice) = await _binanceClient.GetBitcoinPriceAsync(symbol, cancellationToken);
+
+        if (!getPriceSuccess)
+        {
+            // Failed to get BTC price from Binance
+            return null;
+        }
+
         decimal btcAmount = decimal.Round(request.FiatAmount / btcPrice, 8);
 
         BitcoinAddress paymentAddress = _shopWalletAddress;
@@ -127,23 +141,15 @@ public class CryptoPaymentService : ICryptoPaymentService
 
         if (!string.IsNullOrEmpty(payment.TransactionId))
         {
-            try
-            {
-                // Check if transaction is confirmed on blockchain
-                BitcoinTransactionDto? tx = await _httpClient.GetFromJsonAsync<BitcoinTransactionDto>(
-                    $"{_blockstreamApiUrl}/tx/{payment.TransactionId}",
-                    cancellationToken);
+            // Check if transaction is confirmed on blockchain
+            BitcoinTransactionDto? tx = await _httpClient.GetFromJsonAsync<BitcoinTransactionDto>(
+                $"{_blockstreamApiUrl}/tx/{payment.TransactionId}", cancellationToken);
 
-                if (tx?.Status.Confirmed == true)
-                {
-                    confirmations = 1;
-                    payment.Status = CryptoPaymentStatus.Confirmed;
-                    await _db.SaveChangesAsync(cancellationToken);
-                }
-            }
-            catch
+            if (tx?.Status.Confirmed == true)
             {
-                // Transaction not found yet on testnet, keep pending
+                confirmations = 1;
+                payment.Status = CryptoPaymentStatus.Confirmed;
+                await _db.SaveChangesAsync(cancellationToken);
             }
         }
 
@@ -166,11 +172,12 @@ public class CryptoPaymentService : ICryptoPaymentService
 
     public async Task<byte[]> GeneratePaymentQrCodeAsync(Guid paymentId, CancellationToken cancellationToken)
     {
-        var payment = await _db.CryptoPayments
-            .FirstOrDefaultAsync(x => x.Id == paymentId, cancellationToken);
+        CryptoPayment? payment = await _db.CryptoPayments.FirstOrDefaultAsync(x => x.Id == paymentId, cancellationToken);
 
         if (payment is null)
-            throw new Exception("Payment not found");
+        {
+            return new byte[0]; 
+        }
 
         string bitcoinUri = $"bitcoin:{payment.BitcoinAddress}?amount={payment.BitcoinAmount}&label=Order-{payment.OrderId}";
 
@@ -181,13 +188,13 @@ public class CryptoPaymentService : ICryptoPaymentService
         return qrCode.GetGraphic(20);
     }
 
-    private string GetBinanceSymbol(Currency currency) => currency switch
+    private string? GetBinanceSymbol(Currency currency) => currency switch
     {
         Currency.USD => "BTCUSDT",
         Currency.EUR => "BTCEUR",
         Currency.GBP => "BTCGBP",
         Currency.CHF => "BTCCHF",
         Currency.JPY => "BTCJPY",
-        _ => throw new Exception($"Currency {currency} not supported by Binance")
+        _ => null
     };
 }

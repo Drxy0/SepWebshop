@@ -23,7 +23,13 @@ namespace CryptoService.Controllers
                 return BadRequest("Fiat amount must be greater than zero.");
             }
 
-            var response = await _cryptoPaymentService.CreatePaymentAsync(request, cancellationToken);
+            CreateCryptoPaymentResponse? response = await _cryptoPaymentService.CreatePaymentAsync(request, cancellationToken);
+
+            if (response is null)
+            {
+                return BadRequest("Something went wrong");
+            }
+
             return Ok(response);
         }
 
