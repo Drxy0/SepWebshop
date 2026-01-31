@@ -1,5 +1,4 @@
 ﻿using DataService.Contracts;
-using DataService.Models;
 using DataService.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
