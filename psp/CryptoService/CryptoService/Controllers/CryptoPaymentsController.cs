@@ -15,15 +15,15 @@ namespace CryptoService.Controllers
             _cryptoPaymentService = cryptoPaymentService;
         }
 
-        [HttpPost]
-        public async Task<ActionResult<CreateCryptoPaymentResponse>> CreatePayment([FromBody] CreateCryptoPaymentRequest request, CancellationToken cancellationToken)
+        [HttpPost("init")]
+        public async Task<ActionResult<InitializeCryptoPaymentResponse>> InitalizePayment([FromBody] InitializeCryptoPaymentRequest request, CancellationToken cancellationToken)
         {
             if (request.FiatAmount <= 0)
             {
                 return BadRequest("Fiat amount must be greater than zero.");
             }
 
-            CreateCryptoPaymentResponse? response = await _cryptoPaymentService.CreatePaymentAsync(request, cancellationToken);
+            InitializeCryptoPaymentResponse? response = await _cryptoPaymentService.CreatePaymentAsync(request, cancellationToken);
 
             if (response is null)
             {
@@ -34,9 +34,9 @@ namespace CryptoService.Controllers
         }
 
         [HttpGet("{paymentId:guid}")]
-        public async Task<ActionResult<CryptoPaymentStatusResponse>> CheckPaymentStatus(Guid paymentId, CancellationToken cancellationToken)
+        public async Task<ActionResult<CheckCryptoPaymentStatusResponse>> CheckPaymentStatus(Guid paymentId, CancellationToken cancellationToken)
         {
-            CryptoPaymentStatusResponse? status = await _cryptoPaymentService.CheckPaymentStatusAsync(paymentId, false, cancellationToken);
+            CheckCryptoPaymentStatusResponse? status = await _cryptoPaymentService.CheckPaymentStatusAsync(paymentId, false, cancellationToken);
             if (status is null)
             {
                 return NotFound();

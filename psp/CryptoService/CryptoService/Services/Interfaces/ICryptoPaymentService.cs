@@ -4,8 +4,8 @@ namespace CryptoService.Services.Interfaces;
 
 public interface ICryptoPaymentService
 {
-    Task<CreateCryptoPaymentResponse?> CreatePaymentAsync(CreateCryptoPaymentRequest request, CancellationToken cancellationToken);
-    Task<CryptoPaymentStatusResponse?> CheckPaymentStatusAsync(Guid paymentId, bool isSimulation, CancellationToken cancellationToken);
+    Task<InitializeCryptoPaymentResponse?> CreatePaymentAsync(InitializeCryptoPaymentRequest request, CancellationToken cancellationToken);
+    Task<CheckCryptoPaymentStatusResponse?> CheckPaymentStatusAsync(Guid paymentId, bool isSimulation, CancellationToken cancellationToken);
     Task<byte[]> GeneratePaymentQrCodeAsync(Guid paymentId, CancellationToken cancellationToken);
     Task<GenerateWalletResponse> GenerateShopWalletAsync(); // for initial setup only
 }

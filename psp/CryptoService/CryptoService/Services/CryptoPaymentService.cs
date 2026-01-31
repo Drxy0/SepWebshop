@@ -44,7 +44,7 @@ public class CryptoPaymentService : ICryptoPaymentService
         }
     }
 
-    public async Task<CreateCryptoPaymentResponse?> CreatePaymentAsync(CreateCryptoPaymentRequest request, CancellationToken cancellationToken)
+    public async Task<InitializeCryptoPaymentResponse?> CreatePaymentAsync(InitializeCryptoPaymentRequest request, CancellationToken cancellationToken)
     {
         string? symbol = GetBinanceSymbol(request.FiatCurrency);
 
@@ -85,7 +85,7 @@ public class CryptoPaymentService : ICryptoPaymentService
         Console.WriteLine($"Payment {payment.Id} created! Send {btcAmount} BTC to: {paymentAddress}");
 
         // Payment needs time to process in the blockchain, so for now we can just notify the user that the payment is created
-        return new CreateCryptoPaymentResponse(
+        return new InitializeCryptoPaymentResponse(
             payment.Id,
             payment.BitcoinAddress,
             payment.BitcoinAmount,
@@ -96,7 +96,7 @@ public class CryptoPaymentService : ICryptoPaymentService
     /// <summary>
     /// Checks transaction status on testnet blockchain (Blockstream API)
     /// </summary>
-    public async Task<CryptoPaymentStatusResponse?> CheckPaymentStatusAsync(Guid paymentId, bool isSimulation, CancellationToken cancellationToken)
+    public async Task<CheckCryptoPaymentStatusResponse?> CheckPaymentStatusAsync(Guid paymentId, bool isSimulation, CancellationToken cancellationToken)
     {
         CryptoPayment? payment = await _db.CryptoPayments.FirstOrDefaultAsync(x => x.Id == paymentId, cancellationToken);
 
@@ -129,7 +129,7 @@ public class CryptoPaymentService : ICryptoPaymentService
             webshopNotified = await _webshopClient.SendAsync(paymentId, true);
         }
 
-        return new CryptoPaymentStatusResponse(
+        return new CheckCryptoPaymentStatusResponse(
             payment.Id,
             payment.Status,
             payment.BitcoinAmount,

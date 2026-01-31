@@ -2,7 +2,7 @@
 
 namespace CryptoService.DTOs;
 
-public sealed record CryptoPaymentStatusResponse(
+public sealed record CheckCryptoPaymentStatusResponse(
     Guid PaymentId,
     CryptoPaymentStatus Status,
     decimal BitcoinAmount,

@@ -51,16 +51,23 @@ export class Pay implements OnInit {
   }
 
   onPay(method: string) {
-    const oId = this.orderId();
+    const orderId = this.orderId();
     if (this.isProcessingPayment()) return;
 
     this.selectedMethod.set(method);
 
-    if (method === 'QR' && oId) {
-      this.isProcessingPayment.set(true);
-      //const cleanOrderId = oId.replace(/-/g, '');
+    if (!orderId) {
+      return;
+    }
 
-      this.paymentService.initializeQrPayment(oId).subscribe({
+    if (method.toLowerCase() === 'crypto') {
+    }
+
+    if (method === 'QR') {
+      this.isProcessingPayment.set(true);
+      //const cleanOrderId = orderId.replace(/-/g, '');
+
+      this.paymentService.initializeQrPayment(orderId).subscribe({
         next: (response) => {
           window.location.href = response.bankUrl;
         },

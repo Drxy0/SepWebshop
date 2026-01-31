@@ -1,6 +1,6 @@
 ﻿namespace CryptoService.DTOs;
 
-public sealed record CreateCryptoPaymentResponse(
+public sealed record InitializeCryptoPaymentResponse(
     Guid PaymentId,
     string BitcoinAddress,
     decimal BitcoinAmount,
