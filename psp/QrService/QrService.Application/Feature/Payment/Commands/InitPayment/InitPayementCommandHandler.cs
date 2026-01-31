@@ -10,8 +10,7 @@ using System.Text.Json.Serialization;
 
 namespace QrService.Application.Feature.Payment.Commands.InitPayment
 {
-    public class InitPayementCommandHandler :
-        IRequestHandler<InitPayementCommandRequest, InitPayementCommandResponse>
+    public class InitPayementCommandHandler : IRequestHandler<InitPayementCommandRequest, InitPayementCommandResponse>
     {
         private readonly IPaymentRepository _paymentRepository;
         private readonly IHttpClientFactory _httpClientFactory;

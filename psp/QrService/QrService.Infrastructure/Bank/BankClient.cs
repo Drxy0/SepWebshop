@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
 using QrService.Application.Abstractions.Bank;
-using QrService.Domain.DTOs;
 using QrService.Domain.DTOs.Bank;
 using System.Net.Http.Json;
 

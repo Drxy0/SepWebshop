@@ -34,26 +34,23 @@ namespace CryptoService.Controllers
         }
 
         [HttpGet("{paymentId:guid}")]
-        public async Task<ActionResult<CryptoPaymentStatusResponse>> GetPaymentStatus(Guid paymentId, CancellationToken cancellationToken)
+        public async Task<ActionResult<CryptoPaymentStatusResponse>> CheckPaymentStatus(Guid paymentId, CancellationToken cancellationToken)
         {
-            var status = await _cryptoPaymentService.GetStatusAsync(paymentId, cancellationToken);
+            CryptoPaymentStatusResponse? status = await _cryptoPaymentService.CheckPaymentStatusAsync(paymentId, false, cancellationToken);
             if (status is null)
+            {
                 return NotFound();
+            }
+
+            if (!status.WebshopNotified)
+            {
+                return Problem("Payment was succesful, but we failed to notify the webshop.", statusCode: 500);
+            }
 
             return Ok(status);
         }
 
-        [HttpPost("{paymentId:guid}/check")]
-        public async Task<ActionResult<CryptoPaymentStatusResponse>> CheckPayment(Guid paymentId, CancellationToken cancellationToken)
-        {
-            var status = await _cryptoPaymentService.CheckPaymentStatusAsync(paymentId, cancellationToken);
-            if (status is null)
-                return NotFound();
-
-            return Ok(status);
-        }
-
-        [HttpGet("{paymentId:guid}/qrcode")]
+        [HttpGet("{paymentId:guid}/qr-code")]
         public async Task<IActionResult> GetPaymentQrCode(Guid paymentId, CancellationToken cancellationToken)
         {
             try

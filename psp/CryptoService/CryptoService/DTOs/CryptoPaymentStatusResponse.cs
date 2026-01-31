@@ -7,5 +7,6 @@ public sealed record CryptoPaymentStatusResponse(
     CryptoPaymentStatus Status,
     decimal BitcoinAmount,
     string? TransactionId,
-    int Confirmations
+    int Confirmations,
+    bool WebshopNotified
 );

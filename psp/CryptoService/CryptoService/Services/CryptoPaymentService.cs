@@ -14,17 +14,19 @@ public class CryptoPaymentService : ICryptoPaymentService
     private readonly CryptoDbContext _db;
     private readonly HttpClient _httpClient;
     private readonly IBinanceClient _binanceClient;
+    private readonly IWebshopClient _webshopClient;
 
     private readonly BitcoinSecret _shopWalletSecret;
     private readonly BitcoinAddress _shopWalletAddress;
 
     private readonly string _blockstreamApiUrl;
 
-    public CryptoPaymentService(CryptoDbContext db, HttpClient httpClient, IBinanceClient binanceClient, IConfiguration config)
+    public CryptoPaymentService(CryptoDbContext db, HttpClient httpClient, IBinanceClient binanceClient, IConfiguration config, IWebshopClient webshopClient)
     {
         _db = db;
         _httpClient = httpClient;
         _binanceClient = binanceClient;
+        _webshopClient = webshopClient;
 
         // Load Blockstream URL from config
         _blockstreamApiUrl = config["BlockstreamUrl"] ?? throw new InvalidOperationException("BlockstreamUrl not configured");
@@ -40,7 +42,6 @@ public class CryptoPaymentService : ICryptoPaymentService
         {
             throw new InvalidOperationException($"Address mismatch! WIF generates {_shopWalletAddress} but config has {configuredAddress}");
         }
-
     }
 
     public async Task<CreateCryptoPaymentResponse?> CreatePaymentAsync(CreateCryptoPaymentRequest request, CancellationToken cancellationToken)
@@ -83,6 +84,7 @@ public class CryptoPaymentService : ICryptoPaymentService
 
         Console.WriteLine($"Payment {payment.Id} created! Send {btcAmount} BTC to: {paymentAddress}");
 
+        // Payment needs time to process in the blockchain, so for now we can just notify the user that the payment is created
         return new CreateCryptoPaymentResponse(
             payment.Id,
             payment.BitcoinAddress,
@@ -90,41 +92,11 @@ public class CryptoPaymentService : ICryptoPaymentService
             payment.ExpiresAt);
     }
 
-    public async Task<CryptoPaymentStatusResponse?> GetStatusAsync(Guid paymentId, CancellationToken cancellationToken)
-    {
-        CryptoPayment? payment = await _db.CryptoPayments.FirstOrDefaultAsync(x => x.Id == paymentId, cancellationToken);
-
-        if (payment is null)
-        {
-            return null;
-        }
-
-        int confirmations = 0;
-
-        if (payment.TransactionId is not null)
-        {
-            BitcoinTransactionDto? tx = await _httpClient.GetFromJsonAsync<BitcoinTransactionDto>(
-                $"{_blockstreamApiUrl}/tx/{payment.TransactionId}", cancellationToken);
-
-            if (tx?.Status.Confirmed == true && tx.Status.BlockHeight.HasValue)
-            {
-                confirmations = 1;
-                payment.Status = CryptoPaymentStatus.Confirmed;
-            }
-        }
-
-        return new CryptoPaymentStatusResponse(
-            payment.Id,
-            payment.Status,
-            payment.BitcoinAmount,
-            payment.TransactionId,
-            confirmations);
-    }
 
     /// <summary>
     /// Checks transaction status on testnet blockchain (Blockstream API)
     /// </summary>
-    public async Task<CryptoPaymentStatusResponse?> CheckPaymentStatusAsync(Guid paymentId, CancellationToken cancellationToken)
+    public async Task<CryptoPaymentStatusResponse?> CheckPaymentStatusAsync(Guid paymentId, bool isSimulation, CancellationToken cancellationToken)
     {
         CryptoPayment? payment = await _db.CryptoPayments.FirstOrDefaultAsync(x => x.Id == paymentId, cancellationToken);
 
@@ -132,9 +104,13 @@ public class CryptoPaymentService : ICryptoPaymentService
 
         int confirmations = 0;
 
-        if (!string.IsNullOrEmpty(payment.TransactionId))
+        if (isSimulation)
         {
-            // Check if transaction is confirmed on blockchain
+            payment.Status = CryptoPaymentStatus.Confirmed;
+        }
+        // Check blockchain for transaction
+        else if (!string.IsNullOrEmpty(payment.TransactionId))
+        {
             BitcoinTransactionDto? tx = await _httpClient.GetFromJsonAsync<BitcoinTransactionDto>(
                 $"{_blockstreamApiUrl}/tx/{payment.TransactionId}", cancellationToken);
 
@@ -142,8 +118,15 @@ public class CryptoPaymentService : ICryptoPaymentService
             {
                 confirmations = 1;
                 payment.Status = CryptoPaymentStatus.Confirmed;
-                await _db.SaveChangesAsync(cancellationToken);
             }
+        }
+        await _db.SaveChangesAsync(cancellationToken);
+
+        // Notify webshop if payment confirmed
+        bool webshopNotified = false;
+        if (payment.Status == CryptoPaymentStatus.Confirmed)
+        {
+            webshopNotified = await _webshopClient.SendAsync(paymentId, true);
         }
 
         return new CryptoPaymentStatusResponse(
@@ -151,7 +134,8 @@ public class CryptoPaymentService : ICryptoPaymentService
             payment.Status,
             payment.BitcoinAmount,
             payment.TransactionId,
-            confirmations);
+            confirmations,
+            webshopNotified);
     }
 
     public async Task<GenerateWalletResponse> GenerateShopWalletAsync()

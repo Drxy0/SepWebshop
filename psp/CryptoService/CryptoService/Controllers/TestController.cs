@@ -1,5 +1,6 @@
 ﻿using CryptoService.Clients;
 using CryptoService.Clients.Interfaces;
+using CryptoService.DTOs;
 using CryptoService.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -41,7 +42,7 @@ namespace CryptoService.Controllers
         [HttpPost("update-webshop/{orderId:guid}")]
         public async Task<IActionResult> UpdateWebshop(Guid orderId)
         {
-            bool responseSuccess = await _webshopClient.SendAsync(orderId, true, "PSP_ABC_123", "pspsecurepassword456");
+            bool responseSuccess = await _webshopClient.SendAsync(orderId, true);
 
             if (!responseSuccess)
             {
@@ -49,6 +50,23 @@ namespace CryptoService.Controllers
             }
 
             return Ok();
+        }
+
+        [HttpGet("{paymentId:guid}/simulate")]
+        public async Task<ActionResult<CryptoPaymentStatusResponse>> CheckPaymentSimulate(Guid paymentId, CancellationToken cancellationToken)
+        {
+            CryptoPaymentStatusResponse? status = await _cryptoPaymentService.CheckPaymentStatusAsync(paymentId, true, cancellationToken);
+            if (status is null)
+            {
+                return NotFound();
+            }
+
+            if (!status.WebshopNotified)
+            {
+                return Problem("Payment was succesful, but we failed to notify the webshop.", statusCode: 500);
+            }
+
+            return Ok(status);
         }
     }
 }

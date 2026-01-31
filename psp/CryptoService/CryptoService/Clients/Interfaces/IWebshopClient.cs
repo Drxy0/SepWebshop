@@ -5,5 +5,5 @@
 /// </summary>
 public interface IWebshopClient
 {
-    Task<bool> SendAsync(Guid orderId, bool isCompleted, string pspId, string pspPassword);
+    Task<bool> SendAsync(Guid orderId, bool isCompleted);
 }
