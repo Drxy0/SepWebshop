@@ -1,4 +1,4 @@
-﻿namespace PayPalService.Models;
+﻿namespace PayPalService.Config;
 
 public sealed class PSPDataServiceSettings
 {

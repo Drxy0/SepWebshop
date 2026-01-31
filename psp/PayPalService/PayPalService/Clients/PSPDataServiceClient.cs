@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.Options;
-using PayPalService.Models;
+using PayPalService.Config;
 
 namespace PayPalService.Clients;
 

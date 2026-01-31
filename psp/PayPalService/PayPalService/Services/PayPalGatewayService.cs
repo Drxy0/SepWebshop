@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Options;
 using PayPalService.Clients;
-using PayPalService.Models;
+using PayPalService.Config;
 using System.Globalization;
 using System.Net.Http.Headers;
 using System.Text.Json;
@@ -22,9 +22,9 @@ public sealed class PayPalGatewayService
 
     public async Task<string> CreateOrderAsync(decimal amount, string currency)
     {
-        var token = await _client.GetAccessTokenAsync();
+        string token = await _client.GetAccessTokenAsync();
 
-        var request = new HttpRequestMessage(HttpMethod.Post, $"{_settings.BaseUrl}/v2/checkout/orders");
+        HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, $"{_settings.BaseUrl}/v2/checkout/orders");
 
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
@@ -49,12 +49,12 @@ public sealed class PayPalGatewayService
             }
         });
 
-        var response = await _client.SendAsync(request);
+        HttpResponseMessage response = await _client.SendAsync(request);
         response.EnsureSuccessStatusCode();
 
-        var json = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+        JsonDocument json = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
 
-        var approvalUrl = json.RootElement
+        string? approvalUrl = json.RootElement
             .GetProperty("links")
             .EnumerateArray()
             .First(l => l.GetProperty("rel").GetString() == "approve")
@@ -66,16 +66,16 @@ public sealed class PayPalGatewayService
 
     public async Task CaptureAsync(string orderId)
     {
-        var token = await _client.GetAccessTokenAsync();
+        string token = await _client.GetAccessTokenAsync();
 
-        var request = new HttpRequestMessage(HttpMethod.Post, $"{_settings.BaseUrl}/v2/checkout/orders/{orderId}/capture");
+        HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, $"{_settings.BaseUrl}/v2/checkout/orders/{orderId}/capture");
 
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-        var response = await _client.SendAsync(request);
+        HttpResponseMessage response = await _client.SendAsync(request);
         response.EnsureSuccessStatusCode();
 
-        var payload = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+        JsonDocument payload = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
 
         await _pspClient.StoreTransactionAsync(new
         {

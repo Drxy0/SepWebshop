@@ -1,6 +1,5 @@
 ﻿using CryptoService.Clients.Interfaces;
 using CryptoService.DTOs.Binance;
-using System.IdentityModel.Tokens.Jwt;
 
 namespace CryptoService.Clients;
 
@@ -18,13 +17,13 @@ public sealed class BinanceClient : IBinanceClient
         // Binance public price endpoint
         string url = $"https://api.binance.com/api/v3/ticker/price?symbol={symbol.ToUpper()}";
 
-        using var request = new HttpRequestMessage(HttpMethod.Get, url);
+        using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
         request.Headers.Add("User-Agent", "CryptoSchoolProject/1.0");
 
-        using var response = await _httpClient.SendAsync(request, cancellationToken);
+        using HttpResponseMessage response = await _httpClient.SendAsync(request, cancellationToken);
         response.EnsureSuccessStatusCode();
 
-        BinancePriceDto result = await response.Content.ReadFromJsonAsync<BinancePriceDto>(cancellationToken)
+        BinancePriceDto? result = await response.Content.ReadFromJsonAsync<BinancePriceDto>(cancellationToken);
 
         if (result is null)
         {

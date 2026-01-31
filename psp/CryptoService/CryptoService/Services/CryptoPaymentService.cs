@@ -20,11 +20,7 @@ public class CryptoPaymentService : ICryptoPaymentService
 
     private readonly string _blockstreamApiUrl;
 
-    public CryptoPaymentService(
-        CryptoDbContext db,
-        HttpClient httpClient,
-        IBinanceClient binanceClient,
-        IConfiguration config)
+    public CryptoPaymentService(CryptoDbContext db, HttpClient httpClient, IBinanceClient binanceClient, IConfiguration config)
     {
         _db = db;
         _httpClient = httpClient;
@@ -47,9 +43,6 @@ public class CryptoPaymentService : ICryptoPaymentService
 
     }
 
-    /// <summary>
-    /// Generate a payment record with shop's main address for customer to pay
-    /// </summary>
     public async Task<CreateCryptoPaymentResponse?> CreatePaymentAsync(CreateCryptoPaymentRequest request, CancellationToken cancellationToken)
     {
         string? symbol = GetBinanceSymbol(request.FiatCurrency);
