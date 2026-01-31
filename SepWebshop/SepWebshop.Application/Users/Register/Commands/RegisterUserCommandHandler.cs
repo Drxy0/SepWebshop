@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using SepWebshop.Application.Abstractions.Authentication;
 using SepWebshop.Application.Abstractions.Data;
 using SepWebshop.Application.Email.SendConfirmRegisterEmail;
@@ -8,9 +9,11 @@ using SepWebshop.Domain.Users;
 
 namespace SepWebshop.Application.Users.Register.Commands;
 
-internal sealed class RegisterUserCommandHandler(IApplicationDbContext context, IPasswordHasher passwordHasher, IMediator mediator)
+internal sealed class RegisterUserCommandHandler(IApplicationDbContext context, IPasswordHasher passwordHasher, IMediator mediator, IConfiguration config)
     : IRequestHandler<RegisterUserCommand, Result<string>>
 {
+    private readonly string _confirmEmailBaseUrl = config["ConfirmEmailBaseUrl"] ?? throw new ArgumentNullException("ConfirmEmailBaseUrl is missing from appsettings.json");
+
     public async Task<Result<string>> Handle(RegisterUserCommand command, CancellationToken cancellationToken)
     {
         if (await context.Users.AnyAsync(u => u.Email == command.Email, cancellationToken))
@@ -43,9 +46,7 @@ internal sealed class RegisterUserCommandHandler(IApplicationDbContext context, 
 
             string confirmationLink = GenerateConfirmationLink(user.Id, confirmationToken);
             Result<Unit> emailResult = await mediator.Send(
-                new SendConfirmRegisterEmailCommand(user.Email, confirmationLink),
-                cancellationToken
-            );
+                new SendConfirmRegisterEmailCommand(user.Email, confirmationLink), cancellationToken);
 
             if (emailResult.IsFailure)
             {
@@ -76,6 +77,6 @@ internal sealed class RegisterUserCommandHandler(IApplicationDbContext context, 
 
     private string GenerateConfirmationLink(Guid userId, Guid token)
     {
-        return $"https://localhost:7199/api/Users/confirm-email?userId={userId}&token={token}";
+        return $"{_confirmEmailBaseUrl}?userId={userId}&token={token}";
     }
 }

@@ -1,8 +1,8 @@
-﻿using CryptoService.Clients.Interfaces;
+﻿using PayPalService.Clients.Interfaces;
 using System.Text;
 using System.Text.Json;
 
-namespace CryptoService.Clients;
+namespace PayPalService.Clients;
 
 public class WebshopClient : IWebshopClient
 {
@@ -14,7 +14,7 @@ public class WebshopClient : IWebshopClient
     public WebshopClient(HttpClient httpClient, IConfiguration config)
     {
         _httpClient = httpClient;
-        _webshopUpdateOrder_BaseUrl = config["WebshopUpdateOrder_BaseUrl"] 
+        _webshopUpdateOrder_BaseUrl = config["WebshopUpdateOrder_BaseUrl"]
             ?? throw new ArgumentNullException("WebshopUpdateOrder_BaseUrl is missing from appsettings.json");
 
         pspId = config["PSP:PspId"] ?? throw new ArgumentNullException("PspId is missing from appsettings.json");

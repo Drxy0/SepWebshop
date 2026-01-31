@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.Options;
-using PayPalService.Models;
+using PayPalService.Config;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;

@@ -1,5 +1,5 @@
 using PayPalService.Clients;
-using PayPalService.Models;
+using PayPalService.Config;
 using PayPalService.Services;
 
 var builder = WebApplication.CreateBuilder(args);

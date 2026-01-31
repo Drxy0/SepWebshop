@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.Options;
 using SendGrid;
 using SendGrid.Helpers.Mail;
-using SendGrid.Helpers.Mail.Model;
 using SepWebshop.Application.Abstractions.Email;
 
 namespace SepWebshop.Infrastructure.Email;
@@ -34,8 +33,7 @@ internal sealed class SendGridEmailSender : IEmailSender
         if (!response.IsSuccessStatusCode)
         {
             var body = await response.Body.ReadAsStringAsync(cancellationToken);
-            throw new InvalidOperationException(
-                $"SendGrid failed: {response.StatusCode} - {body}");
+            throw new InvalidOperationException($"SendGrid failed: {response.StatusCode} - {body}");
         }
     }
 }
