@@ -55,7 +55,7 @@ namespace QrService.Application.Feature.Payment.Commands.InitPayment
                 MerchantPassword = paymentData.MerchantPassword,
                 Amount = paymentData.Amount,
                 Currency = paymentData.Currency,
-                MerchantOrderId = paymentData.MerchantOrderId,
+                MerchantOrderId = Guid.Parse(paymentData.MerchantOrderId),
                 MerchantTimestamp = paymentData.MerchantTimestamp,
                 IsProcessed = false,
                 CreatedAt = DateTime.UtcNow

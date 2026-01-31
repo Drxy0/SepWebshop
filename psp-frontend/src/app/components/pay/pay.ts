@@ -58,9 +58,9 @@ export class Pay implements OnInit {
 
     if (method === 'QR' && oId) {
       this.isProcessingPayment.set(true);
-      const cleanOrderId = oId.replace(/-/g, '');
+      //const cleanOrderId = oId.replace(/-/g, '');
 
-      this.paymentService.initializeQrPayment(cleanOrderId).subscribe({
+      this.paymentService.initializeQrPayment(oId).subscribe({
         next: (response) => {
           window.location.href = response.bankUrl;
         },

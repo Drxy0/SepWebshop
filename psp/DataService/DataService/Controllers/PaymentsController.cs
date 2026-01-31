@@ -77,7 +77,7 @@ namespace DataService.Controllers
         }
 
         [HttpGet("{merchantOrderId}")]
-        public async Task<IActionResult> GetPayment(string merchantOrderId)
+        public async Task<IActionResult> GetPayment(Guid merchantOrderId)
         {
             GetPaymentResponse? payment = await _paymentService.GetPaymentByOrderIdAsync(merchantOrderId);
 

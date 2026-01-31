@@ -7,5 +7,5 @@ public sealed record InitializePaymentRequest(
     string MerchantPassword,
     double Amount,
     Currency currency,
-    string MerchantOrderId,
+    Guid MerchantOrderId,
     DateTime MerchantTimestamp);

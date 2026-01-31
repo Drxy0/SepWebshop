@@ -12,6 +12,7 @@ using SepWebshop.Application.Orders.GetAllByCarId;
 using SepWebshop.Application.Orders.GetAllByUserId;
 using SepWebshop.Application.Orders.GetById;
 using SepWebshop.Application.Orders.Update;
+using SepWebshop.Application.Orders.UpdatePsp;
 
 namespace SepWebshop.API.Controllers;
 
@@ -124,5 +125,29 @@ public sealed class OrdersController : ApiControllerBase
         }
 
         return NoContent();
+    }
+    [HttpPut("psp/{orderId:guid}")]
+    public async Task<IActionResult> PspUpdate(Guid orderId, [FromBody] UpdatePspOrderRequest request, CancellationToken cancellationToken)
+    {
+        if (orderId != request.OrderId)
+        {
+            return BadRequest("OrderId mismatch");
+        }
+
+        var command = new UpdatePspOrderCommand(
+            request.OrderId,
+            request.OrderStatus,
+            request.PaymentMethod,
+            request.PspId,
+            request.PspPassword);
+
+        var result = await Mediator.Send(command, cancellationToken);
+
+        if (result.IsFailure)
+        {
+            return NotFound(result.Error);
+        }
+
+        return Ok(result.Value);
     }
 }

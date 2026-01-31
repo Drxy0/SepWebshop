@@ -42,7 +42,7 @@ public class PaymentService : IPaymentService
 
         return new PaymentInitializationResult(payment.Id.ToString(), true);
     }
-    public async Task<GetPaymentResponse?> GetPaymentByOrderIdAsync(string merchantOrderId)
+    public async Task<GetPaymentResponse?> GetPaymentByOrderIdAsync(Guid merchantOrderId)
     {
         return await _dbContext.Payments
             .Where(p => p.MerchantOrderId == merchantOrderId)

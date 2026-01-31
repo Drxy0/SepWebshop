@@ -13,5 +13,7 @@ namespace QrService.API.Controllers
             var response = await Mediator.Send(request, cancellationToken);
             return Ok(response);
         }
+        
+
     }
 }

@@ -9,7 +9,7 @@ public interface IPaymentService
         string merchantPassword,
         double amount,
         Currency currency,
-        string merchantOrderId,
+        Guid merchantOrderId,
         DateTime merchantTimestamp,
         CancellationToken cancellationToken = default);
 }

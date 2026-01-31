@@ -75,8 +75,6 @@ internal sealed class CreateOrderCommandHandler(
                 Error.Failure("Order.DatabaseError", ex.Message));
         }
 
-        // Send order data to PSP
-        string merchantOrderId = order.Id.ToString("N");
         DateTime merchantTimestamp = DateTime.UtcNow;
 
         PaymentInitializationResult paymentInitResult = await paymentService.InitializePaymentAsync(
@@ -84,7 +82,7 @@ internal sealed class CreateOrderCommandHandler(
             merchantPassword: _pspOptions.MerchantPassword,
             amount: (double)totalPrice,
             currency: order.Currency,
-            merchantOrderId: merchantOrderId,
+            merchantOrderId: order.Id,
             merchantTimestamp: merchantTimestamp,
             cancellationToken: cancellationToken);
 

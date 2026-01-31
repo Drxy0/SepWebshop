@@ -17,6 +17,11 @@ public class TestController : ControllerBase
     {
         _context = context;
     }
+    [HttpGet("test")]
+    public IActionResult HealthCheck()
+    {
+        return Ok(new { status = "Bank API is running." });
+    }
 
     [HttpPost("create-test-customer")]
     public async Task<IActionResult> CreateTestCustomer()
