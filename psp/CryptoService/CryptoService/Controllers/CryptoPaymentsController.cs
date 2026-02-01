@@ -18,13 +18,13 @@ namespace CryptoService.Controllers
         [HttpPost("init")]
         public async Task<IActionResult> InitalizePayment([FromBody] InitializeCryptoPaymentRequest request, CancellationToken cancellationToken)
         {
-            byte[]? cryptoQrCode = await _cryptoPaymentService.CreatePaymentAsync(request, cancellationToken);
-            if (cryptoQrCode is null)
+            InitializeCryptoPaymentResponse? response = await _cryptoPaymentService.CreatePaymentAsync(request, cancellationToken);
+            if (response is null)
             {
                 return BadRequest("Something went wrong");
             }
 
-            return Ok(cryptoQrCode);
+            return Ok(response);
         }
 
         [HttpGet("{paymentId:guid}")]

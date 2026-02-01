@@ -20,7 +20,7 @@ export const routes: Routes = [
     component: Pay,
   },
   {
-    path: 'pay-crypto',
+    path: 'pay/crypto',
     component: PayCrypto,
   },
   {

@@ -11,3 +11,8 @@ export interface IUpdatePaymentRequest {
 export interface IInitPaymentResponse {
   bankUrl: string;
 }
+
+export interface CryptoPaymentResponse {
+  qrCodeBase64: string;
+  merchantOrderId: string;
+}

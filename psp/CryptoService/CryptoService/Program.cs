@@ -29,6 +29,14 @@ builder.Services.AddScoped<ICryptoPaymentService, CryptoPaymentService>();
 builder.Services.AddHttpClient();
 builder.Services.AddHttpClient<IBinanceClient, BinanceClient>();
 builder.Services.AddHttpClient<IWebshopClient, WebshopClient>();
+builder.Services.AddHttpClient("DataServiceClient", client =>
+{
+    client.BaseAddress = new Uri(
+        builder.Configuration["ApiSettings:DataServiceBaseUrl"]
+            ?? throw new Exception("DataService URL is missing")
+    );
+});
+
 
 var app = builder.Build();
 

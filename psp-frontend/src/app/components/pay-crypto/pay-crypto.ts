@@ -21,8 +21,21 @@ export class PayCrypto {
     }
 
     if (state?.qrUrl) {
+      // Clean up any previous object URL
+      const currentUrl = this.qrImageUrl();
+      if (currentUrl) {
+        URL.revokeObjectURL(currentUrl);
+      }
+
       this.qrImageUrl.set(state.qrUrl);
       this.isLoading.set(false);
+    }
+  }
+
+  ngOnDestroy() {
+    const url = this.qrImageUrl();
+    if (url) {
+      URL.revokeObjectURL(url);
     }
   }
 }

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { IInitPaymentResponse } from '../../models/interfaces/payment';
+import { CryptoPaymentResponse, IInitPaymentResponse } from '../../models/interfaces/payment';
 
 @Injectable({
   providedIn: 'root',
@@ -20,13 +20,13 @@ export class PaymentService {
     return this.http.post<IInitPaymentResponse>(url, body);
   }
 
-  initializeCryptoPayment(merchantOrderId: string): Observable<ArrayBuffer> {
+  initializeCryptoPayment(merchantOrderId: string): Observable<CryptoPaymentResponse> {
     const url = `${environment.crypto_service_api_url}Payments/init`;
 
     const body = {
-      MerchantOrderId: merchantOrderId,
+      merchantOrderId: merchantOrderId,
     };
 
-    return this.http.post<ArrayBuffer>(url, body);
+    return this.http.post<CryptoPaymentResponse>(url, body);
   }
 }

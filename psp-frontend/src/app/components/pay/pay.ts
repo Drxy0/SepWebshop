@@ -4,6 +4,7 @@ import { User } from '../../services/user/user';
 import { CommonModule } from '@angular/common';
 import { PaymentService } from '../../services/payment/payment-service';
 import { finalize } from 'rxjs';
+import { CryptoPaymentResponse } from '../../models/interfaces/payment';
 
 @Component({
   selector: 'app-pay',
@@ -65,19 +66,18 @@ export class Pay implements OnInit {
       this.isProcessingPayment.set(true);
 
       this.paymentService.initializeCryptoPayment(orderId).subscribe({
-        next: (bytes: ArrayBuffer) => {
-          const blob = new Blob([bytes], { type: 'image/png' });
-          const url = URL.createObjectURL(blob);
+        next: (response: CryptoPaymentResponse) => {
+          const dataUrl = `data:image/png;base64,${response.qrCodeBase64}`;
 
           this.router.navigate(['/pay/crypto'], {
             state: {
-              qrUrl: url,
-              orderId,
+              qrUrl: dataUrl,
+              orderId: response.merchantOrderId,
             },
           });
         },
         error: (err) => {
-          console.error('Greška pri inicijalizaciji Crypto plaćanja:', err);
+          console.error('Error initializing Crypto payment:', err);
           this.isProcessingPayment.set(false);
           this.selectedMethod.set(null);
         },

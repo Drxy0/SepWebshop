@@ -46,7 +46,7 @@ public class CryptoPaymentService : ICryptoPaymentService
         }
     }
 
-    public async Task<byte[]?> CreatePaymentAsync(InitializeCryptoPaymentRequest request, CancellationToken cancellationToken)
+    public async Task<InitializeCryptoPaymentResponse?> CreatePaymentAsync(InitializeCryptoPaymentRequest request, CancellationToken cancellationToken)
     {
         var client = _httpClientFactory.CreateClient("DataServiceClient");
         var response = await client.GetAsync($"d/Payments/{request.MerchantOrderId}", cancellationToken);
@@ -88,25 +88,59 @@ public class CryptoPaymentService : ICryptoPaymentService
 
         BitcoinAddress paymentAddress = _shopWalletAddress;
 
-        var payment = new CryptoPayment
+        var existingPayment = await _db.CryptoPayments
+            .FirstOrDefaultAsync(p => p.MerchantOrderId == request.MerchantOrderId, cancellationToken);
+
+        if (existingPayment is not null)
         {
-            Id = Guid.NewGuid(),
-            MerchantOrderId = request.MerchantOrderId,
-            FiatAmount = (decimal)paymentData.Amount,
-            FiatCurrency = paymentData.Currency,
-            BitcoinAmount = btcAmount,
-            BitcoinAddress = paymentAddress.ToString(),
-            Status = CryptoPaymentStatus.Pending,
-            CreatedAt = DateTime.UtcNow,
-            ExpiresAt = DateTime.UtcNow.AddMinutes(20)
-        };
+            existingPayment.FiatAmount = (decimal)paymentData.Amount;
+            existingPayment.FiatCurrency = paymentData.Currency;
+            existingPayment.BitcoinAmount = btcAmount;
+            existingPayment.BitcoinAddress = paymentAddress.ToString();
+            existingPayment.Status = CryptoPaymentStatus.Pending;
+            existingPayment.CreatedAt = DateTime.UtcNow;
+            existingPayment.ExpiresAt = DateTime.UtcNow.AddMinutes(20);
 
-        _db.CryptoPayments.Add(payment);
-        await _db.SaveChangesAsync(cancellationToken);
+            _db.CryptoPayments.Update(existingPayment);
+        }
+        else
+        {
+            var payment = new CryptoPayment
+            {
+                Id = Guid.NewGuid(),
+                MerchantOrderId = request.MerchantOrderId,
+                FiatAmount = (decimal)paymentData.Amount,
+                FiatCurrency = paymentData.Currency,
+                BitcoinAmount = btcAmount,
+                BitcoinAddress = paymentAddress.ToString(),
+                Status = CryptoPaymentStatus.Pending,
+                CreatedAt = DateTime.UtcNow,
+                ExpiresAt = DateTime.UtcNow.AddMinutes(20)
+            };
 
-        Console.WriteLine($"Payment {payment.Id} created! Send {btcAmount} BTC to: {paymentAddress}");
+            _db.CryptoPayments.Add(payment);
+        }
 
-        return await GenerateQrCodeAsync(payment.BitcoinAddress, payment.BitcoinAmount, payment.MerchantOrderId);
+
+        try
+        {
+            await _db.SaveChangesAsync(cancellationToken);
+            CryptoPayment savedPayment = existingPayment ?? await _db.CryptoPayments.FirstAsync(p => p.MerchantOrderId == request.MerchantOrderId, cancellationToken);
+
+            Console.WriteLine($"Payment {savedPayment.Id} created/updated! Send {btcAmount} BTC to: {paymentAddress}");
+
+            string qrCodeBase64 = Convert.ToBase64String(await GenerateQrCodeAsync(
+                savedPayment.BitcoinAddress,
+                savedPayment.BitcoinAmount,
+                savedPayment.MerchantOrderId));
+
+            return new InitializeCryptoPaymentResponse(qrCodeBase64, request.MerchantOrderId);
+        }
+        catch (DbUpdateException ex)
+        {
+            Console.WriteLine($"Error saving payment to database: {ex.Message}");
+            return null;
+        }
     }
 
 
@@ -159,6 +193,7 @@ public class CryptoPaymentService : ICryptoPaymentService
             confirmations,
             webshopNotified);
     }
+
     private async Task<byte[]> GenerateQrCodeAsync(string bitcoinAddress, decimal bitcoinAmount, Guid merchantOrderId)
     {
         string bitcoinUri = $"bitcoin:{bitcoinAddress}?amount={bitcoinAmount}&label=Order-{merchantOrderId}";
