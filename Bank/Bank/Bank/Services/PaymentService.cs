@@ -25,12 +25,7 @@ public class PaymentService : IPaymentService
         _pspHmacKeys = config.GetSection("PSPHmacKeys").Get<Dictionary<string, string>>() ?? new (); // temp
     }
 
-    public async Task<InitializePaymentServiceResult> InitializePayment(
-            PaymentInitRequest request,
-            Guid pspId,
-            string signature,
-            DateTime timestamp,
-            bool isQrPayment)
+    public async Task<InitializePaymentServiceResult> InitializePayment(PaymentInitRequest request, Guid pspId, string signature, DateTime timestamp, bool isQrPayment)
     {
         // Validate PSP
         PSP? psp = await _context.PSPs.FindAsync(pspId);
@@ -89,11 +84,10 @@ public class PaymentService : IPaymentService
         PaymentRequest? paymentRequest = await _context.PaymentRequests
             .FirstOrDefaultAsync(p => p.PaymentRequestId == paymentRequestId);
 
-        if (paymentRequest == null)
+        if (paymentRequest == null || paymentRequest.Status != PaymentRequestStatus.Pending)
+        {
             return await NotifyFailure(paymentRequestId, TransactionStatus.Failed);
-
-        if (paymentRequest.Status != PaymentRequestStatus.Pending)
-            return await NotifyFailure(paymentRequestId, TransactionStatus.Failed);
+        }
 
         if (paymentRequest.ExpiresAt < DateTime.UtcNow)
         {
@@ -103,9 +97,7 @@ public class PaymentService : IPaymentService
             return await NotifyFailure(paymentRequestId, TransactionStatus.Failed);
         }
 
-        if (string.IsNullOrWhiteSpace(request.CVV)
-            || request.CVV.Length != 3
-            || !request.CVV.All(char.IsDigit))
+        if (string.IsNullOrWhiteSpace(request.CVV) || request.CVV.Length != 3 || !request.CVV.All(char.IsDigit))
         {
             paymentRequest.Status = PaymentRequestStatus.Failed;
             await _context.SaveChangesAsync();
@@ -129,27 +121,11 @@ public class PaymentService : IPaymentService
             .FirstOrDefaultAsync(c => c.CardNumber == request.CardNumber);
 
         if (card == null)
-            return await NotifyFailure(paymentRequestId, TransactionStatus.Failed);
-
-        if (DebitCardHelper.IsCardExpired(card.ExpirationDate))
         {
-            paymentRequest.Status = PaymentRequestStatus.Failed;
-            await _context.SaveChangesAsync();
-            await dbTransaction.CommitAsync();
-
             return await NotifyFailure(paymentRequestId, TransactionStatus.Failed);
         }
 
-        if (card.CVV != request.CVV)
-        {
-            paymentRequest.Status = PaymentRequestStatus.Failed;
-            await _context.SaveChangesAsync();
-            await dbTransaction.CommitAsync();
-
-            return await NotifyFailure(paymentRequestId, TransactionStatus.Failed);
-        }
-
-        if (card.Account.Balance < paymentRequest.Amount)
+        if (DebitCardHelper.IsCardExpired(card.ExpirationDate) || card.CVV != request.CVV || card.Account.Balance < paymentRequest.Amount)
         {
             paymentRequest.Status = PaymentRequestStatus.Failed;
             await _context.SaveChangesAsync();
@@ -592,7 +568,7 @@ public class PaymentService : IPaymentService
         }
     }
 
-    // Frontend calls this method to poll for payment status updates
+    // Bank frontend calls this method to poll for payment status updates
     public async Task<QrPaymentStatusDto> GetQrPaymentStatus(Guid paymentRequestId)
     {
         PaymentRequest? paymentRequest = await _context.PaymentRequests

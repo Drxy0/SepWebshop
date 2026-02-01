@@ -2,4 +2,4 @@
 
 namespace CryptoService.DTOs;
 
-public sealed record InitializeCryptoPaymentRequest(Guid MerchantOrderId, decimal FiatAmount, Currency FiatCurrency);
+public sealed record InitializeCryptoPaymentRequest(Guid MerchantOrderId);

@@ -1,0 +1,34 @@
+<div class="payment-container">
+  <!-- Loading state -->
+  @if (isLoading()) {
+    <div class="loading-state">
+      <p>Loading QR code...</p>
+    </div>
+  }
+
+  <!-- QR code display -->
+  @if (!isLoading() && qrImageUrl()) {
+    <div class="payment-card">
+      <h2>Scan QR code to pay</h2>
+
+      <div class="qr-container">
+        <img
+          src="{qrImageUrl()}"
+          alt="QR code for payment"
+          class="qr-code"
+          width="260"
+          height="260"
+        />
+      </div>
+
+      <p class="instruction">Open your wallet app and scan the QR code to complete the payment.</p>
+    </div>
+  }
+
+  <!-- No QR available -->
+  @if (!isLoading() && !qrImageUrl()) {
+    <div class="no-qr-state">
+      <p>QR code not available</p>
+    </div>
+  }
+</div>

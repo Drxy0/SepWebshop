@@ -16,27 +16,21 @@ namespace CryptoService.Controllers
         }
 
         [HttpPost("init")]
-        public async Task<ActionResult<InitializeCryptoPaymentResponse>> InitalizePayment([FromBody] InitializeCryptoPaymentRequest request, CancellationToken cancellationToken)
+        public async Task<IActionResult> InitalizePayment([FromBody] InitializeCryptoPaymentRequest request, CancellationToken cancellationToken)
         {
-            if (request.FiatAmount <= 0)
-            {
-                return BadRequest("Fiat amount must be greater than zero.");
-            }
-
-            InitializeCryptoPaymentResponse? response = await _cryptoPaymentService.CreatePaymentAsync(request, cancellationToken);
-
-            if (response is null)
+            byte[]? cryptoQrCode = await _cryptoPaymentService.CreatePaymentAsync(request, cancellationToken);
+            if (cryptoQrCode is null)
             {
                 return BadRequest("Something went wrong");
             }
 
-            return Ok(response);
+            return Ok(cryptoQrCode);
         }
 
         [HttpGet("{paymentId:guid}")]
-        public async Task<ActionResult<CheckCryptoPaymentStatusResponse>> CheckPaymentStatus(Guid paymentId, CancellationToken cancellationToken)
+        public async Task<ActionResult<CheckPaymentStatusResponse>> CheckPaymentStatus(Guid paymentId, CancellationToken cancellationToken)
         {
-            CheckCryptoPaymentStatusResponse? status = await _cryptoPaymentService.CheckPaymentStatusAsync(paymentId, false, cancellationToken);
+            CheckPaymentStatusResponse? status = await _cryptoPaymentService.CheckPaymentStatusAsync(paymentId, false, cancellationToken);
             if (status is null)
             {
                 return NotFound();
@@ -48,20 +42,6 @@ namespace CryptoService.Controllers
             }
 
             return Ok(status);
-        }
-
-        [HttpGet("{paymentId:guid}/qr-code")]
-        public async Task<IActionResult> GetPaymentQrCode(Guid paymentId, CancellationToken cancellationToken)
-        {
-            try
-            {
-                byte[] qrCode = await _cryptoPaymentService.GeneratePaymentQrCodeAsync(paymentId, cancellationToken);
-                return File(qrCode, "image/png");
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { Error = ex.Message });
-            }
         }
     }
 }

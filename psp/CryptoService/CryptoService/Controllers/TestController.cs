@@ -1,8 +1,6 @@
-﻿using CryptoService.Clients;
-using CryptoService.Clients.Interfaces;
+﻿using CryptoService.Clients.Interfaces;
 using CryptoService.DTOs;
 using CryptoService.Services.Interfaces;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CryptoService.Controllers
@@ -53,9 +51,9 @@ namespace CryptoService.Controllers
         }
 
         [HttpGet("{paymentId:guid}/simulate")]
-        public async Task<ActionResult<CryptoPaymentStatusResponse>> CheckPaymentSimulate(Guid paymentId, CancellationToken cancellationToken)
+        public async Task<IActionResult> CheckPaymentSimulate(Guid paymentId, CancellationToken cancellationToken)
         {
-            CryptoPaymentStatusResponse? status = await _cryptoPaymentService.CheckPaymentStatusAsync(paymentId, true, cancellationToken);
+            CheckPaymentStatusResponse? status = await _cryptoPaymentService.CheckPaymentStatusAsync(paymentId, true, cancellationToken);
             if (status is null)
             {
                 return NotFound();

@@ -20,20 +20,13 @@ export class PaymentService {
     return this.http.post<IInitPaymentResponse>(url, body);
   }
 
-  // TODO:
-  initializeCryptoPayment(
-    merchantOrderId: string,
-    fiatAmount: number,
-    fiatCurrency: string,
-  ): Observable<IInitPaymentResponse> {
+  initializeCryptoPayment(merchantOrderId: string): Observable<ArrayBuffer> {
     const url = `${environment.crypto_service_api_url}Payments/init`;
 
     const body = {
-      merchantOrderId: merchantOrderId,
-      fiatAmount: fiatAmount,
-      fiatCurrency: fiatCurrency,
+      MerchantOrderId: merchantOrderId,
     };
 
-    return this.http.post<IInitPaymentResponse>(url, body);
+    return this.http.post<ArrayBuffer>(url, body);
   }
 }

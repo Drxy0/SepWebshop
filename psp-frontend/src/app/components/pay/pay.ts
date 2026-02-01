@@ -1,5 +1,5 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { User } from '../../services/user/user';
 import { CommonModule } from '@angular/common';
 import { PaymentService } from '../../services/payment/payment-service';
@@ -13,6 +13,7 @@ import { finalize } from 'rxjs';
 })
 export class Pay implements OnInit {
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
   private userService = inject(User);
   private paymentService = inject(PaymentService);
 
@@ -61,9 +62,27 @@ export class Pay implements OnInit {
     }
 
     if (method.toLowerCase() === 'crypto') {
-    }
+      this.isProcessingPayment.set(true);
 
-    if (method === 'QR') {
+      this.paymentService.initializeCryptoPayment(orderId).subscribe({
+        next: (bytes: ArrayBuffer) => {
+          const blob = new Blob([bytes], { type: 'image/png' });
+          const url = URL.createObjectURL(blob);
+
+          this.router.navigate(['/pay/crypto'], {
+            state: {
+              qrUrl: url,
+              orderId,
+            },
+          });
+        },
+        error: (err) => {
+          console.error('Greška pri inicijalizaciji Crypto plaćanja:', err);
+          this.isProcessingPayment.set(false);
+          this.selectedMethod.set(null);
+        },
+      });
+    } else if (method === 'QR') {
       this.isProcessingPayment.set(true);
       //const cleanOrderId = orderId.replace(/-/g, '');
 

@@ -28,24 +28,18 @@ public class PaymentsController : ControllerBase
         [FromHeader(Name = "IsQrPayment")] bool isQrPayment)
     {
         if (Math.Abs((DateTime.UtcNow - timestamp).TotalMinutes) > 30)
+        {
             return Unauthorized("Timestamp expired");
+        }
 
         InitializePaymentServiceResult result = await _paymentService.InitializePayment(dto, pspId, signature, timestamp, isQrPayment);
 
         return result.Result switch
         {
-            InitializePaymentResult.Success =>
-                Ok(result.Response),
-
-            InitializePaymentResult.InvalidPsp =>
-                Unauthorized("Invalid PSP"),
-
-            InitializePaymentResult.InvalidSignature =>
-                Unauthorized("Invalid signature"),
-
-            InitializePaymentResult.InvalidMerchant =>
-                BadRequest("Invalid merchant"),
-
+            InitializePaymentResult.Success => Ok(result.Response),
+            InitializePaymentResult.InvalidPsp => Unauthorized("Invalid PSP"),
+            InitializePaymentResult.InvalidSignature => Unauthorized("Invalid signature"),
+            InitializePaymentResult.InvalidMerchant => BadRequest("Invalid merchant"),
             _ => StatusCode(500)
         };
     }
@@ -75,36 +69,19 @@ public class PaymentsController : ControllerBase
         return Ok(result);
     }
 
+    // TODO: double check if this is needed
     [HttpPost("qr/{paymentRequestId}/process")]
     public async Task<ActionResult<QRPaymentResponseDto>> ProcessQrPayment(Guid paymentRequestId, [FromBody] ProcessQrPaymentRequest request)
     {
         try
         {
-            var result = await _paymentService.ProcessQrPayment(
-                paymentRequestId,
-                request.CustomerAccountNumber);
+            var result = await _paymentService.ProcessQrPayment(paymentRequestId, request.CustomerAccountNumber);
 
             return Ok(result); // Change result to an url
         }
         catch (Exception ex)
         {
             return BadRequest(new { error = ex.Message });
-        }
-    }
-
-    // TODO: ovo bi trebalo da simulira pravi IPS, vjerovatno treba obrisati 
-    [HttpPost("qr/ips-callback")]
-    [AllowAnonymous]
-    public async Task<IActionResult> HandleIpsCallback([FromBody] IpsCallbackDto callbackData)
-    {
-        try
-        {
-            await _paymentService.ProcessIpsCallback(callbackData);
-            return Ok(new { success = true });
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new { error = ex.Message });
         }
     }
 

@@ -4,7 +4,7 @@ public sealed class CryptoPayment
 {
     public Guid Id { get; set; }
 
-    public Guid OrderId { get; set; }
+    public Guid MerchantOrderId { get; set; }
 
     public decimal FiatAmount { get; set; }
 
