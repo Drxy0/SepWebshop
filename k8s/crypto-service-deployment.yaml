@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: crypto-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: crypto-service
+  template:
+    metadata:
+      labels:
+        app: crypto-service
+    spec:
+      containers:
+        - name: crypto-service
+          image: ${ACR_NAME}.azurecr.io/crypto-service:latest
+          ports:
+            - containerPort: 8080
+          livenessProbe:
+            httpGet:
+              path: /crypto/Test/ping
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /crypto/Test/ping
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: crypto-service-clusterip
+spec:
+  type: ClusterIP
+  selector:
+    app: crypto-service
+  ports:
+    - name: crypto-service
+      port: 80
+      targetPort: 8080

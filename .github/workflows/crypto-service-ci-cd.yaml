@@ -1,0 +1,202 @@
+name: CryptoService CI/CD
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Select environment"
+        required: true
+        default: dev
+        type: choice
+        options:
+          - dev
+          - prod
+      imageTag:
+        description: "Optional: specific image tag to deploy (skip build if provided)"
+        required: false
+        default: ""
+
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+
+jobs:
+  docker-build-push:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+    if: ${{ github.event.inputs.imageTag == '' }}
+    outputs:
+      image_tag: ${{ steps.build.outputs.image_tag }}
+
+    env:
+      REGISTRY_LOGIN_SERVER: ${{ secrets.ACR_LOGIN_SERVER }}
+      REGISTRY_USERNAME: ${{ secrets.ACR_USERNAME }}
+      REGISTRY_PASSWORD: ${{ secrets.ACR_PASSWORD }}
+      IMAGE_NAME: crypto-service
+      DOCKERFILE_PATH: ./psp/CryptoService/Dockerfile
+      WORKING_DIRECTORY: ./psp/CryptoService
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Set up EF Core CLI
+        run: dotnet tool install --global dotnet-ef --version 8.0.*
+
+      - name: Add EF Core CLI to PATH
+        run: echo "${{ github.workspace }}/.dotnet/tools" >> $GITHUB_PATH
+
+      - name: Azure CLI login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Get agent public IP
+        id: get-ip
+        shell: bash
+        run: |
+          echo "Fetching public IP…"
+          AGENT_IP=$(curl -s http://ipinfo.io/ip)
+          echo "AGENT_IP=$AGENT_IP" >> $GITHUB_ENV
+
+      - name: fetch Azure Key Vault secrets
+        id: fetch-secrets
+        uses: azure/get-keyvault-secrets@v1
+        with:
+          keyvault: ${{ vars.AZURE_KEY_VAULT_NAME }}
+          secrets: sql-admin,sql-password
+
+      - name: Add Agent IP to SQL server firewall
+        shell: bash
+        run: |
+          az sql server firewall-rule create \
+            --resource-group ${{ vars.AZURE_SQL_RESOURCE_GROUP }} \
+            --server ${{ vars.AZURE_SQL_SERVER_NAME }} \
+            --name AllowGitHubActions \
+            --start-ip-address $AGENT_IP \
+            --end-ip-address   $AGENT_IP
+
+      - name: Apply EF Core migrations
+        run: |
+          echo "Applying EF Core migrations…"
+          dotnet ef database update --project ${{ env.WORKING_DIRECTORY }}/CryptoService/CryptoService.csproj --connection "Server=tcp:${{ vars.AZURE_SQL_SERVER_NAME }}.database.windows.net,1433;Initial Catalog=${{ vars.AZURE_SQL_CRYPTO_SERVICE_DATABASE_NAME }};Persist Security Info=False;User ID=${{ steps.fetch-secrets.outputs.sql-admin }};Password=${{ steps.fetch-secrets.outputs.sql-password }};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
+
+      - name: Remove Agent IP from SQL firewall
+        if: always()
+        shell: bash
+        run: |
+          az sql server firewall-rule delete \
+          --resource-group ${{ vars.AZURE_SQL_RESOURCE_GROUP }} \
+          --server ${{ vars.AZURE_SQL_SERVER_NAME }} \
+          --name AllowGitHubActions
+
+      - name: Replace connection string in appsettings.json
+        shell: bash
+        run: |
+          echo "Updating appsettings.json with Azure SQL connection string..."
+
+          CONN_STR="Server=tcp:${{ vars.AZURE_SQL_SERVER_NAME }}.database.windows.net,1433;Initial Catalog=${{ vars.AZURE_SQL_CRYPTO_SERVICE_DATABASE_NAME }};Persist Security Info=False;User ID=${{ steps.fetch-secrets.outputs.sql-admin }};Password=${{ steps.fetch-secrets.outputs.sql-password }};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
+
+          FILE_PATH="${{ env.WORKING_DIRECTORY }}/CryptoService/appsettings.json"
+
+          jq --arg conn "$CONN_STR" '.ConnectionStrings.DefaultConnection = $conn' "$FILE_PATH" > temp.json && mv temp.json "$FILE_PATH"
+
+      - name: Log in to Azure Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ secrets.ACR_LOGIN_SERVER }}
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+
+      - name: Build Docker image
+        id: build
+        shell: bash
+        run: |
+          IMAGE_TAG=${{ github.event.inputs.environment }}-${{ github.run_number }}-${GITHUB_SHA::7}
+
+          FULL_IMAGE_NAME="${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:$IMAGE_TAG"
+
+          echo "Building image: $FULL_IMAGE_NAME"
+
+          docker build -f ${{ env.DOCKERFILE_PATH }} \
+            -t $FULL_IMAGE_NAME \
+            ./psp/CryptoService
+
+          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+          echo "image_tag=$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+      - name: Push Docker image
+        run: |
+          docker push ${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+          docker tag ${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} ${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:latest
+          docker push ${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:latest
+
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+    needs: [docker-build-push]
+    if: ${{ always() && (github.event.inputs.imageTag != '' || needs.docker-build-push.result == 'success') }}
+
+    env:
+      REGISTRY_LOGIN_SERVER: ${{ secrets.ACR_LOGIN_SERVER }}
+      IMAGE_NAME: crypto-service
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Azure CLI login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Get AKS credentials
+        uses: azure/aks-set-context@v4
+        with:
+          resource-group: ${{ vars.AKS_RESOURCE_GROUP }}
+          cluster-name: ${{ vars.AKS_CLUSTER_NAME }}
+
+      - name: Set image tag
+        run: |
+          if [ "${{ github.event.inputs.imageTag }}" != "" ]; then
+            echo "IMAGE_TAG=${{ github.event.inputs.imageTag }}" >> $GITHUB_ENV
+          else
+            echo "IMAGE_TAG=${{ needs.docker-build-push.outputs.image_tag }}" >> $GITHUB_ENV
+          fi
+
+      - name: Set environment variables
+        run: |
+          if [ "${{ github.event.inputs.environment }}" = "dev" ]; then
+            echo "ACR_NAME=acrsepappdev001" >> $GITHUB_ENV
+          elif [ "${{ github.event.inputs.environment }}" = "prod" ]; then
+            echo "ACR_NAME=acrsepappprod001" >> $GITHUB_ENV
+          else
+            echo "Unknown environment"
+            exit 1
+          fi
+
+      - name: Apply Kubernetes manifests or update image
+        run: |
+          if kubectl get deployment crypto-service; then
+            echo "Deployment exists, updating image..."
+            kubectl set image deployment/crypto-service crypto-service=${{ env.REGISTRY_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} --record
+            kubectl rollout restart deployment/crypto-service
+          else
+            echo "Deployment does not exist, creating..."
+            envsubst < ./k8s/crypto-service-deployment.yaml | kubectl apply -f -
+          fi
+          kubectl get all
+
+      - name: Wait for rollout
+        run: |
+          kubectl rollout status deployment/crypto-service
+      - name: Kubectl get all
+        run: |
+          kubectl get all

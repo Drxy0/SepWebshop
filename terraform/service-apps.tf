@@ -7,6 +7,9 @@ resource azurerm_service_plan main {
 }
 
 resource azurerm_linux_web_app backend {
+
+  depends_on = [ azurerm_linux_web_app.bank_backend, azurerm_linux_web_app.psp_frontend ]
+
   name                = "lwa-${var.application_name}-be-${var.environment_name}-${var.location_short}-${var.resource_version}"
   resource_group_name = azurerm_resource_group.main.name
   location            = azurerm_resource_group.main.location
@@ -93,6 +96,9 @@ resource azurerm_linux_web_app bank_frontend {
 }
 
 resource azurerm_linux_web_app bank_backend {
+
+  depends_on = [ azurerm_linux_web_app.bank_frontend, azurerm_linux_web_app.frontend ]
+
   name                = "lwa-${var.application_name}-be-bank-${var.environment_name}-${var.location_short}-${var.resource_version}"
   resource_group_name = azurerm_resource_group.main.name
   location            = azurerm_resource_group.main.location
@@ -118,5 +124,7 @@ resource azurerm_linux_web_app bank_backend {
   }
   app_settings = {
     "BankFrontendUrl" = "https://${azurerm_linux_web_app.bank_frontend.default_hostname}"
+    "ApiSettings__PspQrBaseUrl" = "https://sepapp.xyz/"
+    "ApiSettings__WebShopSuccessUrl" = "https://${azurerm_linux_web_app.frontend.default_hostname}/success"
   }
 }

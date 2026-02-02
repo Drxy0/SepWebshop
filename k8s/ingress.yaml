@@ -30,3 +30,10 @@ spec:
                 name: qr-service-clusterip
                 port:
                   number: 80
+          - path: /crypto
+            pathType: Prefix
+            backend:
+              service:
+                name: crypto-service-clusterip
+                port:
+                  number: 80
