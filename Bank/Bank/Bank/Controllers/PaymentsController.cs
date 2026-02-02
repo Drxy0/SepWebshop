@@ -69,7 +69,6 @@ public class PaymentsController : ControllerBase
         return Ok(result);
     }
 
-    // TODO: double check if this is needed
     [HttpPost("qr/{paymentRequestId}/process")]
     public async Task<ActionResult<QRPaymentResponseDto>> ProcessQrPayment(Guid paymentRequestId, [FromBody] ProcessQrPaymentRequest request)
     {
@@ -77,7 +76,7 @@ public class PaymentsController : ControllerBase
         {
             var result = await _paymentService.ProcessQrPayment(paymentRequestId, request.CustomerAccountNumber);
 
-            return Ok(result); // Change result to an url
+            return Ok(result);
         }
         catch (Exception ex)
         {

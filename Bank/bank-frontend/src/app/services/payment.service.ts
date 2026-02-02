@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import {
   CardPaymentRequestDto,
   PayByCardRequest,
+  ProcessQrPaymentResponse,
   QrPaymentResponseDto,
   QrPaymentStatusDto,
 } from './payment.models';
@@ -39,9 +40,12 @@ export class PaymentService {
   processQrPayment(
     paymentRequestId: string,
     customerAccountNumber?: string,
-  ): Observable<QrPaymentResponseDto> {
-    return this.http.post<QrPaymentResponseDto>(`${this.baseUrl}/qr/${paymentRequestId}/process`, {
-      customerAccountNumber,
-    });
+  ): Observable<ProcessQrPaymentResponse> {
+    return this.http.post<ProcessQrPaymentResponse>(
+      `${this.baseUrl}/qr/${paymentRequestId}/process`,
+      {
+        customerAccountNumber,
+      },
+    );
   }
 }

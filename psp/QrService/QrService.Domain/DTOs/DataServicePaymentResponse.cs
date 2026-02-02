@@ -10,6 +10,6 @@ public class DataServicePaymentResponse
     public required string MerchantPassword { get; set; }
     public required double Amount { get; set; }
     public Currency Currency { get; set; }
-    public required string MerchantOrderId { get; set; }
+    public required Guid MerchantOrderId { get; set; }
     public DateTime MerchantTimestamp { get; set; }
 }

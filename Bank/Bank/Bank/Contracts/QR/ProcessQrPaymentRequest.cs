@@ -1,6 +1,3 @@
 ﻿namespace Bank.Contracts.QR;
 
-public class ProcessQrPaymentRequest
-{
-    public string? CustomerAccountNumber { get; set; }
-}
+public sealed record ProcessQrPaymentRequest(string CustomerAccountNumber);

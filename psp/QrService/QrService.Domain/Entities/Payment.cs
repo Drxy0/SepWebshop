@@ -11,7 +11,7 @@ namespace QrService.Domain.Entities
         public Currency Currency { get; set; }
         public required Guid MerchantOrderId { get; set; }
         public DateTime MerchantTimestamp { get; set; }
-        public bool IsProcessed { get; set; } = false;
+        public bool IsProcessed { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 }

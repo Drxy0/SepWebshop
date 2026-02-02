@@ -38,7 +38,13 @@ export interface QrPaymentStatusDto {
 // Enums
 export type PaymentRequestStatus = 'Pending' | 'Success' | 'Failed' | 'Expired';
 
-// For backend processing (simulation)
+// For processing (simulation)
 export interface ProcessQrPaymentRequest {
   customerAccountNumber?: string;
+}
+
+export interface ProcessQrPaymentResponse {
+  paymentRequestId: string;
+  status: PaymentRequestStatus;
+  redirectUrl: string;
 }

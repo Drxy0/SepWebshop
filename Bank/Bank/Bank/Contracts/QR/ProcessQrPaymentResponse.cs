@@ -5,5 +5,5 @@ namespace Bank.Contracts.QR;
 public sealed record ProcessQrPaymentResponse(
     Guid PaymentRequestId,
     PaymentRequestStatus Status,
-    string RedirectUrl
+    string? RedirectUrl
 );

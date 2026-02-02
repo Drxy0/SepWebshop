@@ -42,10 +42,13 @@ namespace QrService.Application.Feature.Payment.Commands.InitPayment
                 Converters = { new JsonStringEnumConverter() }
             };
 
-            var paymentData = await response.Content.ReadFromJsonAsync<DataServicePaymentResponse>(options, cancellationToken);
+            DataServicePaymentResponse? paymentData = await response.Content.ReadFromJsonAsync<DataServicePaymentResponse>(options, cancellationToken);
 
             if (paymentData == null)
                 throw new Exception("Failed to deserialize payment data.");
+
+            Domain.Entities.Payment? existingPayment = await _paymentRepository.GetByIdAsync(paymentData.Id, cancellationToken);
+
 
             var newPayment = new Domain.Entities.Payment
             {
@@ -54,30 +57,49 @@ namespace QrService.Application.Feature.Payment.Commands.InitPayment
                 MerchantPassword = paymentData.MerchantPassword,
                 Amount = paymentData.Amount,
                 Currency = paymentData.Currency,
-                MerchantOrderId = Guid.Parse(paymentData.MerchantOrderId),
+                MerchantOrderId = paymentData.MerchantOrderId,
                 MerchantTimestamp = paymentData.MerchantTimestamp,
                 IsProcessed = false,
                 CreatedAt = DateTime.UtcNow
             };
 
-            var isSaved = await _paymentRepository.InitPaymentAsync(newPayment, cancellationToken);
+            bool isSaved;
+
+            if (existingPayment != null)
+            {
+                // Update existing payment
+                existingPayment.MerchantId = newPayment.MerchantId;
+                existingPayment.MerchantPassword = newPayment.MerchantPassword;
+                existingPayment.Amount = newPayment.Amount;
+                existingPayment.Currency = newPayment.Currency;
+                existingPayment.MerchantOrderId = newPayment.MerchantOrderId;
+                existingPayment.MerchantTimestamp = newPayment.MerchantTimestamp;
+                existingPayment.IsProcessed = newPayment.IsProcessed;
+                existingPayment.CreatedAt = newPayment.CreatedAt;
+
+                isSaved = await _paymentRepository.UpdateAsync(existingPayment, cancellationToken);
+            }
+            else
+            {
+                // Insert new payment
+                isSaved = await _paymentRepository.InitPaymentAsync(newPayment, cancellationToken);
+            }
 
             if (!isSaved)
             {
                 throw new Exception("Failed to save payment to QrService database. Id already exists");
             }
 
-            // Map DataServicePaymentResponse to Bank request
             var bankRequest = new BankInitPaymentRequest(
                 MerchantId: paymentData.MerchantId,
                 PspPaymentId: paymentData.Id,
                 Amount: paymentData.Amount,
                 Currency: paymentData.Currency,
-                Stan: paymentData.MerchantOrderId,
+                Stan: paymentData.MerchantOrderId.ToString(),
                 PspTimestamp: paymentData.MerchantTimestamp
             );
 
-            // Call Bank API with the properly mapped request
+            // Call Bank API
             BankInitPaymentResponse bankResponse = await _bankClient.InitQrPaymentAsync(bankRequest, cancellationToken);
 
             return new InitPayementCommandResponse
