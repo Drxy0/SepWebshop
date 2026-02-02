@@ -35,7 +35,7 @@ public sealed class BankClient : IBankClient
         string secret = _configuration[$"PSPHmacKey:{QrPspId}"] ?? throw new Exception($"Missing HMAC key for PSP {QrPspId}");
         string signature = BankClientHelper.GenerateHmac(payload, secret);
 
-        var requestDto = new BankInitPaymentRequest(payment.MerchantId, payment.Amount, payment.Currency, stan, timestamp);
+        var requestDto = new BankInitPaymentRequest(payment.MerchantId,payment.PspPaymentId, payment.Amount, payment.Currency, stan, timestamp);
 
         using var request = new HttpRequestMessage(
             method: HttpMethod.Post, 

@@ -10,7 +10,7 @@ import { QrPaymentResponseDto, QrPaymentStatusDto } from '../services/payment.mo
   standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: './qr-payment.html',
-  styleUrl: './qr-payment.scss'
+  styleUrl: './qr-payment.scss',
 })
 export class QrPayment implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
@@ -30,19 +30,20 @@ export class QrPayment implements OnInit, OnDestroy {
 
     this.simulatingPayment.set(true);
     const testAccount = '123-456789-78';
-    
-    this.paymentService.processQrPayment(paymentRequestId, testAccount)
+
+    this.paymentService
+      .processQrPayment(paymentRequestId, testAccount)
       .pipe(
-        catchError(err => {
+        catchError((err) => {
           console.error('Payment processing error:', err);
           this.error.set('Payment simulation failed');
           return of(null);
         }),
         finalize(() => {
           this.simulatingPayment.set(false);
-        })
+        }),
       )
-      .subscribe(result => {
+      .subscribe((result) => {
         if (result) {
           console.log('Payment processed:', result);
           // Force immediate status check
@@ -68,7 +69,8 @@ export class QrPayment implements OnInit, OnDestroy {
   }
 
   private loadQrCode(paymentRequestId: string): void {
-    this.paymentService.getQrCode(paymentRequestId)
+    this.paymentService
+      .getQrCode(paymentRequestId)
       .pipe(
         catchError((err) => {
           console.error('QR code generation error:', err);
@@ -77,7 +79,7 @@ export class QrPayment implements OnInit, OnDestroy {
         }),
         finalize(() => {
           this.loading.set(false);
-        })
+        }),
       )
       .subscribe((res) => {
         if (res) {
@@ -92,10 +94,10 @@ export class QrPayment implements OnInit, OnDestroy {
   private startStatusPolling(): void {
     this.stopStatusPolling();
     this.isPolling.set(true);
-    
+
     const paymentRequestId = this.qr()?.paymentRequestId;
     if (!paymentRequestId) return;
-    
+
     // Poll every 60 seconds
     this.pollingSubscription = interval(60_000).subscribe(() => {
       this.checkPaymentStatus(paymentRequestId);
@@ -111,17 +113,18 @@ export class QrPayment implements OnInit, OnDestroy {
   }
 
   private checkPaymentStatus(paymentRequestId: string): void {
-    this.paymentService.getQrPaymentStatus(paymentRequestId)
+    this.paymentService
+      .getQrPaymentStatus(paymentRequestId)
       .pipe(
-        catchError(err => {
+        catchError((err) => {
           console.error('Error checking payment status:', err);
           return of(null);
-        })
+        }),
       )
       .subscribe((status) => {
         if (status) {
           this.paymentStatus.set(status);
-          
+
           // Stop polling if payment is completed, failed, or expired
           if (status.status !== 'Pending') {
             this.stopStatusPolling();

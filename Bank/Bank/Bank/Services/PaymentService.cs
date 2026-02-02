@@ -173,6 +173,7 @@ public class PaymentService : IPaymentService
             var redirectUrl = await _pspClient.NotifyPaymentStatusAsync(new PspPaymentStatusDto
             {
                 PaymentRequestId = paymentRequestId,
+                PspPaymentId = paymentRequest.PspPaymentId,
                 Stan = paymentRequest.Stan,
                 GlobalTransactionId = globalTransactionId,
                 AcquirerTimestamp = acquirerTimestamp,
@@ -419,6 +420,7 @@ public class PaymentService : IPaymentService
                 redirectUrl = await _pspClient.NotifyPaymentStatusAsync(new PspPaymentStatusDto
                 {
                     PaymentRequestId = paymentRequestId,
+                    PspPaymentId = paymentRequest.PspPaymentId,
                     Stan = paymentRequest.Stan,
                     GlobalTransactionId = globalTransactionId,
                     AcquirerTimestamp = acquirerTimestamp,

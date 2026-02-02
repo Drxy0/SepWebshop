@@ -2,7 +2,7 @@
   @if (!loading() && !error() && qr()) {
     <div class="payment-card">
       <h2>Scan QR code to pay</h2>
-      
+
       <div class="qr-container">
         <img
           [src]="qr()?.qrCodeBase64"
@@ -14,14 +14,16 @@
       </div>
 
       <div class="payment-details">
-        <p><strong>Amount:</strong> {{ paymentStatus()?.amount }} {{ paymentStatus()?.currency }}</p>
-        <p><strong>Expires:</strong> {{ paymentStatus()?.expiresAt | date:'short' }}</p>
+        <p>
+          <strong>Amount:</strong> {{ paymentStatus()?.amount }} {{ paymentStatus()?.currency }}
+        </p>
+        <p><strong>Expires:</strong> {{ paymentStatus()?.expiresAt | date: 'short' }}</p>
       </div>
-      
+
       @if (paymentStatus()) {
         <div class="status-indicator" [class]="paymentStatus()?.status?.toLowerCase()">
           <strong>Status:</strong> {{ paymentStatus()?.status }}
-          
+
           @if (paymentStatus()?.status === 'Success') {
             <div class="success-message">
               <p>✓ Payment successful!</p>
@@ -30,7 +32,7 @@
               }
             </div>
           }
-          
+
           @if (paymentStatus()?.status === 'Failed') {
             <div class="error-message">
               <p>✗ Payment failed</p>
@@ -57,10 +59,11 @@
       <!-- Simulation button - for testing only -->
       @if (paymentStatus()?.status === 'Pending') {
         <div class="simulation-section">
-          <button 
-            (click)="simulateMobilePayment()" 
+          <button
+            (click)="simulateMobilePayment()"
             class="simulate-button"
-            [disabled]="simulatingPayment()">
+            [disabled]="simulatingPayment()"
+          >
             {{ simulatingPayment() ? 'Processing...' : 'Simulate Mobile Payment' }}
           </button>
         </div>

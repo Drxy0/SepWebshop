@@ -18,13 +18,13 @@ public class PspClient : IPSPClient
     {
         var requestPayload = new
         {
-            PaymentId = dto.PaymentRequestId,
+            PaymentId = dto.PspPaymentId,
             BankId = _config["Bank:BankId"],
             BankPassword = _config["Bank:BankPassword"]
         };
 
         using var response = await _httpClient.PutAsJsonAsync(
-            "q/Payment/bank/update",
+            $"q/Payment/bank/update/{dto.PspPaymentId}",
             requestPayload
         );
 
