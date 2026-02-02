@@ -26,14 +26,14 @@ export class User {
   loginUser(obj: ILoginRequest): Observable<ILoginResponse> {
     return this.http.post<ILoginResponse>(
       environment.api_url + Constants.API_METHOD.LOGIN_USER,
-      obj
+      obj,
     );
   }
 
   refreshToken(refreshToken: string): Observable<ILoginResponse> {
     return this.http.post<ILoginResponse>(
       environment.api_url + Constants.API_METHOD.REFRESH_TOKEN,
-      { refreshToken }
+      { refreshToken },
     );
   }
 }

@@ -13,14 +13,20 @@ export class OrdersService {
 
   getOrdersByCarId(carId: string): Observable<IOrderResponse[]> {
     return this.http.get<IOrderResponse[]>(
-      `${environment.api_url}${Constants.API_METHOD.ORDERS}/car/${carId}`
+      `${environment.api_url}${Constants.API_METHOD.ORDERS}/car/${carId}`,
     );
   }
 
   createOrder(payload: any): Observable<IOrderCreateResponse> {
     return this.http.post<IOrderCreateResponse>(
       `${environment.api_url}${Constants.API_METHOD.ORDERS}`,
-      payload
+      payload,
+    );
+  }
+
+  getOrdersByUserId(userId: string): Observable<IOrderResponse[]> {
+    return this.http.get<IOrderResponse[]>(
+      `${environment.api_url}${Constants.API_METHOD.ORDERS}/user/${userId}`,
     );
   }
 }

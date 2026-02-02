@@ -10,6 +10,7 @@ import { Insurances } from './components/admin/insurances/insurances';
 import { Success } from './components/success/success';
 import { Error } from './components/error/error';
 import { Failed } from './components/failed/failed';
+import { MyOrders } from './components/my-orders/my-orders';
 
 export const routes: Routes = [
   {
@@ -53,5 +54,10 @@ export const routes: Routes = [
   {
     path: 'failed',
     component: Failed,
+  },
+  {
+    path: 'my-orders',
+    component: MyOrders,
+    canActivate: [authGuard],
   },
 ];

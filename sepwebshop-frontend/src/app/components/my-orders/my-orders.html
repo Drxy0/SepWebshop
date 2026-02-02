@@ -1,1 +1,72 @@
-<p>my-orders works!</p>
+<div class="container mx-auto p-6">
+  <h2 class="text-2xl font-bold mb-6 text-gray-800">My Completed Orders</h2>
+
+  @if (loading()) {
+    <div class="text-center py-10">
+      <div
+        class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500 mb-2"
+      ></div>
+      <p class="text-lg text-gray-600">Loading your orders...</p>
+    </div>
+  } @else if (error()) {
+    <div class="bg-red-100 p-4 rounded text-red-800 border border-red-200">
+      {{ error() }}
+    </div>
+  } @else if (ordersDetails().length === 0) {
+    <div class="bg-blue-100 p-4 rounded text-blue-800 border border-blue-200">
+      You have no completed orders yet.
+    </div>
+  } @else {
+    <div class="grid gap-6">
+      @for (order of ordersDetails(); track order.id) {
+        <div
+          class="bg-white shadow-md rounded-lg overflow-hidden border border-gray-200 transition hover:shadow-lg"
+        >
+          <div
+            class="bg-gray-50 px-4 py-2 border-b border-gray-200 flex justify-between items-center"
+          >
+            <span class="text-sm font-semibold text-gray-600">
+              Order ID: {{ order.id | slice: 0 : 8 }}...
+            </span>
+
+            <span
+              class="px-2 py-1 text-xs font-bold rounded uppercase"
+              [class]="getStatusClasses(order.orderStatus)"
+            >
+              {{ order.orderStatus }}
+            </span>
+          </div>
+
+          <div class="p-4 grid md:grid-cols-3 gap-4">
+            <div>
+              <p class="text-sm text-gray-500">Vehicle</p>
+              <p class="font-bold text-lg text-blue-700">{{ order.carName }}</p>
+            </div>
+            <div>
+              <p class="text-sm text-gray-500">Insurance Plan</p>
+              <p class="font-semibold">{{ order.insuranceName }}</p>
+            </div>
+            <div class="text-right">
+              <p class="text-sm text-gray-500">Total Price</p>
+              <p class="text-xl font-black text-gray-900">
+                {{ order.totalPrice }} {{ order.currency }}
+              </p>
+            </div>
+          </div>
+
+          <div class="px-4 py-3 bg-gray-50 text-sm grid md:grid-cols-2 gap-2 text-gray-700">
+            <div>
+              <span class="font-medium text-gray-500 italic">Period:</span>
+              {{ order.leaseStartDate | date: 'mediumDate' }} -
+              {{ order.leaseEndDate | date: 'mediumDate' }}
+            </div>
+            <div class="md:text-right">
+              <span class="font-medium text-gray-500 italic">Payment:</span>
+              {{ order.paymentMethod }}
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

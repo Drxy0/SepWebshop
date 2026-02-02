@@ -43,4 +43,9 @@ export class Auth {
   isLoggedIn(): boolean {
     return !!this.getAccessToken();
   }
+
+  getUserId(): string | null {
+    const decoded = this.decodeToken();
+    return decoded ? decoded.sub : null;
+  }
 }

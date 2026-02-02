@@ -10,6 +10,10 @@
         <a routerLink="/index" class="hover:underline">Home</a>
       </li>
 
+      <li *ngIf="auth.isLoggedIn()">
+        <a routerLink="/my-orders" class="hover:underline">My Orders</a>
+      </li>
+
       <!-- ADMIN MENU -->
       <li *ngIf="auth.isAdmin()">
         <a routerLink="/admin/cars" class="hover:underline">Cars</a>
