@@ -412,9 +412,10 @@ public class PaymentService : IPaymentService
             await transaction.CommitAsync();
 
             // Notify PSP
+            string? redirectUrl = null;
             try
             {
-                await _pspClient.NotifyPaymentStatusAsync(new PspPaymentStatusDto
+                redirectUrl = await _pspClient.NotifyPaymentStatusAsync(new PspPaymentStatusDto
                 {
                     PaymentRequestId = paymentRequestId,
                     Stan = paymentRequest.Stan,
@@ -435,7 +436,8 @@ public class PaymentService : IPaymentService
                 null,
                 PaymentRequestStatus.Success,
                 paymentRequest.Stan,
-                paymentRequest.ExpiresAt
+                paymentRequest.ExpiresAt,
+                redirectUrl
             );
         }
         catch

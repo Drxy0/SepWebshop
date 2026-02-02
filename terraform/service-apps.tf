@@ -36,6 +36,8 @@ resource azurerm_linux_web_app backend {
     "PSP__PaymentInitEndpoint" = "https://sepapp.xyz/d/Payments/init"
 
     "SendGrid__ApiKey" = "${data.azurerm_key_vault_secret.sendgrid_api_key.value}"
+
+    "ConfirmEmailBaseUrl" = "https://${azurerm_linux_web_app.backend.default_hostname}/api/Users/confirm-email"
   }
 }
 

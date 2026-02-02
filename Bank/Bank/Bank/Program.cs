@@ -15,7 +15,13 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
     });
 
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddHttpClient<IPSPClient, PspClient>(client =>
+{
+    var baseUrl = builder.Configuration["ApiSettings:PspQrBaseUrl"]
+        ?? throw new Exception("PspQrBaseUrl is missing");
+    client.BaseAddress = new Uri(baseUrl);
+});
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 

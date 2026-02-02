@@ -1,33 +1,42 @@
 ﻿using Bank.Contracts;
+using Bank.Models;
 
 namespace Bank.Clients;
 
 public class PspClient : IPSPClient
 {
     private readonly HttpClient _httpClient;
+    private readonly IConfiguration _config;
 
-    public PspClient(HttpClient httpClient)
+    public PspClient(HttpClient httpClient, IConfiguration config)
     {
         _httpClient = httpClient;
+        _config = config;
     }
 
     public async Task<string> NotifyPaymentStatusAsync(PspPaymentStatusDto dto)
     {
-        using var response = await _httpClient.PostAsJsonAsync(
-            "https://localhost:7150/api/psp/bank/callback",
-            dto
+        var requestPayload = new
+        {
+            PaymentId = dto.PaymentRequestId,
+            BankId = _config["Bank:BankId"],
+            BankPassword = _config["Bank:BankPassword"]
+        };
+
+        using var response = await _httpClient.PutAsJsonAsync(
+            "q/Payment/bank/update",
+            requestPayload
         );
 
-        string redirectUrl = await response.Content.ReadAsStringAsync();
-
         if (!response.IsSuccessStatusCode)
-            throw new InvalidOperationException(
-                $"PSP callback failed ({response.StatusCode}): {redirectUrl}"
-            );
+        {
+            var error = await response.Content.ReadAsStringAsync();
+            throw new InvalidOperationException($"PSP callback failed: {error}");
+        }
 
-        if (string.IsNullOrWhiteSpace(redirectUrl))
-            throw new InvalidOperationException("Callback did not return redirectUrl.");
+        var result = await response.Content.ReadFromJsonAsync<BankUpdatePaymentCommandResponse>();
 
-        return redirectUrl;
+        return _config["ApiSettings:WebShopSuccessUrl"]
+           ?? "http://localhost:4200/success";
     }
 }

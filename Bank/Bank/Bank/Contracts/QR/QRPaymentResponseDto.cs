@@ -7,5 +7,6 @@ public sealed record QRPaymentResponseDto(
     string QrCodeBase64,
     PaymentRequestStatus Status = PaymentRequestStatus.Pending,
     string? TransactionReference = null,  // (STAN or IPS transaction ID)
-    DateTime? ExpiresAt = null  // for frontend countdown
+    DateTime? ExpiresAt = null,  // for frontend countdown
+    string? RedirectUrl = null
 );
