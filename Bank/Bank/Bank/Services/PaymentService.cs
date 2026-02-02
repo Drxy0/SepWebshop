@@ -126,7 +126,13 @@ public class PaymentService : IPaymentService
             return await NotifyFailure(paymentRequestId, TransactionStatus.Failed);
         }
 
-        if (DebitCardHelper.IsCardExpired(card.ExpirationDate) || card.CVV != request.CVV || card.Account.Balance < paymentRequest.Amount)
+        // Check if request expiry matches card expiry
+        string requestExpiry = $"{request.ExpiryMonth:D2}/{request.ExpiryYear:D2}";
+        
+        if (DebitCardHelper.IsCardExpired(card.ExpirationDate) || 
+            card.ExpirationDate != requestExpiry ||
+            card.CVV != request.CVV || 
+            card.Account.Balance < paymentRequest.Amount)
         {
             paymentRequest.Status = PaymentRequestStatus.Failed;
             await _context.SaveChangesAsync();
@@ -173,6 +179,7 @@ public class PaymentService : IPaymentService
             var redirectUrl = await _pspClient.NotifyPaymentStatusAsync(new PspPaymentStatusDto
             {
                 PaymentRequestId = paymentRequestId,
+                PspId = paymentRequest.PspId,
                 PspPaymentId = paymentRequest.PspPaymentId,
                 Stan = paymentRequest.Stan,
                 GlobalTransactionId = globalTransactionId,
@@ -217,6 +224,8 @@ public class PaymentService : IPaymentService
         var redirectUrl = await _pspClient.NotifyPaymentStatusAsync(new PspPaymentStatusDto
         {
             PaymentRequestId = paymentRequestId,
+            PspId = paymentRequest.PspId,
+            PspPaymentId = paymentRequest.PspPaymentId,
             Stan = paymentRequest.Stan,
             GlobalTransactionId = Guid.NewGuid(),
             AcquirerTimestamp = DateTime.UtcNow,
@@ -420,6 +429,7 @@ public class PaymentService : IPaymentService
                 redirectUrl = await _pspClient.NotifyPaymentStatusAsync(new PspPaymentStatusDto
                 {
                     PaymentRequestId = paymentRequestId,
+                    PspId = paymentRequest.PspId,
                     PspPaymentId = paymentRequest.PspPaymentId,
                     Stan = paymentRequest.Stan,
                     GlobalTransactionId = globalTransactionId,
@@ -556,6 +566,8 @@ public class PaymentService : IPaymentService
             await _pspClient.NotifyPaymentStatusAsync(new PspPaymentStatusDto
             {
                 PaymentRequestId = paymentRequest.PaymentRequestId,
+                PspId = paymentRequest.PspId,
+                PspPaymentId = paymentRequest.PspPaymentId,
                 Stan = paymentRequest.Stan,
                 GlobalTransactionId = Guid.NewGuid(),
                 AcquirerTimestamp = DateTime.UtcNow,

@@ -29,4 +29,14 @@ export class PaymentService {
 
     return this.http.post<CryptoPaymentResponse>(url, body);
   }
+
+  initializeCardPayment(merchantOrderId: string): Observable<IInitPaymentResponse> {
+    const url = `${environment.card_service_api_url}Payment/init`;
+
+    const body = {
+      merchantOrderId: merchantOrderId,
+    };
+
+    return this.http.post<IInitPaymentResponse>(url, body);
+  }
 }

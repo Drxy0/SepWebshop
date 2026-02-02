@@ -96,6 +96,19 @@ export class Pay implements OnInit {
           this.selectedMethod.set(null);
         },
       });
+    } else if (method.toLowerCase() === 'card') {
+      this.isProcessingPayment.set(true);
+
+      this.paymentService.initializeCardPayment(orderId).subscribe({
+        next: (response) => {
+          window.location.href = response.bankUrl;
+        },
+        error: (err) => {
+          console.error('Error initializing Card payment:', err);
+          this.isProcessingPayment.set(false);
+          this.selectedMethod.set(null);
+        },
+      });
     } else {
       console.log(`Starting payment for ${this.orderId()} using ${method}`);
     }

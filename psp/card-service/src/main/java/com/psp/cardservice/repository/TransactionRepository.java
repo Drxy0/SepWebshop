@@ -13,5 +13,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     
     Optional<Transaction> findByStan(String stan);
     
+    Optional<Transaction> findByPspPaymentId(String pspPaymentId);
+    
     boolean existsByPaymentId(String paymentId);
 }

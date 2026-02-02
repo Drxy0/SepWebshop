@@ -27,6 +27,7 @@ export class CardPayment implements OnInit {
   errorSignal = signal<string | null>(null);
   submitting = signal(false);
   hasAttempted = signal(false);
+  formValues = signal({ cardHolder: '', cardNumber: '', expiry: '', cvv: '' });
 
   loading = computed(() => this.loadingSignal());
   payment = computed(() => this.paymentSignal());
@@ -34,18 +35,13 @@ export class CardPayment implements OnInit {
 
   private paymentRequestId!: string;
 
-  form: FormGroup<{
-    cardNumber: FormControl<string>;
-    expiry: FormControl<string>;
-    cvv: FormControl<string>;
-    cardHolder: FormControl<string>;
-  }>;
+  form: FormGroup;
 
   constructor(
     private route: ActivatedRoute,
     private fb: FormBuilder
   ) {
-    this.form = this.fb.nonNullable.group({
+    this.form = this.fb.group({
       cardNumber: [''],
       expiry: [''],
       cvv: [''],
@@ -56,6 +52,16 @@ export class CardPayment implements OnInit {
   ngOnInit(): void {
     this.paymentRequestId =
       this.route.snapshot.paramMap.get('paymentRequestId')!;
+
+    // Subscribe to form value changes
+    this.form.valueChanges.subscribe(values => {
+      this.formValues.set({
+        cardHolder: values.cardHolder || '',
+        cardNumber: values.cardNumber || '',
+        expiry: values.expiry || '',
+        cvv: values.cvv || ''
+      });
+    });
 
     this.paymentService.getPaymentRequest(this.paymentRequestId).subscribe({
       next: res => {
@@ -70,23 +76,42 @@ export class CardPayment implements OnInit {
   }
 
   cardBrand = computed<CardBrand>(() =>
-    detectCardBrand(this.form.controls.cardNumber.value)
+    detectCardBrand(this.formValues().cardNumber)
   );
 
   isFormValid = computed(() => {
-    const v = this.form.getRawValue();
+    const v = this.formValues();
+
+    const holderValid = v.cardHolder.trim().length > 2;
+    const cardNumberValid = isValidLuhn(v.cardNumber);
+    const brandValid = this.cardBrand() !== 'UNKNOWN';
+    const expiryValid = isExpiryValid(v.expiry);
+    const cvvValid = /^\d{3}$/.test(v.cvv);
+
+    console.log('Form validation:', {
+      holderValid,
+      cardNumberValid,
+      brandValid,
+      expiryValid,
+      cvvValid,
+      cardHolder: v.cardHolder,
+      cardNumber: v.cardNumber,
+      brand: this.cardBrand(),
+      expiry: v.expiry,
+      cvv: v.cvv
+    });
 
     return (
-      v.cardHolder.trim().length > 2 &&
-      isValidLuhn(v.cardNumber) &&
-      this.cardBrand() !== 'UNKNOWN' &&
-      isExpiryValid(v.expiry) &&
-      /^\d{3}$/.test(v.cvv)
+      holderValid &&
+      cardNumberValid &&
+      brandValid &&
+      expiryValid &&
+      cvvValid
     );
   });
 
   submitDisabled = computed(() =>
-    !this.isFormValid() || this.submitting() || this.hasAttempted()
+    !this.isFormValid() || this.submitting()
   );
 
   handleSubmit() {
@@ -98,12 +123,16 @@ export class CardPayment implements OnInit {
 
     const raw = this.form.getRawValue();
 
-    // Convert expiry from "MM/YY" format to match backend expectations
+    // Parse expiry from "MM/YY" format
+    const [month, year] = raw.expiry.split('/').map(Number);
+
     const paymentData: PayByCardRequest = {
       cardNumber: raw.cardNumber,
-      expirationDate: raw.expiry, // Keep as "MM/YY" format
-      cvv: raw.cvv,
-      cardHolderName: raw.cardHolder
+      cardHolderName: raw.cardHolder,
+      expiryMonth: month,
+      expiryYear: year,
+      cardHolder: raw.cardHolder,
+      cvv: raw.cvv
     };
 
     this.paymentService.submitPayment(this.paymentRequestId, paymentData)
@@ -114,6 +143,7 @@ export class CardPayment implements OnInit {
         error: () => {
           this.errorSignal.set('Payment failed. Please try again.');
           this.submitting.set(false);
+          this.hasAttempted.set(false); // Allow retry
         }
       });
   }

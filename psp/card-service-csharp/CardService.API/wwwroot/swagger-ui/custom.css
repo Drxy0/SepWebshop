@@ -1,0 +1,11 @@
+body {
+    background-color: #fafafa !important;
+}
+
+.swagger-ui .topbar {
+    background-color: #89bf04 !important;
+}
+
+.swagger-ui .scheme-container {
+    background-color: #fff !important;
+}
