@@ -56,6 +56,7 @@ public class PaymentService : IPaymentService
             PaymentRequestId = Guid.NewGuid(),
             MerchantId = request.MerchantId,
             PspId = pspId,
+            PspPaymentId = request.PspPaymentId,
             Amount = request.Amount,
             Currency = request.Currency,
             Stan = request.Stan,

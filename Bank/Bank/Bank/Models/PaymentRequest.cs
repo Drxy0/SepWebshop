@@ -8,6 +8,7 @@ public class PaymentRequest
     public Merchant Merchant { get; set; }
 
     public Guid PspId { get; set; }
+    public Guid PspPaymentId { get; set; }
 
     public double Amount { get; set; }
 

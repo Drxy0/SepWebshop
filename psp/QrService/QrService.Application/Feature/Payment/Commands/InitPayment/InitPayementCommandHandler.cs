@@ -70,6 +70,7 @@ namespace QrService.Application.Feature.Payment.Commands.InitPayment
             // Map DataServicePaymentResponse to Bank request
             var bankRequest = new BankInitPaymentRequest(
                 MerchantId: paymentData.MerchantId,
+                PspPaymentId: paymentData.Id,
                 Amount: paymentData.Amount,
                 Currency: paymentData.Currency,
                 Stan: paymentData.MerchantOrderId,
