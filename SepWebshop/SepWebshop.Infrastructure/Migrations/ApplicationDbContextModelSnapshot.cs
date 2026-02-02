@@ -44,7 +44,7 @@ namespace SepWebshop.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Cars");
+                    b.ToTable("Cars", (string)null);
                 });
 
             modelBuilder.Entity("SepWebshop.Domain.Insurances.Insurance", b =>
@@ -68,7 +68,7 @@ namespace SepWebshop.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Insurances");
+                    b.ToTable("Insurances", (string)null);
                 });
 
             modelBuilder.Entity("SepWebshop.Domain.Orders.Order", b =>
@@ -117,7 +117,7 @@ namespace SepWebshop.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Orders");
+                    b.ToTable("Orders", (string)null);
                 });
 
             modelBuilder.Entity("SepWebshop.Domain.Users.RefreshToken", b =>
@@ -143,7 +143,7 @@ namespace SepWebshop.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("RefreshTokens");
+                    b.ToTable("RefreshTokens", (string)null);
                 });
 
             modelBuilder.Entity("SepWebshop.Domain.Users.User", b =>
@@ -182,7 +182,7 @@ namespace SepWebshop.Infrastructure.Migrations
                     b.HasIndex("Email")
                         .IsUnique();
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("SepWebshop.Domain.Orders.Order", b =>

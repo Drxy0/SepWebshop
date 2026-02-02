@@ -1,7 +1,10 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { User } from '../../services/user/user';
 import { CommonModule } from '@angular/common';
+import { PaymentService } from '../../services/payment/payment-service';
+import { finalize } from 'rxjs';
+import { CryptoPaymentResponse } from '../../models/interfaces/payment';
 
 @Component({
   selector: 'app-pay',
@@ -11,11 +14,17 @@ import { CommonModule } from '@angular/common';
 })
 export class Pay implements OnInit {
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
   private userService = inject(User);
+  private paymentService = inject(PaymentService);
 
   orderId = signal<string | null>(null);
   merchantId = signal<string | null>(null);
   availableMethods = signal<string[]>([]);
+
+  isLoadingMethods = signal<boolean>(false);
+  isProcessingPayment = signal<boolean>(false);
+  selectedMethod = signal<string | null>(null);
 
   ngOnInit() {
     const params = this.route.snapshot.queryParamMap;
@@ -29,18 +38,66 @@ export class Pay implements OnInit {
   }
 
   loadMerchantMethods(id: string) {
-    this.userService.getActiveMethods(id).subscribe({
-      next: (methods) => {
-        this.availableMethods.set(methods);
-      },
-      error: (err) => {
-        console.error('Error fetching merchant methods:', err);
-      },
-    });
+    this.isLoadingMethods.set(true);
+    this.userService
+      .getActiveMethods(id)
+      .pipe(finalize(() => this.isLoadingMethods.set(false)))
+      .subscribe({
+        next: (methods) => {
+          this.availableMethods.set(methods);
+        },
+        error: (err) => {
+          console.error('Error fetching merchant methods:', err);
+        },
+      });
   }
 
   onPay(method: string) {
-    console.log(`Starting payment for ${this.orderId()} using ${method}`);
-    // Ovde bi išla logika za procesuiranje uplate
+    const orderId = this.orderId();
+    if (this.isProcessingPayment()) return;
+
+    this.selectedMethod.set(method);
+
+    if (!orderId) {
+      return;
+    }
+
+    if (method.toLowerCase() === 'crypto') {
+      this.isProcessingPayment.set(true);
+
+      this.paymentService.initializeCryptoPayment(orderId).subscribe({
+        next: (response: CryptoPaymentResponse) => {
+          const dataUrl = `data:image/png;base64,${response.qrCodeBase64}`;
+
+          this.router.navigate(['/pay/crypto'], {
+            state: {
+              qrUrl: dataUrl,
+              orderId: response.merchantOrderId,
+            },
+          });
+        },
+        error: (err) => {
+          console.error('Error initializing Crypto payment:', err);
+          this.isProcessingPayment.set(false);
+          this.selectedMethod.set(null);
+        },
+      });
+    } else if (method === 'QR') {
+      this.isProcessingPayment.set(true);
+      //const cleanOrderId = orderId.replace(/-/g, '');
+
+      this.paymentService.initializeQrPayment(orderId).subscribe({
+        next: (response) => {
+          window.location.href = response.bankUrl;
+        },
+        error: (err) => {
+          console.error('Greška pri inicijalizaciji QR plaćanja:', err);
+          this.isProcessingPayment.set(false);
+          this.selectedMethod.set(null);
+        },
+      });
+    } else {
+      console.log(`Starting payment for ${this.orderId()} using ${method}`);
+    }
   }
 }

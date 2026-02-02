@@ -7,3 +7,12 @@ export interface IPaymentMethod {
 export interface IUpdatePaymentRequest {
   paymentMethodIds: number[];
 }
+
+export interface IInitPaymentResponse {
+  bankUrl: string;
+}
+
+export interface CryptoPaymentResponse {
+  qrCodeBase64: string;
+  merchantOrderId: string;
+}

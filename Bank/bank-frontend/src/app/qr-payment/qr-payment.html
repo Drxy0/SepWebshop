@@ -1,0 +1,85 @@
+<div class="payment-container">
+  @if (!loading() && !error() && qr()) {
+    <div class="payment-card">
+      <h2>Scan QR code to pay</h2>
+
+      <div class="qr-container">
+        <img
+          [src]="qr()?.qrCodeBase64"
+          alt="QR code for payment"
+          class="qr-code"
+          width="260"
+          height="260"
+        />
+      </div>
+
+      <div class="payment-details">
+        <p>
+          <strong>Amount:</strong> {{ paymentStatus()?.amount }} {{ paymentStatus()?.currency }}
+        </p>
+        <p><strong>Expires:</strong> {{ paymentStatus()?.expiresAt | date: 'short' }}</p>
+      </div>
+
+      @if (paymentStatus()) {
+        <div class="status-indicator" [class]="paymentStatus()?.status?.toLowerCase()">
+          <strong>Status:</strong> {{ paymentStatus()?.status }}
+
+          @if (paymentStatus()?.status === 'Success') {
+            <div class="success-message">
+              <p>✓ Payment successful!</p>
+              @if (paymentStatus()?.transactionId) {
+                <p class="transaction-id">Transaction ID: {{ paymentStatus()?.transactionId }}</p>
+              }
+            </div>
+          }
+
+          @if (paymentStatus()?.status === 'Failed') {
+            <div class="error-message">
+              <p>✗ Payment failed</p>
+              <p>Please try again or contact support</p>
+            </div>
+          }
+
+          @if (paymentStatus()?.status === 'Expired') {
+            <div class="warning-message">
+              <p>⚠ Payment expired</p>
+              <p>Please request a new payment link</p>
+            </div>
+          }
+        </div>
+      }
+
+      @if (isPolling() && paymentStatus()?.status === 'Pending') {
+        <div class="polling-indicator">
+          <span class="spinner"></span>
+          <p>Waiting for payment...</p>
+        </div>
+      }
+
+      <!-- Simulation button - for testing only -->
+      @if (paymentStatus()?.status === 'Pending') {
+        <div class="simulation-section">
+          <button
+            (click)="simulateMobilePayment()"
+            class="simulate-button"
+            [disabled]="simulatingPayment()"
+          >
+            {{ simulatingPayment() ? 'Processing...' : 'Simulate Mobile Payment' }}
+          </button>
+        </div>
+      }
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+    </div>
+  }
+
+  @if (error()) {
+    <div class="error-state">
+      <button (click)="ngOnInit()" class="retry-button">Retry</button>
+    </div>
+  }
+</div>

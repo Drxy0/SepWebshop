@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SepWebshop.API.Services;
 using SepWebshop.Application.Abstractions.IdentityService;
 
 namespace SepWebshop.API.Controllers

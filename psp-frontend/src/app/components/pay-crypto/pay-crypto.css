@@ -1,0 +1,33 @@
+.payment-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: #f8fafc;
+  font-family: 'Segoe UI', 'Roboto', sans-serif;
+  text-align: center;
+}
+
+.payment-card {
+  background: white;
+  border-radius: 1rem;
+  padding: 2rem;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+  width: 100%;
+  max-width: 320px;
+}
+
+.qr-container {
+  margin: 1.5rem 0;
+}
+
+.qr-code {
+  border-radius: 0.5rem;
+  border: 1px solid #e2e8f0;
+}
+
+.loading-state,
+.no-qr-state {
+  font-size: 1rem;
+  color: #475569;
+}

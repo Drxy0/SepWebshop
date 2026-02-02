@@ -32,7 +32,6 @@ public class UsersController : ApiControllerBase
         }
 
         return Ok(result.Value);
-
     }
 
     [HttpPost("login")]
@@ -50,7 +49,6 @@ public class UsersController : ApiControllerBase
         }
 
         return Ok(result.Value);
-
     }
 
     [HttpPost("refresh-token")]

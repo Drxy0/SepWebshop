@@ -38,9 +38,8 @@ namespace DataService.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("MerchantOrderId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<Guid>("MerchantOrderId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("MerchantPassword")
                         .IsRequired()

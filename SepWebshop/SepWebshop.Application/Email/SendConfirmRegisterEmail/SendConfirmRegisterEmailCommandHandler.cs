@@ -21,9 +21,8 @@ internal sealed class SendConfirmRegisterEmailCommandHandler(IEmailSender emailS
         }
         catch (Exception ex)
         {
-            return Result.Failure<Unit>(
-                Error.Failure("Email.SendFailed", ex.Message));
-        }*/
+            return Result.Failure<Unit>(Error.Failure("Email.SendFailed", ex.Message));
+        }
 
         return Result.Success(Unit.Value);
     }

@@ -8,12 +8,12 @@ namespace DataService.Controllers
 {
     [ApiController]
     [Route("d/[controller]")]
-    public class PaymentController : ControllerBase
+    public class PaymentsController : ControllerBase
     {
         private readonly IUserService _userService;
         private readonly IPaymentService _paymentService;
 
-        public PaymentController(IUserService userService, IPaymentService paymentService)
+        public PaymentsController(IUserService userService, IPaymentService paymentService)
         {
             _userService = userService;
             _paymentService = paymentService;
@@ -67,11 +67,26 @@ namespace DataService.Controllers
         public async Task<IActionResult> InitializePayment([FromBody] InitializePaymentRequest request)
         {
             var initResult = await _paymentService.InitializePaymentAsync(request);
+
             if (!initResult.IsSuccess)
             {
-                return BadRequest(new { Message = "Failed to initialize payment." });
+                return BadRequest(new { Message = "Invalid Merchant credentials or payment failed." });
             }
+
             return Ok(new { PaymentId = initResult.PaymentId });
+        }
+
+        [HttpGet("{merchantOrderId}")]
+        public async Task<IActionResult> GetPayment(Guid merchantOrderId)
+        {
+            GetPaymentResponse? payment = await _paymentService.GetPaymentByOrderIdAsync(merchantOrderId);
+
+            if (payment == null)
+            {
+                return NotFound(new { Message = $"Payment with Order ID '{merchantOrderId}' not found." });
+            }
+
+            return Ok(payment);
         }
     }
 }

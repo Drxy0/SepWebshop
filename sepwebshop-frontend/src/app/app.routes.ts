@@ -7,6 +7,9 @@ import { Login } from './components/login/login';
 import { Register } from './components/register/register';
 import { CarsComponent } from './components/admin/cars/cars';
 import { Insurances } from './components/admin/insurances/insurances';
+import { Success } from './components/success/success';
+import { Error } from './components/error/error';
+import { Failed } from './components/failed/failed';
 
 export const routes: Routes = [
   {
@@ -38,5 +41,17 @@ export const routes: Routes = [
     path: 'admin/insurances',
     component: Insurances,
     canActivate: [authGuard, adminGuard],
+  },
+  {
+    path: 'success',
+    component: Success,
+  },
+  {
+    path: 'error',
+    component: Error,
+  },
+  {
+    path: 'failed',
+    component: Failed,
   },
 ];

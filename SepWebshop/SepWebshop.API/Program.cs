@@ -22,7 +22,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddSwaggerWithJwtAuth();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IIdentityService, IdentityService>();
-builder.Services.AddApplication();
+builder.Services.AddApplication(builder.Configuration);
 builder.Services.AddInfrastructure(builder.Configuration);
 
 builder.Services.Configure<PspOptions>(

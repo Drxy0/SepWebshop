@@ -21,7 +21,7 @@ public sealed class PaymentService : IPaymentService
         string merchantPassword,
         double amount,
         Currency currency,
-        string merchantOrderId,
+        Guid merchantOrderId,
         DateTime merchantTimestamp,
         CancellationToken cancellationToken = default)
     {
@@ -73,7 +73,7 @@ internal sealed record PaymentInitRequest
     public required string MerchantPassword { get; init; }
     public required double Amount { get; init; }
     public Currency Currency { get; init; }
-    public required string MerchantOrderId { get; init; }
+    public required Guid MerchantOrderId { get; init; }
     public DateTime MerchantTimestamp { get; init; }
 }
 
