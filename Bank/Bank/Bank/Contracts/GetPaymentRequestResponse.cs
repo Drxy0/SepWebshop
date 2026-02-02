@@ -2,10 +2,11 @@
 
 namespace Bank.Contracts;
 
-public sealed record PaymentRequestDto(
+public sealed record GetPaymentRequestResponse(
     Guid PaymentRequestId,
     double Amount,
     Currency Currency,
     PaymentRequestStatus Status,
-    DateTime ExpiresAt
+    DateTime? ExpiresAt,
+    string? ErrorMessage
 );

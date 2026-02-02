@@ -90,57 +90,6 @@ public class TestController : ControllerBase
             Balance = merchantAccount.Balance
         });
     }
-
-
-    [HttpPost("simulate-ips-payment")]
-    public async Task<IActionResult> SimulateIpsPayment(
-        [FromBody] SimulateIpsPaymentRequest request)
-    {
-        // 1. Get payment request
-        var paymentRequest = await _context.PaymentRequests
-            .Include(p => p.Merchant)
-            .ThenInclude(m => m.Account)
-            .FirstOrDefaultAsync(p => p.PaymentRequestId == request.PaymentRequestId);
-
-        if (paymentRequest == null) return NotFound("Payment request not found");
-
-        // 2. Get customer account
-        var customerAccount = await _context.Accounts
-            .FirstOrDefaultAsync(a => a.AccountNumber == request.CustomerAccountNumber
-                                   && a.Type == AccountType.Customer);
-
-        if (customerAccount == null) return NotFound("Customer account not found");
-
-        // 3. Check balance
-        if (customerAccount.Balance < paymentRequest.Amount)
-            return BadRequest("Insufficient balance");
-
-        // 4. Create mock IPS callback
-        var callbackData = new IpsCallbackDto
-        {
-            Reference = paymentRequest.Stan,
-            TransactionId = $"IPS-TEST-{Guid.NewGuid()}",
-            Amount = (decimal)paymentRequest.Amount,
-            Currency = "RSD",
-            Status = IpsPaymentStatus.Success,
-            TransactionTimestamp = DateTime.UtcNow,
-            PayerAccountNumber = customerAccount.AccountNumber,
-            PayerName = customerAccount.AccountHolderName,
-            Signature = "test-signature"
-        };
-
-        // 5. Process the callback (this will deduct from customer and credit merchant)
-        var paymentService = HttpContext.RequestServices.GetRequiredService<IPaymentService>();
-        await paymentService.ProcessIpsCallback(callbackData);
-
-        return Ok(new
-        {
-            success = true,
-            paymentRequestId = paymentRequest.PaymentRequestId,
-            customerNewBalance = customerAccount.Balance,
-            merchantNewBalance = paymentRequest.Merchant.Account.Balance
-        });
-    }
 }
 
 public class SimulateIpsPaymentRequest

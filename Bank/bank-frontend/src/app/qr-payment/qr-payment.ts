@@ -46,8 +46,6 @@ export class QrPayment implements OnInit, OnDestroy {
       .subscribe((result) => {
         if (result) {
           console.log('Payment processed:', result);
-          // Force immediate status check
-          this.checkPaymentStatus(paymentRequestId);
         }
       });
   }

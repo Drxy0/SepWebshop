@@ -88,14 +88,7 @@ public class PaymentsController : ControllerBase
     [HttpGet("qr/{paymentRequestId:guid}/status")]
     public async Task<IActionResult> GetQrPaymentStatus(Guid paymentRequestId)
     {
-        try
-        {
-            var status = await _paymentService.GetQrPaymentStatus(paymentRequestId);
-            return Ok(status);
-        }
-        catch (Exception ex)
-        {
-            return NotFound(new { error = ex.Message });
-        }
+        var status = await _paymentService.GetQrPaymentStatus(paymentRequestId);
+        return Ok(status);
     }
 }

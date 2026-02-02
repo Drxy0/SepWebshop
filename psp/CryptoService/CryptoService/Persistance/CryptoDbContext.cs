@@ -28,9 +28,6 @@ public class CryptoDbContext : DbContext
 
             entity.Property(x => x.FiatCurrency)
                   .HasConversion<string>();
-
-            entity.HasIndex(x => x.BitcoinAddress)
-                  .IsUnique();
         });
     }
 }

@@ -1,7 +1,12 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { CardPaymentRequestDto, PayByCardRequest, QrPaymentResponseDto, QrPaymentStatusDto } from './payment.models';
+import {
+  CardPaymentRequestDto,
+  PayByCardRequest,
+  QrPaymentResponseDto,
+  QrPaymentStatusDto,
+} from './payment.models';
 import { environment } from '../../environments/environment';
 
 @Injectable({
@@ -30,9 +35,13 @@ export class PaymentService {
     return this.http.get<QrPaymentStatusDto>(`${this.baseUrl}/qr/${paymentRequestId}/status`);
   }
 
-  // For simulation only - in production, this would be triggered by IPS callback
-  processQrPayment(paymentRequestId: string, customerAccountNumber?: string): Observable<QrPaymentResponseDto> {
-    return this.http.post<QrPaymentResponseDto>(`${this.baseUrl}/qr/${paymentRequestId}/process`, { customerAccountNumber }
-    );
+  // For simulation only
+  processQrPayment(
+    paymentRequestId: string,
+    customerAccountNumber?: string,
+  ): Observable<QrPaymentResponseDto> {
+    return this.http.post<QrPaymentResponseDto>(`${this.baseUrl}/qr/${paymentRequestId}/process`, {
+      customerAccountNumber,
+    });
   }
 }

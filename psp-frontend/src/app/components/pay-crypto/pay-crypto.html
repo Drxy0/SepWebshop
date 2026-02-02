@@ -22,6 +22,14 @@
       </div>
 
       <p class="instruction">Open your wallet app and scan the QR code to complete the payment.</p>
+
+      <button (click)="simulateTransaction()" [disabled]="isSimulating()" class="simulate-btn">
+        @if (isSimulating()) {
+          Simulating...
+        } @else {
+          Simulate Transaction
+        }
+      </button>
     </div>
   }
 

@@ -23,20 +23,16 @@ public class PspClient : IPSPClient
             BankPassword = _config["Bank:BankPassword"]
         };
 
-        using var response = await _httpClient.PutAsJsonAsync(
-            $"q/Payment/bank/update/{dto.PspPaymentId}",
-            requestPayload
-        );
+        using var response = await _httpClient.PutAsJsonAsync($"q/Payment/bank/update/{dto.PspPaymentId}", requestPayload);
 
         if (!response.IsSuccessStatusCode)
         {
-            var error = await response.Content.ReadAsStringAsync();
-            throw new InvalidOperationException($"PSP callback failed: {error}");
+            string errorMessage = await response.Content.ReadAsStringAsync();
+            throw new InvalidOperationException($"PSP callback failed: {errorMessage}");
         }
 
         var result = await response.Content.ReadFromJsonAsync<BankUpdatePaymentCommandResponse>();
 
-        return _config["ApiSettings:WebShopSuccessUrl"]
-           ?? "http://localhost:4200/success";
+        return _config["ApiSettings:WebShopSuccessUrl"]!;
     }
 }

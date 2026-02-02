@@ -49,22 +49,5 @@ namespace CryptoService.Controllers
 
             return Ok();
         }
-
-        [HttpGet("{paymentId:guid}/simulate")]
-        public async Task<IActionResult> CheckPaymentSimulate(Guid paymentId, CancellationToken cancellationToken)
-        {
-            CheckPaymentStatusResponse? status = await _cryptoPaymentService.CheckPaymentStatusAsync(paymentId, true, cancellationToken);
-            if (status is null)
-            {
-                return NotFound();
-            }
-
-            if (!status.WebshopNotified)
-            {
-                return Problem("Payment was succesful, but we failed to notify the webshop.", statusCode: 500);
-            }
-
-            return Ok(status);
-        }
     }
 }

@@ -79,7 +79,10 @@
 
   @if (error()) {
     <div class="error-state">
-      <button (click)="ngOnInit()" class="retry-button">Retry</button>
+      <div class="error-content">
+        <h3>Payment Unavailable</h3>
+        <p class="error-message">{{ error() }}</p>
+      </div>
     </div>
   }
 </div>

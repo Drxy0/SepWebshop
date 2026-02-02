@@ -27,10 +27,27 @@ namespace CryptoService.Controllers
             return Ok(response);
         }
 
-        [HttpGet("{paymentId:guid}")]
-        public async Task<ActionResult<CheckPaymentStatusResponse>> CheckPaymentStatus(Guid paymentId, CancellationToken cancellationToken)
+        [HttpGet("{merchantOrderId:guid}")]
+        public async Task<ActionResult<CheckPaymentStatusResponse>> CheckPaymentStatus(Guid merchantOrderId, CancellationToken cancellationToken)
         {
-            CheckPaymentStatusResponse? status = await _cryptoPaymentService.CheckPaymentStatusAsync(paymentId, false, cancellationToken);
+            CheckPaymentStatusResponse? status = await _cryptoPaymentService.CheckPaymentStatusAsync(merchantOrderId, false, cancellationToken);
+            if (status is null)
+            {
+                return NotFound();
+            }
+
+            if (!status.WebshopNotified)
+            {
+                return Problem("Payment was succesful, but we failed to notify the webshop.", statusCode: 500);
+            }
+
+            return Ok(status);
+        }
+
+        [HttpGet("{merchantOrderId:guid}/simulate")]
+        public async Task<IActionResult> CheckPaymentSimulate(Guid merchantOrderId, CancellationToken cancellationToken)
+        {
+            CheckPaymentStatusResponse? status = await _cryptoPaymentService.CheckPaymentStatusAsync(merchantOrderId, true, cancellationToken);
             if (status is null)
             {
                 return NotFound();

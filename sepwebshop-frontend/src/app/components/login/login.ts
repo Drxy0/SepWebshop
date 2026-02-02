@@ -18,7 +18,11 @@ export class Login {
 
   form;
 
-  constructor(private fb: FormBuilder, private user: User, private router: Router) {
+  constructor(
+    private fb: FormBuilder,
+    private user: User,
+    private router: Router,
+  ) {
     this.form = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', Validators.required],
@@ -51,7 +55,7 @@ export class Login {
         this.loading = false;
         this.form.enable();
 
-        this.generalError = err.error?.description || 'Invalid email or password1';
+        this.generalError = err.error?.description || 'Invalid email or password!';
       },
     });
   }

@@ -61,19 +61,27 @@
   min-height: 100vh;
   background: #f8fafc;
   font-family: 'Segoe UI', 'Roboto', sans-serif;
+}
 
-  &::before {
-    content: attr(data-error);
-    text-align: center;
-    font-size: 1.5rem;
-    font-weight: 500;
-    color: #dc2626;
-    background: #fef2f2;
-    border-radius: 0.75rem;
-    padding: 2rem;
-    max-width: 400px;
-    width: 100%;
-  }
+.error-content {
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: #dc2626;
+  background: #fef2f2;
+  border-radius: 0.75rem;
+  padding: 2rem;
+  max-width: 400px;
+  border: 1px solid #fecaca;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.error-content h3 {
+  font-size: 1.5rem;
+}
+
+.error-message {
+  font-size: 1rem;
 }
 
 .no-qr-state {

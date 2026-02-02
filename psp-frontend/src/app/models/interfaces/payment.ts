@@ -16,3 +16,10 @@ export interface CryptoPaymentResponse {
   qrCodeBase64: string;
   merchantOrderId: string;
 }
+
+export interface CheckPaymentStatusResponse {
+  merchantOrderId: string;
+  status: string;
+  webshopNotified: boolean;
+  redirectUrl?: string | null;
+}

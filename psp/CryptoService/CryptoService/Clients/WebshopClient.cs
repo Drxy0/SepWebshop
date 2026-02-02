@@ -14,18 +14,18 @@ public class WebshopClient : IWebshopClient
     public WebshopClient(HttpClient httpClient, IConfiguration config)
     {
         _httpClient = httpClient;
-        _webshopUpdateOrder_BaseUrl = config["WebshopUpdateOrder_BaseUrl"] 
+        _webshopUpdateOrder_BaseUrl = config["ApiSettings:WebshopUpdateOrder_BaseUrl"] 
             ?? throw new ArgumentNullException("WebshopUpdateOrder_BaseUrl is missing from appsettings.json");
 
         pspId = config["PSP:PspId"] ?? throw new ArgumentNullException("PspId is missing from appsettings.json");
         pspPassword = config["PSP:PspPassword"] ?? throw new ArgumentNullException("PspId is missing from appsettings.json");
     }
 
-    public async Task<bool> SendAsync(Guid orderId, bool isCompleted)
+    public async Task<bool> SendAsync(Guid merchantOrderId, bool isCompleted)
     {
         object payload = new
         {
-            orderId = orderId,
+            orderId = merchantOrderId,
             orderStatus = isCompleted ? "Completed" : "Failed",
             paymentMethod = "Crypto",
             pspId = pspId,
@@ -37,7 +37,7 @@ public class WebshopClient : IWebshopClient
         using StringContent content = new StringContent(jsonData, Encoding.UTF8, "application/json");
 
         HttpResponseMessage response = await _httpClient.PutAsync(
-            $"{_webshopUpdateOrder_BaseUrl}{orderId}", content);
+            $"{_webshopUpdateOrder_BaseUrl}{merchantOrderId}", content);
 
         if (!response.IsSuccessStatusCode)
         {
