@@ -1,11 +1,10 @@
 ﻿using Microsoft.Extensions.Options;
-using PayPalService.Clients;
 using PayPalService.Config;
 using System.Globalization;
 using System.Net.Http.Headers;
 using System.Text.Json;
 
-namespace PayPalService.Services;
+namespace PayPalService.Clients;
 
 public sealed class PayPalGatewayService
 {
@@ -20,7 +19,7 @@ public sealed class PayPalGatewayService
         _settings = options.Value;
     }
 
-    public async Task<string> CreateOrderAsync(decimal amount, string currency)
+    public async Task<string> CreateOrderAsync(double amount, string currency)
     {
         string token = await _client.GetAccessTokenAsync();
 

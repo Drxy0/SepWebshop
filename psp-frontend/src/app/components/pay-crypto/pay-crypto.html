@@ -8,7 +8,7 @@
 
   <!-- QR code display -->
   @if (!isLoading() && qrImageUrl()) {
-    <div class="payment-card">
+    <div class="crypto-payment-card">
       <h2>Scan QR code to pay</h2>
 
       <div class="qr-container">
@@ -23,12 +23,9 @@
 
       <p class="instruction">Open your wallet app and scan the QR code to complete the payment.</p>
 
-      <button (click)="simulateTransaction()" [disabled]="isSimulating()" class="simulate-btn">
-        @if (isSimulating()) {
-          Simulating...
-        } @else {
-          Simulate Transaction
-        }
+      <!-- Simulation button -->
+      <button class="simulate-button" (click)="simulatePayment()" [disabled]="isProccessing()">
+        {{ isProccessing() ? 'Processing...' : 'Simulate Payment' }}
       </button>
     </div>
   }

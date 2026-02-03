@@ -36,7 +36,7 @@ export class PaymentService {
     return this.http.get<QrPaymentStatusDto>(`${this.baseUrl}/qr/${paymentRequestId}/status`);
   }
 
-  // For simulation only
+  // For simulation
   processQrPayment(
     paymentRequestId: string,
     customerAccountNumber?: string,

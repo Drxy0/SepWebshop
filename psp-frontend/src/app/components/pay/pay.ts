@@ -84,7 +84,6 @@ export class Pay implements OnInit {
       });
     } else if (method === 'QR') {
       this.isProcessingPayment.set(true);
-      //const cleanOrderId = orderId.replace(/-/g, '');
 
       this.paymentService.initializeQrPayment(orderId).subscribe({
         next: (response) => {
@@ -92,6 +91,19 @@ export class Pay implements OnInit {
         },
         error: (err) => {
           console.error('Greška pri inicijalizaciji QR plaćanja:', err);
+          this.isProcessingPayment.set(false);
+          this.selectedMethod.set(null);
+        },
+      });
+    } else if (method.toLowerCase() === 'card') {
+      this.isProcessingPayment.set(true);
+
+      this.paymentService.initializeCardPayment(orderId).subscribe({
+        next: (response) => {
+          window.location.href = response.bankUrl;
+        },
+        error: (err) => {
+          console.error('Error initializing Card payment:', err);
           this.isProcessingPayment.set(false);
           this.selectedMethod.set(null);
         },

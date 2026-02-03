@@ -6,7 +6,6 @@ using CryptoService.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using NBitcoin;
 using QRCoder;
-using System.Net.Http;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -34,8 +33,8 @@ public class CryptoPaymentService : ICryptoPaymentService
         _httpClientFactory = httpClientFactory;
 
         _blockstreamApiUrl = config["BlockstreamUrl"] ?? throw new InvalidOperationException("BlockstreamUrl not configured");
-        _webShopSuccessUrl = config["ApiSettings:WebShopSuccessUrl"] ?? throw new InvalidOperationException("WebShopSuccessUrl not configured");
-
+        _webShopSuccessUrl = config["ApiSettings:WebShopSuccessUrl"] ?? throw new InvalidOperationException("WebShopSuccessUrl is missing from appsettings.json");
+        
         string wif = config["TestShopWallet:Wif"] ?? throw new InvalidOperationException("TestShopWallet:Wif not configured");
 
         _shopWalletSecret = new BitcoinSecret(wif, Network.TestNet);
@@ -181,10 +180,16 @@ public class CryptoPaymentService : ICryptoPaymentService
 
         if (payment.Status == CryptoPaymentStatus.Confirmed)
         {
-            webshopNotified = await _webshopClient.SendAsync(payment.MerchantOrderId, true);
+            webshopNotified = await _webshopClient.SendAsync(merchantOrderId, true);
         }
 
-        return new CheckPaymentStatusResponse(payment.MerchantOrderId, payment.Status, webshopNotified, _webShopSuccessUrl);
+        return new CheckPaymentStatusResponse(
+            payment.Status,
+            payment.BitcoinAmount,
+            payment.TransactionId,
+            webshopNotified,
+            webshopNotified ? _webShopSuccessUrl : null
+        );
     }
 
     private async Task<byte[]> GenerateQrCodeAsync(string bitcoinAddress, decimal bitcoinAmount, Guid merchantOrderId)

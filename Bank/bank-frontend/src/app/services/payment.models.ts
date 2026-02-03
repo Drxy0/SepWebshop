@@ -9,9 +9,11 @@ export interface CardPaymentRequestDto {
 
 export interface PayByCardRequest {
   cardNumber: string;
-  expirationDate: string; // Format: "MM/YY"
-  cvv: string;
   cardHolderName: string;
+  expiryMonth: number;
+  expiryYear: number;
+  cardHolder: string;
+  cvv: string;
 }
 
 // QR Payment Models
@@ -45,6 +47,6 @@ export interface ProcessQrPaymentRequest {
 
 export interface ProcessQrPaymentResponse {
   paymentRequestId: string;
-  status: PaymentRequestStatus;
+  status: string;
   redirectUrl: string;
 }

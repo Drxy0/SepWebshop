@@ -69,8 +69,9 @@ public class PaymentsController : ControllerBase
         return Ok(result);
     }
 
+    // Used for simulation
     [HttpPost("qr/{paymentRequestId}/process")]
-    public async Task<ActionResult<QRPaymentResponseDto>> ProcessQrPayment(Guid paymentRequestId, [FromBody] ProcessQrPaymentRequest request)
+    public async Task<IActionResult> ProcessQrPayment(Guid paymentRequestId, [FromBody] ProcessQrPaymentRequest request)
     {
         try
         {

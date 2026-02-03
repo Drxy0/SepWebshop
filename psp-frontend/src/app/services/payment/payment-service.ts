@@ -34,8 +34,25 @@ export class PaymentService {
     return this.http.post<CryptoPaymentResponse>(url, body);
   }
 
-  simulateCryptoPaymentComplete(paymentId: string): Observable<CheckPaymentStatusResponse> {
-    const url = `${environment.crypto_service_api_url}Payments/${paymentId}/simulate`;
+  checkCryptoPaymentStatus(merchantOrderId: string): Observable<CheckPaymentStatusResponse> {
+    const url = `${environment.crypto_service_api_url}Payments/${merchantOrderId}`;
+
     return this.http.get<CheckPaymentStatusResponse>(url);
+  }
+
+  simulateCryptoPayment(merchantOrderId: string): Observable<CheckPaymentStatusResponse> {
+    const url = `${environment.crypto_service_api_url}Payments/${merchantOrderId}/simulate`;
+
+    return this.http.get<CheckPaymentStatusResponse>(url);
+  }
+
+  initializeCardPayment(merchantOrderId: string): Observable<IInitPaymentResponse> {
+    const url = `${environment.card_service_api_url}Payment/init`;
+
+    const body = {
+      merchantOrderId: merchantOrderId,
+    };
+
+    return this.http.post<IInitPaymentResponse>(url, body);
   }
 }

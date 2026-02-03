@@ -35,6 +35,14 @@ public class Transaction {
     @Column(nullable = false, unique = true)
     private String stan;
     
+    private String merchantOrderId;
+    
+    private String merchantPassword;
+    
+    private String pspPaymentId;
+    
+    private Boolean isProcessed;
+    
     private String globalTransactionId;
     
     @Column(nullable = false)
