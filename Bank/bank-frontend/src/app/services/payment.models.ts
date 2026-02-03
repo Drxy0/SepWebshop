@@ -44,3 +44,9 @@ export type PaymentRequestStatus = 'Pending' | 'Success' | 'Failed' | 'Expired';
 export interface ProcessQrPaymentRequest {
   customerAccountNumber?: string;
 }
+
+export interface ProcessQrPaymentResponse {
+  paymentRequestId: string;
+  status: string;
+  redirectUrl: string;
+}

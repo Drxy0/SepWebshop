@@ -18,11 +18,8 @@ public interface IPaymentService
 
     Task<QRPaymentResponseDto> GenerateQrPayment(Guid paymentRequestId);
 
-    // For real IPS integration - callback from National Bank of Serbia
-    Task ProcessIpsCallback(IpsCallbackDto callbackData);
-
     // For simulation - manually trigger QR payment
-    Task<QRPaymentResponseDto> ProcessQrPayment(Guid paymentRequestId, string? customerAccountNumber);
+    Task<ProcessQrPaymentResponse> ProcessQrPayment(Guid paymentRequestId, string? customerAccountNumber);
 
     // Frontend polls this endpoint to check payment status
     Task<QrPaymentStatusDto> GetQrPaymentStatus(Guid paymentRequestId);

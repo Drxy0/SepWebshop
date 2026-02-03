@@ -131,7 +131,6 @@ public class TestController : ControllerBase
 
         // 5. Process the callback (this will deduct from customer and credit merchant)
         var paymentService = HttpContext.RequestServices.GetRequiredService<IPaymentService>();
-        await paymentService.ProcessIpsCallback(callbackData);
 
         return Ok(new
         {

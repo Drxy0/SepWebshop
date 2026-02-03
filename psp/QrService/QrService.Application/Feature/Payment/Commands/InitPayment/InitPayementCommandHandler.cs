@@ -47,7 +47,7 @@ namespace QrService.Application.Feature.Payment.Commands.InitPayment
             if (paymentData == null)
                 throw new Exception("Failed to deserialize payment data.");
 
-            var newPayment = new Domain.Entities.Payment
+            var payment = new Domain.Entities.Payment
             {
                 Id = paymentData.Id,
                 MerchantId = paymentData.MerchantId,
@@ -60,14 +60,32 @@ namespace QrService.Application.Feature.Payment.Commands.InitPayment
                 CreatedAt = DateTime.UtcNow
             };
 
-            var isSaved = await _paymentRepository.InitPaymentAsync(newPayment, cancellationToken);
+            var existingPayment = await _paymentRepository.GetByIdAsync(payment.Id, cancellationToken);
+
+            bool isSaved;
+
+            if (existingPayment != null)
+            {
+                existingPayment.MerchantId = payment.MerchantId;
+                existingPayment.MerchantPassword = payment.MerchantPassword;
+                existingPayment.Amount = payment.Amount;
+                existingPayment.Currency = payment.Currency;
+                existingPayment.MerchantOrderId = payment.MerchantOrderId;
+                existingPayment.MerchantTimestamp = payment.MerchantTimestamp;
+                existingPayment.IsProcessed = payment.IsProcessed;
+
+                isSaved = await _paymentRepository.UpdateAsync(existingPayment, cancellationToken);
+            }
+            else
+            {
+                isSaved = await _paymentRepository.InitPaymentAsync(payment, cancellationToken);
+            }
 
             if (!isSaved)
             {
-                throw new Exception("Failed to save payment to QrService database. Id already exists");
+                throw new Exception("Failed to persist payment in QrService database.");
             }
 
-            // Map DataServicePaymentResponse to Bank request
             var bankRequest = new BankInitPaymentRequest(
                 MerchantId: paymentData.MerchantId,
                 PspPaymentId: paymentData.Id,
@@ -77,13 +95,14 @@ namespace QrService.Application.Feature.Payment.Commands.InitPayment
                 PspTimestamp: paymentData.MerchantTimestamp
             );
 
-            // Call Bank API with the properly mapped request
-            BankInitPaymentResponse bankResponse = await _bankClient.InitQrPaymentAsync(bankRequest, cancellationToken);
+            BankInitPaymentResponse bankResponse =
+                await _bankClient.InitQrPaymentAsync(bankRequest, cancellationToken);
 
             return new InitPayementCommandResponse
             {
                 BankUrl = bankResponse.PaymentUrl
             };
         }
+
     }
 }

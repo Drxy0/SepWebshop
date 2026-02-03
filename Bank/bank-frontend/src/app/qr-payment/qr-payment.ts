@@ -31,25 +31,20 @@ export class QrPayment implements OnInit, OnDestroy {
     this.simulatingPayment.set(true);
     const testAccount = '123-456789-78';
 
-    this.paymentService
-      .processQrPayment(paymentRequestId, testAccount)
-      .pipe(
-        catchError((err) => {
-          console.error('Payment processing error:', err);
-          this.error.set('Payment simulation failed');
-          return of(null);
-        }),
-        finalize(() => {
-          this.simulatingPayment.set(false);
-        }),
-      )
-      .subscribe((result) => {
-        if (result) {
-          console.log('Payment processed:', result);
-          // Force immediate status check
-          this.checkPaymentStatus(paymentRequestId);
+    this.paymentService.processQrPayment(paymentRequestId, testAccount).subscribe({
+      next: (result) => {
+        if (result?.redirectUrl) {
+          window.location.href = result.redirectUrl;
         }
-      });
+      },
+      error: (err) => {
+        console.error('Payment processing error:', err);
+        this.error.set('Payment simulation failed');
+      },
+      complete: () => {
+        this.simulatingPayment.set(false);
+      },
+    });
   }
 
   ngOnInit(): void {
