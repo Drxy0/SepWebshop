@@ -1,6 +1,5 @@
 using PayPalService.Clients;
 using PayPalService.Config;
-using PayPalService.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,15 +10,18 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.Configure<PayPalSettings>(
-    builder.Configuration.GetSection("PayPal"));
-
-builder.Services.Configure<PSPDataServiceSettings>(
-    builder.Configuration.GetSection("PSPDataService"));
-
+builder.Services.Configure<PayPalSettings>(builder.Configuration.GetSection("PayPal"));
+builder.Services.Configure<PSPDataServiceSettings>(builder.Configuration.GetSection("PSPDataService"));
 
 builder.Services.AddHttpClient<PayPalClient>();
 builder.Services.AddHttpClient<PSPDataServiceClient>();
+builder.Services.AddHttpClient("DataServiceClient", client =>
+{
+    client.BaseAddress = new Uri(
+        builder.Configuration["ApiSettings:DataServiceBaseUrl"]
+            ?? throw new Exception("DataService URL is missing")
+    );
+});
 
 builder.Services.AddScoped<PayPalGatewayService>();
 
