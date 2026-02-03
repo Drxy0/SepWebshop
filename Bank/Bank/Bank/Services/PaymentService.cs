@@ -30,7 +30,7 @@ public class PaymentService : IPaymentService
     public async Task<InitializePaymentServiceResult> InitializePayment(PaymentInitRequest request, Guid pspId, string signature, DateTime timestamp, bool isQrPayment)
     {
         PSP? psp = await _context.PSPs.FindAsync(pspId);
-        if (psp is null || !_pspHmacKeys.ContainsKey(pspId.ToString()))
+        if (psp is null)
         {
             return new InitializePaymentServiceResult(InitializePaymentResult.InvalidPsp, null);
         }
@@ -63,15 +63,19 @@ public class PaymentService : IPaymentService
     {
         using var dbTransaction = await _context.Database.BeginTransactionAsync();
 
-        var paymentRequest = await _context.PaymentRequests.FirstOrDefaultAsync(p => p.PaymentRequestId == paymentRequestId);
+        PaymentRequest? paymentRequest = await _context.PaymentRequests
+            .FirstOrDefaultAsync(p => p.PaymentRequestId == paymentRequestId);
 
         if (paymentRequest == null || paymentRequest.Status != PaymentRequestStatus.Pending)
         {
             return await NotifyFailure(paymentRequestId, TransactionStatus.Failed);
         }
 
-        if (await HandleExpiredPayment(paymentRequest, dbTransaction))
+        if (paymentRequest.ExpiresAt < DateTime.UtcNow)
         {
+            paymentRequest.Status = PaymentRequestStatus.Expired;
+            await _context.SaveChangesAsync();
+            await dbTransaction.CommitAsync();
             return await NotifyFailure(paymentRequestId, TransactionStatus.Failed);
         }
 
@@ -111,19 +115,35 @@ public class PaymentService : IPaymentService
             return await NotifyFailure(paymentRequestId, TransactionStatus.Failed);
         }
 
-        Merchant? merchant = await _context.Merchants
+        var merchant = await _context.Merchants
             .Include(c => c.Account)
             .FirstOrDefaultAsync(b => b.Id == paymentRequest.MerchantId);
 
         if (merchant?.Account is null)
         {
-            return await FailPaymentAndNotify(paymentRequest, dbTransaction, paymentRequestId);
+            paymentRequest.Status = PaymentRequestStatus.Failed;
+            await _context.SaveChangesAsync();
+            await dbTransaction.CommitAsync();
+
+            return await NotifyFailure(paymentRequestId, TransactionStatus.Failed);
         }
 
         try
         {
-            PaymentServiceHelper.TransferFunds(card.Account, merchant.Account, paymentRequest.Amount);
-            var (globalTransactionId, acquirerTimestamp) = RecordSuccessfulTransaction(paymentRequestId);
+            card.Account.Balance -= paymentRequest.Amount;
+            merchant.Account.Balance += paymentRequest.Amount;
+
+            var globalTransactionId = Guid.NewGuid();
+            var acquirerTimestamp = DateTime.UtcNow;
+
+            _context.Transactions.Add(new Transaction
+            {
+                PaymentRequestId = paymentRequestId,
+                GlobalTransactionId = globalTransactionId,
+                AcquirerTimestamp = acquirerTimestamp,
+                Status = TransactionStatus.Successful
+            });
+
             paymentRequest.Status = PaymentRequestStatus.Success;
 
             await _context.SaveChangesAsync();
@@ -147,7 +167,20 @@ public class PaymentService : IPaymentService
         catch
         {
             await dbTransaction.RollbackAsync();
-            await RecordFailedTransaction(paymentRequestId);
+
+            var globalTransactionId = Guid.NewGuid();
+            var acquirerTimestamp = DateTime.UtcNow;
+
+            _context.Transactions.Add(new Transaction
+            {
+                PaymentRequestId = paymentRequestId,
+                GlobalTransactionId = globalTransactionId,
+                AcquirerTimestamp = acquirerTimestamp,
+                Status = TransactionStatus.Failed
+            });
+
+            await _context.SaveChangesAsync();
+
             return await NotifyFailure(paymentRequestId, TransactionStatus.Failed);
         }
     }
@@ -179,7 +212,7 @@ public class PaymentService : IPaymentService
 
     public async Task<PaymentRequestDto> GetPaymentRequest(Guid paymentRequestId)
     {
-        var paymentRequest = await _context.PaymentRequests
+        PaymentRequestDto? paymentRequest = await _context.PaymentRequests
             .Where(p => p.PaymentRequestId == paymentRequestId)
             .Select(p => new PaymentRequestDto(
                 p.PaymentRequestId, p.Amount, p.Currency, p.Status, p.ExpiresAt))
@@ -197,7 +230,13 @@ public class PaymentService : IPaymentService
 
     public async Task<QRPaymentResponseDto> GenerateQrPayment(Guid paymentRequestId)
     {
-        var paymentRequest = await LoadPaymentRequest(paymentRequestId, includeMerchant: true);
+        PaymentRequest? paymentRequest = await _context.PaymentRequests
+                .Include(p => p.Merchant)
+                .ThenInclude(m => m.Account)
+                .FirstOrDefaultAsync(p => p.PaymentRequestId == paymentRequestId);
+
+        if (paymentRequest == null)
+            throw new Exception("Payment request not found");
 
         var ipsData = BuildIpsData(paymentRequest);
 
@@ -244,9 +283,13 @@ public class PaymentService : IPaymentService
 
         try
         {
-            PaymentRequest paymentRequest = await LoadPaymentRequest(paymentRequestId, includeMerchant: true);
+            var paymentRequest = await _context.PaymentRequests
+                .Include(p => p.Merchant)
+                    .ThenInclude(m => m.Account)
+                .FirstOrDefaultAsync(p => p.PaymentRequestId == paymentRequestId);
 
-            if (paymentRequest.Status != PaymentRequestStatus.Pending)
+            if (paymentRequest is null || paymentRequest.Status != PaymentRequestStatus.Pending)
+            {
                 throw new Exception("Payment request not valid");
             }
 
@@ -321,19 +364,18 @@ public class PaymentService : IPaymentService
 
             return new ProcessQrPaymentResponse(paymentRequestId, paymentRequest.Status, _webShopSuccessUrl);
         }
-        catch (Exception ex)
+        catch
         {
-            Console.WriteLine($"Error notifying PSP: {ex.Message}");
-            return null;
+            await transaction.RollbackAsync();
+            throw;
         }
     }
 
     public async Task<QrPaymentStatusDto> GetQrPaymentStatus(Guid paymentRequestId)
     {
-        IQueryable<PaymentRequest> query = _context.PaymentRequests;
-
-        if (includeMerchant)
-            query = query.Include(p => p.Merchant).ThenInclude(m => m.Account);
+        PaymentRequest? paymentRequest = await _context.PaymentRequests
+            .Include(p => p.Transactions)
+            .FirstOrDefaultAsync(p => p.PaymentRequestId == paymentRequestId);
 
         if (paymentRequest == null)
             throw new Exception("Payment request not found.");

@@ -82,7 +82,7 @@ export class Pay implements OnInit {
           this.selectedMethod.set(null);
         },
       });
-    } else if (method === 'QR') {
+    } else if (method.toLowerCase() === 'qr') {
       this.isProcessingPayment.set(true);
 
       this.paymentService.initializeQrPayment(orderId).subscribe({
@@ -90,7 +90,7 @@ export class Pay implements OnInit {
           window.location.href = response.bankUrl;
         },
         error: (err) => {
-          console.error('Greška pri inicijalizaciji QR plaćanja:', err);
+          console.error('Error initializing QR payment:', err);
           this.isProcessingPayment.set(false);
           this.selectedMethod.set(null);
         },

@@ -67,11 +67,11 @@ export class PayCrypto {
     const id = this.orderId();
     if (!id) return;
 
-    this.isSimulating.set(true);
+    this.isProccessing.set(true);
 
-    this.paymentService.simulateCryptoPaymentComplete(id).subscribe({
+    this.paymentService.simulateCryptoPayment(id).subscribe({
       next: (response) => {
-        this.isSimulating.set(false);
+        this.isProccessing.set(false);
 
         if (response.redirectUrl) {
           window.location.href = response.redirectUrl;
@@ -82,7 +82,7 @@ export class PayCrypto {
       error: (err) => {
         console.error('Simulation failed', err);
         alert('Simulation failed. Check console.');
-        this.isSimulating.set(false);
+        this.isProccessing.set(false);
       },
     });
   }

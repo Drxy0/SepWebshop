@@ -192,7 +192,7 @@ public class CryptoPaymentService : ICryptoPaymentService
         );
     }
 
-    private async Task<byte[]> GenerateQrCodeAsync(string bitcoinAddress, decimal bitcoinAmount, Guid merchantOrderId)
+        private async Task<byte[]> GenerateQrCodeAsync(string bitcoinAddress, decimal bitcoinAmount, Guid merchantOrderId)
     {
         string bitcoinUri = $"bitcoin:{bitcoinAddress}?amount={bitcoinAmount}&label=Order-{merchantOrderId}";
 
