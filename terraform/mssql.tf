@@ -45,3 +45,14 @@ resource azurerm_mssql_database cryptodb {
   server_id = azurerm_mssql_server.main.id
   sku_name  = "Basic"
 }
+resource azurerm_mssql_database carddb {
+  name      = "sqldb-${var.application_name}-carddb-${var.environment_name}-${var.location_short}-${var.resource_version}"
+  server_id = azurerm_mssql_server.main.id
+  sku_name  = "Basic"
+}
+
+/*resource azurerm_mssql_database paypaldb {
+  name      = "sqldb-${var.application_name}-paypaldb-${var.environment_name}-${var.location_short}-${var.resource_version}"
+  server_id = azurerm_mssql_server.main.id
+  sku_name  = "Basic"
+}*/

@@ -124,6 +124,7 @@ resource azurerm_linux_web_app bank_backend {
   }
   app_settings = {
     "BankFrontendUrl" = "https://${azurerm_linux_web_app.bank_frontend.default_hostname}"
+    "ApiSettings__PspCardBaseUrl" = "https://sepapp.xyz/"
     "ApiSettings__PspQrBaseUrl" = "https://sepapp.xyz/"
     "ApiSettings__WebShopSuccessUrl" = "https://${azurerm_linux_web_app.frontend.default_hostname}/success"
   }
