@@ -84,7 +84,6 @@ export class Pay implements OnInit {
       });
     } else if (method === 'QR') {
       this.isProcessingPayment.set(true);
-      //const cleanOrderId = orderId.replace(/-/g, '');
 
       this.paymentService.initializeQrPayment(orderId).subscribe({
         next: (response) => {

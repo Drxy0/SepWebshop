@@ -115,20 +115,6 @@ public class TestController : ControllerBase
         if (customerAccount.Balance < paymentRequest.Amount)
             return BadRequest("Insufficient balance");
 
-        // 4. Create mock IPS callback
-        var callbackData = new IpsCallbackDto
-        {
-            Reference = paymentRequest.Stan,
-            TransactionId = $"IPS-TEST-{Guid.NewGuid()}",
-            Amount = (decimal)paymentRequest.Amount,
-            Currency = "RSD",
-            Status = IpsPaymentStatus.Success,
-            TransactionTimestamp = DateTime.UtcNow,
-            PayerAccountNumber = customerAccount.AccountNumber,
-            PayerName = customerAccount.AccountHolderName,
-            Signature = "test-signature"
-        };
-
         // 5. Process the callback (this will deduct from customer and credit merchant)
         var paymentService = HttpContext.RequestServices.GetRequiredService<IPaymentService>();
 

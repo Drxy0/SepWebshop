@@ -6,7 +6,6 @@ using CryptoService.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using NBitcoin;
 using QRCoder;
-using System.Net.Http;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -24,6 +23,7 @@ public class CryptoPaymentService : ICryptoPaymentService
     private readonly BitcoinAddress _shopWalletAddress;
 
     private readonly string _blockstreamApiUrl;
+    private readonly string _webShopSuccessUrl;
 
     public CryptoPaymentService(CryptoDbContext db, IHttpClientFactory httpClientFactory, IBinanceClient binanceClient, IConfiguration config, IWebshopClient webshopClient)
     {
@@ -33,7 +33,8 @@ public class CryptoPaymentService : ICryptoPaymentService
         _httpClientFactory = httpClientFactory;
 
         _blockstreamApiUrl = config["BlockstreamUrl"] ?? throw new InvalidOperationException("BlockstreamUrl not configured");
-
+        _webShopSuccessUrl = config["ApiSettings:WebShopSuccessUrl"] ?? throw new InvalidOperationException("WebShopSuccessUrl is missing from appsettings.json");
+        
         string wif = config["TestShopWallet:Wif"] ?? throw new InvalidOperationException("TestShopWallet:Wif not configured");
 
         _shopWalletSecret = new BitcoinSecret(wif, Network.TestNet);
@@ -147,16 +148,14 @@ public class CryptoPaymentService : ICryptoPaymentService
     /// <summary>
     /// Checks transaction status on testnet blockchain (Blockstream API)
     /// </summary>
-    public async Task<CheckPaymentStatusResponse?> CheckPaymentStatusAsync(Guid paymentId, bool isSimulation, CancellationToken cancellationToken)
+    public async Task<CheckPaymentStatusResponse?> CheckPaymentStatusAsync(Guid merchantOrderId, bool isSimulation, CancellationToken cancellationToken)
     {
-        CryptoPayment? payment = await _db.CryptoPayments.FirstOrDefaultAsync(x => x.Id == paymentId, cancellationToken);
+        CryptoPayment? payment = await _db.CryptoPayments.FirstOrDefaultAsync(x => x.MerchantOrderId == merchantOrderId, cancellationToken);
 
         if (payment is null)
         {
             return null;
         }
-
-        int confirmations = 0;
 
         if (isSimulation)
         {
@@ -171,7 +170,6 @@ public class CryptoPaymentService : ICryptoPaymentService
 
             if (tx?.Status.Confirmed == true)
             {
-                confirmations = 1;
                 payment.Status = CryptoPaymentStatus.Confirmed;
             }
         }
@@ -182,16 +180,16 @@ public class CryptoPaymentService : ICryptoPaymentService
 
         if (payment.Status == CryptoPaymentStatus.Confirmed)
         {
-            webshopNotified = await _webshopClient.SendAsync(paymentId, true);
+            webshopNotified = await _webshopClient.SendAsync(merchantOrderId, true);
         }
 
         return new CheckPaymentStatusResponse(
-            payment.Id,
             payment.Status,
             payment.BitcoinAmount,
             payment.TransactionId,
-            confirmations,
-            webshopNotified);
+            webshopNotified,
+            webshopNotified ? _webShopSuccessUrl : null
+        );
     }
 
     private async Task<byte[]> GenerateQrCodeAsync(string bitcoinAddress, decimal bitcoinAmount, Guid merchantOrderId)
