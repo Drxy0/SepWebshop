@@ -6,6 +6,7 @@ import {
   CheckPaymentStatusResponse,
   CryptoPaymentResponse,
   IInitPaymentResponse,
+  InitPayPalPaymentResponse,
 } from '../../models/interfaces/payment';
 
 @Injectable({
@@ -13,6 +14,16 @@ import {
 })
 export class PaymentService {
   constructor(private http: HttpClient) {}
+
+  initializeCardPayment(merchantOrderId: string): Observable<IInitPaymentResponse> {
+    const url = `${environment.card_service_api_url}Payment/init`;
+
+    const body = {
+      merchantOrderId: merchantOrderId,
+    };
+
+    return this.http.post<IInitPaymentResponse>(url, body);
+  }
 
   initializeQrPayment(merchantOrderId: string): Observable<IInitPaymentResponse> {
     const url = `${environment.qr_service_api_url}Payment/init`;
@@ -46,13 +57,13 @@ export class PaymentService {
     return this.http.get<CheckPaymentStatusResponse>(url);
   }
 
-  initializeCardPayment(merchantOrderId: string): Observable<IInitPaymentResponse> {
-    const url = `${environment.card_service_api_url}Payment/init`;
+  initializePayPalPayment(merchantOrderId: string): Observable<InitPayPalPaymentResponse> {
+    const url = `${environment.paypal_service_api_url}Payments/init`;
 
     const body = {
       merchantOrderId: merchantOrderId,
     };
 
-    return this.http.post<IInitPaymentResponse>(url, body);
+    return this.http.post<InitPayPalPaymentResponse>(url, body);
   }
 }

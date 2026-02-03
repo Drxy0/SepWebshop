@@ -23,3 +23,8 @@ export interface CheckPaymentStatusResponse {
   webshopNotified: boolean;
   redirectUrl?: string | null;
 }
+
+export interface InitPayPalPaymentResponse {
+  merchantOrderId: string;
+  approvalUrl: string;
+}

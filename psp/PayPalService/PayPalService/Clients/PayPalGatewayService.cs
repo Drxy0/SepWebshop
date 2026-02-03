@@ -2,6 +2,7 @@
 using PayPalService.Config;
 using System.Globalization;
 using System.Net.Http.Headers;
+using System.Text;
 using System.Text.Json;
 
 namespace PayPalService.Clients;
@@ -9,14 +10,16 @@ namespace PayPalService.Clients;
 public sealed class PayPalGatewayService
 {
     private readonly PayPalClient _client;
-    private readonly PSPDataServiceClient _pspClient;
     private readonly PayPalSettings _settings;
 
-    public PayPalGatewayService(PayPalClient client, PSPDataServiceClient pspClient, IOptions<PayPalSettings> options)
+    private readonly string _webshopSuccessUrl;
+
+    public PayPalGatewayService(PayPalClient client, IOptions<PayPalSettings> options, IConfiguration config)
     {
         _client = client;
-        _pspClient = pspClient;
         _settings = options.Value;
+
+        _webshopSuccessUrl = config["ApiSettings:WebShopSuccessUrl"] ?? throw new Exception("ApiSettings:WebShopSuccessUrl is missing from appsettings.json");
     }
 
     public async Task<string> CreateOrderAsync(double amount, string currency)
@@ -63,25 +66,31 @@ public sealed class PayPalGatewayService
         return approvalUrl!;
     }
 
-    public async Task CaptureAsync(string orderId)
+    public async Task<(bool success, string redirectUrl)> CaptureAsync(string orderId)
     {
-        string token = await _client.GetAccessTokenAsync();
-
-        HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, $"{_settings.BaseUrl}/v2/checkout/orders/{orderId}/capture");
-
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
-
-        HttpResponseMessage response = await _client.SendAsync(request);
-        response.EnsureSuccessStatusCode();
-
-        JsonDocument payload = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
-
-        await _pspClient.StoreTransactionAsync(new
+        try
         {
-            Provider = "PayPal",
-            OrderId = orderId,
-            Raw = payload.RootElement.ToString(),
-            Status = "Completed"
-        });
+            string token = await _client.GetAccessTokenAsync();
+
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, $"{_settings.BaseUrl}/v2/checkout/orders/{orderId}/capture");
+
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            request.Content = new StringContent("{}", Encoding.UTF8, "application/json");
+
+
+            HttpResponseMessage response = await _client.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+
+            JsonDocument payload = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+
+            return (true, _webshopSuccessUrl);
+        }
+        catch (Exception ex)
+        {
+            // Log the exception
+            Console.WriteLine($"Capture failed for order {orderId}: {ex.Message}");
+            return (false, null);
+        }
     }
 }

@@ -1,5 +1,7 @@
 using PayPalService.Clients;
 using PayPalService.Config;
+using PayPalService.Services;
+using PayPalService.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,10 +13,10 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.Configure<PayPalSettings>(builder.Configuration.GetSection("PayPal"));
-builder.Services.Configure<PSPDataServiceSettings>(builder.Configuration.GetSection("PSPDataService"));
+
+builder.Services.AddScoped<IPaymentService, PaymentService>();
 
 builder.Services.AddHttpClient<PayPalClient>();
-builder.Services.AddHttpClient<PSPDataServiceClient>();
 builder.Services.AddHttpClient("DataServiceClient", client =>
 {
     client.BaseAddress = new Uri(

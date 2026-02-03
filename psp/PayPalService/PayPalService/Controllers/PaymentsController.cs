@@ -33,9 +33,14 @@ public class PaymentsController : ControllerBase
     [HttpGet("return")]
     public async Task<IActionResult> Return([FromQuery(Name = "token")] string orderId)
     {
-        await _service.CaptureAsync(orderId);
+        var response = await _service.CaptureAsync(orderId);
 
-        return Ok("Payment successful");
+        if (response.success == false)
+        {
+            return BadRequest("Payment failed");
+        }
+
+        return Redirect(response.redirectUrl);
     }
 
     [HttpGet("cancel")]

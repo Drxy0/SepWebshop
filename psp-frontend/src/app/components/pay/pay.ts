@@ -82,6 +82,19 @@ export class Pay implements OnInit {
           this.selectedMethod.set(null);
         },
       });
+    } else if (method.toLowerCase() === 'paypal') {
+      this.isProcessingPayment.set(true);
+
+      this.paymentService.initializePayPalPayment(orderId).subscribe({
+        next: (response) => {
+          window.location.href = response.approvalUrl;
+        },
+        error: (err) => {
+          console.error('Error initializing PayPal payment:', err);
+          this.isProcessingPayment.set(false);
+          this.selectedMethod.set(null);
+        },
+      });
     } else if (method.toLowerCase() === 'qr') {
       this.isProcessingPayment.set(true);
 
@@ -108,8 +121,6 @@ export class Pay implements OnInit {
           this.selectedMethod.set(null);
         },
       });
-    } else {
-      console.log(`Starting payment for ${this.orderId()} using ${method}`);
     }
   }
 }
