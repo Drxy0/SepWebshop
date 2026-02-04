@@ -1,5 +1,10 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using PayPalService.Clients.Interfaces;
 using PayPalService.Config;
+using PayPalService.DTOs;
+using PayPalService.Models;
+using PayPalService.Persistance;
 using System.Globalization;
 using System.Net.Http.Headers;
 using System.Text;
@@ -11,18 +16,22 @@ public sealed class PayPalGatewayService
 {
     private readonly PayPalClient _client;
     private readonly PayPalSettings _settings;
+    private readonly IWebshopClient _webshopClient;
+    private readonly PayPalDbContext _context;
 
     private readonly string _webshopSuccessUrl;
 
-    public PayPalGatewayService(PayPalClient client, IOptions<PayPalSettings> options, IConfiguration config)
+    public PayPalGatewayService(PayPalClient client, IOptions<PayPalSettings> options, IConfiguration config, IWebshopClient webshopClient, PayPalDbContext context)
     {
         _client = client;
         _settings = options.Value;
 
         _webshopSuccessUrl = config["ApiSettings:WebShopSuccessUrl"] ?? throw new Exception("ApiSettings:WebShopSuccessUrl is missing from appsettings.json");
+        _webshopClient = webshopClient;
+        _context = context;
     }
 
-    public async Task<string> CreateOrderAsync(double amount, string currency)
+    public async Task<PayPalCreateOrderResult> CreateOrderAsync(double amount, string currency, Guid merchantOrderId)
     {
         string token = await _client.GetAccessTokenAsync();
 
@@ -37,6 +46,7 @@ public sealed class PayPalGatewayService
             {
                 new
                 {
+                    custom_id = merchantOrderId,
                     amount = new
                     {
                         currency_code = currency,
@@ -56,6 +66,8 @@ public sealed class PayPalGatewayService
 
         JsonDocument json = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
 
+        string paypalOrderId = json.RootElement.GetProperty("id").GetString()!;
+
         string? approvalUrl = json.RootElement
             .GetProperty("links")
             .EnumerateArray()
@@ -63,7 +75,7 @@ public sealed class PayPalGatewayService
             .GetProperty("href")
             .GetString();
 
-        return approvalUrl!;
+        return new PayPalCreateOrderResult(paypalOrderId, approvalUrl);
     }
 
     public async Task<(bool success, string redirectUrl)> CaptureAsync(string orderId)
@@ -84,7 +96,17 @@ public sealed class PayPalGatewayService
 
             JsonDocument payload = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
 
-            return (true, _webshopSuccessUrl);
+            PayPalPayment? payment = await _context.Payments
+                .FirstOrDefaultAsync(p => p.PayPalOrderId == orderId);
+
+            if (payment == null)
+            {
+                return (false, null!);
+            }
+
+            bool notifySuccess = await _webshopClient.SendAsync(payment.MerchantOrderId, true);
+
+            return (notifySuccess, _webshopSuccessUrl);
         }
         catch (Exception ex)
         {

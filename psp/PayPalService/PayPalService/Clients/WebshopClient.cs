@@ -27,7 +27,7 @@ public class WebshopClient : IWebshopClient
         {
             orderId = orderId,
             orderStatus = isCompleted ? "Completed" : "Failed",
-            paymentMethod = "Crypto",
+            paymentMethod = "PayPal",
             pspId = pspId,
             pspPassword = pspPassword
         };

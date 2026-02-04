@@ -1,53 +1,51 @@
 ﻿using CryptoService.Clients.Interfaces;
-using CryptoService.DTOs;
 using CryptoService.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CryptoService.Controllers
+namespace CryptoService.Controllers;
+
+[Route("crypto/[controller]")]
+[ApiController]
+public class TestController : ControllerBase
 {
-    [Route("crypto/[controller]")]
-    [ApiController]
-    public class TestController : ControllerBase
+    private readonly ICryptoPaymentService _cryptoPaymentService;
+    private readonly IWebshopClient _webshopClient;
+
+    public TestController(ICryptoPaymentService cryptoPaymentService, IWebshopClient webshopClient)
     {
-        private readonly ICryptoPaymentService _cryptoPaymentService;
-        private readonly IWebshopClient _webshopClient;
+        _cryptoPaymentService = cryptoPaymentService;
+        _webshopClient = webshopClient;
+    }
 
-        public TestController(ICryptoPaymentService cryptoPaymentService, IWebshopClient webshopClient)
+    [HttpGet("ping")]
+    public IActionResult Ping()
+    {
+        return Ok("CryptoService is alive");
+    }
+
+    [HttpPost("setup/generate-shop-wallet")]
+    public async Task<ActionResult> GenerateShopWallet()
+    {
+        var (wif, address) = await _cryptoPaymentService.GenerateShopWalletAsync();
+
+        return Ok(new
         {
-            _cryptoPaymentService = cryptoPaymentService;
-            _webshopClient = webshopClient;
+            WIF = wif,
+            Address = address,
+            Instructions = "1. Copy WIF to appsettings.json, 2. You don't need to fund this address (customers pay TO it)"
+        });
+    }
+
+    [HttpPost("update-webshop/{orderId:guid}")]
+    public async Task<IActionResult> UpdateWebshop(Guid orderId)
+    {
+        bool responseSuccess = await _webshopClient.SendAsync(orderId, true);
+
+        if (!responseSuccess)
+        {
+            return BadRequest();
         }
 
-        [HttpGet("ping")]
-        public IActionResult Ping()
-        {
-            return Ok("CryptoService is alive");
-        }
-
-        [HttpPost("setup/generate-shop-wallet")]
-        public async Task<ActionResult> GenerateShopWallet()
-        {
-            var (wif, address) = await _cryptoPaymentService.GenerateShopWalletAsync();
-
-            return Ok(new
-            {
-                WIF = wif,
-                Address = address,
-                Instructions = "1. Copy WIF to appsettings.json, 2. You don't need to fund this address (customers pay TO it)"
-            });
-        }
-
-        [HttpPost("update-webshop/{orderId:guid}")]
-        public async Task<IActionResult> UpdateWebshop(Guid orderId)
-        {
-            bool responseSuccess = await _webshopClient.SendAsync(orderId, true);
-
-            if (!responseSuccess)
-            {
-                return BadRequest();
-            }
-
-            return Ok();
-        }
+        return Ok();
     }
 }
