@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build-env
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build-env
 WORKDIR /src
 
 COPY CardService.Domain/CardService.Domain.csproj CardService.Domain/
@@ -13,7 +13,7 @@ COPY . .
 WORKDIR /src/CardService.API
 RUN dotnet publish -c Release -o /app/out
 
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 WORKDIR /app
 COPY --from=build-env /app/out .
 ENTRYPOINT ["dotnet", "CardService.API.dll"]
