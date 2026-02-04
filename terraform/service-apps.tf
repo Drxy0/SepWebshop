@@ -40,7 +40,7 @@ resource azurerm_linux_web_app backend {
 
     "SendGrid__ApiKey" = "${data.azurerm_key_vault_secret.sendgrid_api_key.value}"
 
-    "ConfirmEmailBaseUrl" = "https://${azurerm_linux_web_app.backend.default_hostname}/api/Users/confirm-email"
+    "ConfirmEmailBaseUrl" = "https://lwa-sepapp-be-dev-eun-001.azurewebsites.net/api/Users/confirm-email"
   }
 }
 
