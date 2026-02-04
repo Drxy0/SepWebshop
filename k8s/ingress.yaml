@@ -37,3 +37,10 @@ spec:
                 name: crypto-service-clusterip
                 port:
                   number: 80
+          - path: /ca
+            pathType: Prefix
+            backend:
+              service:
+                name: card-service-clusterip
+                port:
+                  number: 80
