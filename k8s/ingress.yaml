@@ -44,3 +44,10 @@ spec:
                 name: card-service-clusterip
                 port:
                   number: 80
+          - path: /paypal
+            pathType: Prefix
+            backend:
+              service:
+                name: paypal-service-clusterip
+                port:
+                  number: 80

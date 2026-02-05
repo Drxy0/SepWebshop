@@ -51,8 +51,8 @@ resource azurerm_mssql_database carddb {
   sku_name  = "Basic"
 }
 
-/*resource azurerm_mssql_database paypaldb {
+resource azurerm_mssql_database paypaldb {
   name      = "sqldb-${var.application_name}-paypaldb-${var.environment_name}-${var.location_short}-${var.resource_version}"
   server_id = azurerm_mssql_server.main.id
   sku_name  = "Basic"
-}*/
+}
