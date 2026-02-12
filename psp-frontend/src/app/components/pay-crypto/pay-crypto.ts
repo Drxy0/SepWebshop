@@ -2,6 +2,8 @@ import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CheckPaymentStatusResponse } from '../../models/interfaces/payment';
 import { PaymentService } from '../../services/payment/payment-service';
+import { Subscription, timer } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-pay-crypto',
@@ -12,6 +14,7 @@ import { PaymentService } from '../../services/payment/payment-service';
 })
 export class PayCrypto {
   private paymentService = inject(PaymentService);
+  private statusPollingSub?: Subscription;
 
   orderId = signal<string | null>(null);
   qrImageUrl = signal<string | null>(null);
@@ -33,6 +36,35 @@ export class PayCrypto {
       this.qrImageUrl.set(state.qrUrl);
       this.isLoading.set(false);
     }
+
+    if (state?.orderId) {
+      this.orderId.set(state.orderId);
+      this.startPolling();
+    }
+  }
+
+  private startPolling(): void {
+    const orderId = this.orderId();
+    if (!orderId) return;
+
+    this.statusPollingSub = timer(0, 60_000)
+      .pipe(switchMap(() => this.paymentService.checkCryptoPaymentStatus(orderId)))
+      .subscribe({
+        next: (res: CheckPaymentStatusResponse) => {
+          if (res.redirectUrl) {
+            this.stopPolling();
+            window.location.href = res.redirectUrl;
+          }
+        },
+        error: (err) => {
+          console.error('Status check failed:', err);
+        },
+      });
+  }
+
+  private stopPolling(): void {
+    this.statusPollingSub?.unsubscribe();
+    this.statusPollingSub = undefined;
   }
 
   simulatePayment(): void {
@@ -57,33 +89,11 @@ export class PayCrypto {
   }
 
   ngOnDestroy() {
+    this.stopPolling();
+
     const url = this.qrImageUrl();
     if (url) {
       URL.revokeObjectURL(url);
     }
-  }
-
-  simulateTransaction() {
-    const id = this.orderId();
-    if (!id) return;
-
-    this.isProccessing.set(true);
-
-    this.paymentService.simulateCryptoPayment(id).subscribe({
-      next: (response) => {
-        this.isProccessing.set(false);
-
-        if (response.redirectUrl) {
-          window.location.href = response.redirectUrl;
-        } else {
-          alert('Simulation completed, but no redirect URL provided.');
-        }
-      },
-      error: (err) => {
-        console.error('Simulation failed', err);
-        alert('Simulation failed. Check console.');
-        this.isProccessing.set(false);
-      },
-    });
   }
 }
