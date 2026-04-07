@@ -1,0 +1,9 @@
+name: Sync feature branch to target repo (without sync workflow)
+
+on:
+  push:
+    branches:
+      - "feature/**"
+
+permissions:
+  contents: write
